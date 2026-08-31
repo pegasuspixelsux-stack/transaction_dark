@@ -9,31 +9,31 @@ const ZONES: { name: string; blurb: string; image: string; className: string }[]
     name: "José Ignacio",
     blurb: "El pueblo de pescadores devenido en el enclave más codiciado de la costa.",
     image: zimg("1507525428034-b723cf961d3e"),
-    className: "sm:col-span-4 aspect-[16/10]",
+    className: "sm:col-span-4 sm:row-span-2",
   },
   {
     name: "Manantiales",
     blurb: "Playas amplias, médanos y las mejores mesas del este.",
     image: zimg("1519046904884-53103b34b206"),
-    className: "sm:col-span-2 aspect-[16/10]",
+    className: "sm:col-span-2 sm:row-span-2",
   },
   {
     name: "La Barra",
     blurb: "Galerías y arquitectura de autor sobre el arroyo Maldonado.",
     image: zimg("1471922694854-ff1b63b20054"),
-    className: "sm:col-span-2 aspect-[4/3]",
+    className: "sm:col-span-2",
   },
   {
     name: "Península",
     blurb: "El corazón histórico de Punta del Este, entre dos mares.",
     image: zimg("1505142468610-359e7d316be0"),
-    className: "sm:col-span-2 aspect-[4/3]",
+    className: "sm:col-span-2",
   },
   {
     name: "Mansa",
     blurb: "Atardeceres sobre aguas calmas y las torres frente al mar.",
     image: zimg("1533105079780-92b9be482077"),
-    className: "sm:col-span-2 aspect-[4/3]",
+    className: "sm:col-span-2",
   },
 ];
 
@@ -45,13 +45,13 @@ export function Zones() {
         <h2 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">
           Cinco zonas
         </h2>
-        <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-6">
+        <div className="mt-14 grid grid-cols-1 gap-4 sm:auto-rows-[240px] sm:grid-cols-6">
           {ZONES.map((zone) => (
             <a
               key={zone.name}
               href="#"
               className={cn(
-                "group relative overflow-hidden border border-hairline focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink",
+                "group relative min-h-[240px] overflow-hidden border border-hairline focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink sm:min-h-0",
                 zone.className,
               )}
             >
