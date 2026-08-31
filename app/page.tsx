@@ -9,9 +9,9 @@ export default function Home() {
   return (
     <>
       <OceanusHero />
+      <BrandStatement />
       <FeaturedProperties />
       <Zones />
-      <BrandStatement />
       <Contact />
       <SiteFooter />
     </>

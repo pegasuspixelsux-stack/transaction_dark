@@ -25,8 +25,8 @@ export function OceanusHero() {
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0 flex select-none items-center justify-center gap-4 sm:gap-8"
       >
-        <Trident className="size-16 text-white/15 sm:size-24 lg:size-32" />
-        <span className="text-5xl font-normal uppercase tracking-wordmark text-white/15 sm:text-7xl lg:text-8xl">
+        <Trident className="size-16 text-white/30 sm:size-24 lg:size-32" />
+        <span className="text-5xl font-normal uppercase tracking-wordmark text-white/30 sm:text-7xl lg:text-8xl">
           Oceanus
         </span>
       </div>
@@ -34,7 +34,7 @@ export function OceanusHero() {
       <div className="container-page relative z-10 flex flex-1 flex-col items-start justify-end gap-5 pb-20 text-left text-white [text-shadow:0_1px_18px_rgba(0,0,0,0.35)] sm:pb-28">
         <p
           data-rise
-          className="text-xs font-normal uppercase tracking-luxury text-white/85 [animation-delay:0ms]"
+          className="text-xs font-normal uppercase tracking-luxury text-ink [text-shadow:0_1px_10px_rgba(255,255,255,0.35)] [animation-delay:0ms]"
         >
           Punta del Este · Uruguay
         </p>
