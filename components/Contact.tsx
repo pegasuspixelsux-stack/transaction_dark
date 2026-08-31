@@ -6,7 +6,7 @@ const fieldClass =
 
 export function Contact() {
   return (
-    <section className="border-t border-hairline bg-surface-raised">
+    <section id="contacto" className="scroll-mt-24 border-t border-hairline bg-surface-raised">
       <div className="container-page py-24 sm:py-32">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Left — contact info */}

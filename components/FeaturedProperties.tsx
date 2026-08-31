@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { properties } from "@/lib/properties";
 import { PropertyCard } from "@/components/PropertyCard";
 
@@ -11,12 +12,12 @@ export function FeaturedProperties() {
             Propiedades destacadas
           </h2>
         </div>
-        <a
-          href="#"
+        <Link
+          href="/propiedades"
           className="hidden shrink-0 text-xs uppercase tracking-luxury text-ink-muted transition-colors hover:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink sm:block"
         >
-          Ver todas
-        </a>
+          Buscar propiedades
+        </Link>
       </header>
       {/* First row: 2-up. Remaining rows: 3-up. */}
       <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2">

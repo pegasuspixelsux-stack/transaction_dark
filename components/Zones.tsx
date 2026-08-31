@@ -1,10 +1,18 @@
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { countByZone } from "@/lib/properties";
+import type { PropertyZone } from "@/types/property";
 
 const zimg = (id: string) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=80`;
 
-const ZONES: { name: string; blurb: string; image: string; className: string }[] = [
+const ZONES: {
+  name: PropertyZone;
+  blurb: string;
+  image: string;
+  className: string;
+}[] = [
   {
     name: "José Ignacio",
     blurb: "El pueblo de pescadores devenido en el enclave más codiciado de la costa.",
@@ -39,7 +47,7 @@ const ZONES: { name: string; blurb: string; image: string; className: string }[]
 
 export function Zones() {
   return (
-    <section className="border-y border-hairline bg-surface-raised">
+    <section id="zonas" className="scroll-mt-24 border-y border-hairline bg-surface-raised">
       <div className="container-page py-24 sm:py-32">
         <p className="text-xs uppercase tracking-luxury text-ink-muted">Dónde</p>
         <h2 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">
@@ -50,34 +58,40 @@ export function Zones() {
           resto del litoral esteño y en la costa de Rocha.
         </p>
         <div className="mt-14 grid grid-cols-1 gap-4 sm:auto-rows-[240px] sm:grid-cols-6">
-          {ZONES.map((zone) => (
-            <a
-              key={zone.name}
-              href="#"
-              className={cn(
-                "group relative min-h-[240px] overflow-hidden border border-hairline focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink sm:min-h-0",
-                zone.className,
-              )}
-            >
-              <Image
-                src={zone.image}
-                alt=""
-                fill
-                sizes="(min-width: 640px) 50vw, 100vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div
-                aria-hidden
-                className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent"
-              />
-              <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
-                <h3 className="font-display text-xl font-medium tracking-tight sm:text-2xl">
-                  {zone.name}
-                </h3>
-                <p className="mt-1 max-w-xs text-sm text-white/85">{zone.blurb}</p>
-              </div>
-            </a>
-          ))}
+          {ZONES.map((zone) => {
+            const count = countByZone(zone.name);
+            return (
+              <Link
+                key={zone.name}
+                href={`/propiedades?zona=${encodeURIComponent(zone.name)}`}
+                className={cn(
+                  "group relative min-h-[240px] overflow-hidden border border-hairline focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink sm:min-h-0",
+                  zone.className,
+                )}
+              >
+                <Image
+                  src={zone.image}
+                  alt=""
+                  fill
+                  sizes="(min-width: 640px) 50vw, 100vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"
+                />
+                <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
+                  <p className="text-xs uppercase tracking-luxury text-white/75">
+                    {count} {count === 1 ? "propiedad" : "propiedades"}
+                  </p>
+                  <h3 className="mt-1.5 font-display text-xl font-medium tracking-tight sm:text-2xl">
+                    {zone.name}
+                  </h3>
+                  <p className="mt-1 max-w-xs text-sm text-white/85">{zone.blurb}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

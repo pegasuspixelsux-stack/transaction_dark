@@ -2,7 +2,12 @@ import Link from "next/link";
 import { Menu } from "lucide-react";
 import { Trident } from "@/components/Trident";
 
-const NAV_LINKS = ["Propiedades", "Zonas", "Nosotros", "Contacto"] as const;
+const NAV_LINKS: { label: string; href: string }[] = [
+  { label: "Propiedades", href: "/propiedades" },
+  { label: "Zonas", href: "/#zonas" },
+  { label: "Nosotros", href: "/#nosotros" },
+  { label: "Contacto", href: "/#contacto" },
+];
 
 const focusRing =
   "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink";
@@ -24,13 +29,13 @@ export function SiteHeader() {
 
         <ul className="hidden items-center gap-10 md:flex">
           {NAV_LINKS.map((link) => (
-            <li key={link}>
-              <a
-                href="#"
+            <li key={link.label}>
+              <Link
+                href={link.href}
                 className={`text-xs uppercase tracking-luxury text-ink/85 transition-colors hover:text-ink ${focusRing}`}
               >
-                {link}
-              </a>
+                {link.label}
+              </Link>
             </li>
           ))}
         </ul>

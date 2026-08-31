@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Property } from "@/types/property";
 import { formatPrice, propertyTypeLabel } from "@/lib/properties";
@@ -61,6 +62,12 @@ export function HeroSlideshow({ properties }: { properties: Property[] }) {
           {current.bedrooms > 0 ? `${current.bedrooms} dorm · ` : ""}
           {propertyTypeLabel(current.type)} · {formatPrice(current.price)}
         </p>
+        <Link
+          href="/propiedades"
+          className="mt-4 inline-flex min-h-11 items-center border border-white/50 px-8 text-xs font-normal uppercase tracking-luxury text-white transition-colors [text-shadow:none] hover:bg-white hover:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white"
+        >
+          Buscar propiedades
+        </Link>
       </div>
     </>
   );
