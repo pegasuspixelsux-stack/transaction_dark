@@ -19,11 +19,25 @@ export function Team() {
           <h2 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">
             Quiénes somos
           </h2>
-          <p className="mt-6 max-w-md text-base leading-relaxed text-ink-muted">
-            Un equipo reducido de asesores con raíces en Punta del Este. Conocemos
-            cada calle, cada playa y cada casa que representamos — y trabajamos con
-            un número acotado de clientes por temporada.
-          </p>
+          <div className="mt-6 max-w-md space-y-4 text-base leading-relaxed text-ink-muted">
+            <p>
+              Oceanus nació de una idea simple: comprar o vender una casa frente
+              al mar debería sentirse como una conversación entre conocidos, no
+              como una transacción. Somos un equipo reducido de asesores con
+              raíces en Punta del Este.
+            </p>
+            <p>
+              Conocemos cada calle, cada playa y cada casa que representamos.
+              Muchas de nuestras propiedades nunca llegan a publicarse: circulan
+              entre un grupo acotado de compradores que confían en nuestro
+              criterio y en nuestra discreción.
+            </p>
+            <p>
+              Trabajamos con un número limitado de clientes por temporada para
+              acompañar cada operación de principio a fin — desde la primera
+              visita hasta la escritura, y también en todo lo que viene después.
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6">
