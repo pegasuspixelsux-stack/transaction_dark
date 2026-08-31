@@ -55,7 +55,6 @@ body {
 @keyframes heroSlide {
   from {
     opacity: 0;
-    transform: scale(1.05);
   }
 }
 
