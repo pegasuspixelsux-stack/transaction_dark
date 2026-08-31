@@ -7,6 +7,7 @@ export function OceanusHero() {
         src="/images/hero/serena.png"
         alt=""
         fill
+        loading="eager"
         fetchPriority="high"
         sizes="100vw"
         className="object-cover"
@@ -47,7 +48,7 @@ export function OceanusHero() {
         <a
           data-rise
           href="#"
-          className="mt-2 inline-flex min-h-11 items-center border border-ink/30 px-8 text-xs uppercase tracking-luxury transition-colors [animation-delay:180ms] hover:bg-ink hover:text-surface focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink"
+          className="mt-2 inline-flex min-h-11 items-center border border-ink/30 px-8 text-xs uppercase tracking-luxury transition-colors [animation-delay:150ms] hover:bg-ink hover:text-surface focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink"
         >
           Ver propiedades
         </a>

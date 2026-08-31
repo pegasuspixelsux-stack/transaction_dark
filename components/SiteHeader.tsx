@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Menu } from "lucide-react";
+import { Trident } from "@/components/Trident";
 
 const NAV_LINKS = ["Propiedades", "Zonas", "Nosotros", "Contacto"] as const;
 
@@ -15,21 +16,7 @@ export function SiteHeader() {
           aria-label="Oceanus — inicio"
           className={`flex items-center gap-2.5 ${focusRing}`}
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-            className="size-4 text-sky-400"
-          >
-            <path d="M12 21v-9" />
-            <path d="M12 3v9" />
-            <path d="M7 5v3a5 5 0 0 0 10 0V5" />
-            <path d="M9.5 21h5" />
-          </svg>
+          <Trident className="size-4 text-sky-400" />
           <span className="text-sm font-light uppercase tracking-wordmark text-ink">
             Oceanus
           </span>
