@@ -1,4 +1,11 @@
+import { Facebook, Instagram, Linkedin } from "lucide-react";
 import { Trident } from "@/components/Trident";
+
+const SOCIAL = [
+  { label: "Instagram", Icon: Instagram },
+  { label: "Facebook", Icon: Facebook },
+  { label: "LinkedIn", Icon: Linkedin },
+];
 
 const FOOTER_COLUMNS: { heading: string; items: string[] }[] = [
   { heading: "Propiedades", items: ["Casas", "Apartamentos", "Penthouses", "Terrenos"] },
@@ -11,11 +18,29 @@ export function SiteFooter() {
     <footer className="border-t border-hairline">
       <div className="container-page py-16">
         <div className="flex flex-col gap-12 sm:flex-row sm:justify-between">
-          <div className="flex items-center gap-3">
-            <Trident className="size-8 text-sky-600" />
-            <span className="text-xl uppercase tracking-wordmark text-ink">
-              Oceanus
-            </span>
+          <div className="max-w-xs">
+            <div className="flex items-center gap-3">
+              <Trident className="size-8 text-sky-600" />
+              <span className="text-xl uppercase tracking-wordmark text-ink">
+                Oceanus
+              </span>
+            </div>
+            <p className="mt-5 text-sm leading-relaxed text-ink-muted">
+              Propiedades de autor frente al mar en Punta del Este. Asesoramiento
+              privado para compradores y vendedores.
+            </p>
+            <div className="mt-6 flex items-center gap-5">
+              {SOCIAL.map(({ label, Icon }) => (
+                <a
+                  key={label}
+                  href="#"
+                  aria-label={label}
+                  className="text-ink-muted transition-colors hover:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink"
+                >
+                  <Icon size={18} strokeWidth={1.5} />
+                </a>
+              ))}
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-10 sm:grid-cols-3">
             {FOOTER_COLUMNS.map((column) => (
