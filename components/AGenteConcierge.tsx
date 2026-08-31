@@ -6,25 +6,94 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { X } from "lucide-react";
 import { Trident } from "@/components/Trident";
 
-type Step = "intent" | "asset" | "zone" | "form" | "done";
+type Phase = "options" | "form" | "done";
+type AnswerKey =
+  | "intent"
+  | "asset"
+  | "zone"
+  | "timeline"
+  | "budget"
+  | "beds"
+  | "baths"
+  | "preference";
 
-const INTENT = ["Inversión patrimonial", "Residencia permanente", "Casa vacacional"];
-const ASSET = ["Residencia / Casa", "Finca en chacra", "Penthouse / Apartamento"];
-const ZONE = ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"];
-const BEST_TIMES = ["Mañana", "Mediodía", "Tarde", "Noche"];
+const OPTION_STEPS: { key: AnswerKey; kicker: string; q: string; options: string[] }[] = [
+  {
+    key: "intent",
+    kicker: "Intención",
+    q: "¿Qué te trae por aquí hoy?",
+    options: ["Inversión patrimonial", "Residencia permanente", "Casa vacacional"],
+  },
+  {
+    key: "asset",
+    kicker: "Tipo",
+    q: "¿Qué tipo de propiedad buscás?",
+    options: ["Residencia / Casa", "Finca en chacra", "Penthouse / Apartamento"],
+  },
+  {
+    key: "zone",
+    kicker: "Zona",
+    q: "¿Qué zona de la costa uruguaya preferís?",
+    options: ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"],
+  },
+  {
+    key: "timeline",
+    kicker: "Horizonte",
+    q: "¿Cuál es su horizonte de compra?",
+    options: ["Inmediata / Ahora", "En 6 meses", "En 1 año", "Explorando opciones"],
+  },
+  {
+    key: "budget",
+    kicker: "Inversión",
+    q: "¿Cuál es el rango de inversión estimado?",
+    options: [
+      "USD 1M — 3M",
+      "USD 3M — 6M",
+      "USD 6M — 10M+",
+      "Consultar off-market",
+    ],
+  },
+  {
+    key: "beds",
+    kicker: "Configuración deseada",
+    q: "¿Cuántos dormitorios?",
+    options: ["3 Dormitorios", "4 Dormitorios", "5+ Dormitorios", "Indiferente"],
+  },
+  {
+    key: "baths",
+    kicker: "Configuración deseada",
+    q: "¿Cuántos baños?",
+    options: ["3+ Baños", "5+ Baños", "Indiferente"],
+  },
+  {
+    key: "preference",
+    kicker: "Requisitos particulares",
+    q: "¿Qué es lo que no puede faltar?",
+    options: [
+      "Acceso directo / Vista al mar",
+      "Privacidad absoluta / Chacra",
+      "Seguridad privada 24/7",
+      "Arquitectura de autor",
+    ],
+  },
+];
 
 const ASSET_TIPO: Record<string, string> = {
   "Residencia / Casa": "house",
   "Finca en chacra": "house,land",
   "Penthouse / Apartamento": "penthouse,apartment",
 };
-
-const QUESTION: Record<"intent" | "asset" | "zone", string> = {
-  intent: "¿Qué te trae por aquí hoy?",
-  asset: "¿Qué tipo de propiedad buscás?",
-  zone: "¿Qué zona de la costa uruguaya preferís?",
+const BUDGET_MAX: Record<string, string> = {
+  "USD 1M — 3M": "3000000",
+  "USD 3M — 6M": "6000000",
+};
+const BEDS_MIN: Record<string, string> = {
+  "3 Dormitorios": "3",
+  "4 Dormitorios": "4",
+  "5+ Dormitorios": "4",
 };
 
+const BEST_TIMES = ["Mañana", "Mediodía", "Tarde", "Noche"];
 const SEEN_KEY = "agente-concierge-seen";
 const WHATSAPP = "59842771234";
 
@@ -37,12 +106,9 @@ const backClass =
 export function AGenteConcierge() {
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState<Step>("intent");
-  const [answers, setAnswers] = useState<{
-    intent?: string;
-    asset?: string;
-    zone?: string;
-  }>({});
+  const [phase, setPhase] = useState<Phase>("options");
+  const [stepIdx, setStepIdx] = useState(0);
+  const [answers, setAnswers] = useState<Partial<Record<AnswerKey, string>>>({});
   const [form, setForm] = useState({ name: "", phone: "", bestTime: BEST_TIMES[0] });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,9 +134,22 @@ export function AGenteConcierge() {
     }
   }
 
-  function pick(key: "intent" | "asset" | "zone", value: string) {
-    setAnswers((a) => ({ ...a, [key]: value }));
-    setStep(key === "intent" ? "asset" : key === "asset" ? "zone" : "form");
+  const current = OPTION_STEPS[stepIdx];
+  const total = OPTION_STEPS.length;
+
+  function pick(value: string) {
+    setAnswers((a) => ({ ...a, [current.key]: value }));
+    if (stepIdx < total - 1) setStepIdx(stepIdx + 1);
+    else setPhase("form");
+  }
+
+  function back() {
+    if (phase === "form") {
+      setPhase("options");
+      setStepIdx(total - 1);
+    } else if (stepIdx > 0) {
+      setStepIdx(stepIdx - 1);
+    }
   }
 
   async function submit(e: React.FormEvent) {
@@ -87,7 +166,7 @@ export function AGenteConcierge() {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(data.error ?? "No pudimos registrar tu consulta.");
       }
-      setStep("done");
+      setPhase("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Algo salió mal.");
     } finally {
@@ -95,22 +174,25 @@ export function AGenteConcierge() {
     }
   }
 
-  const curatedHref = `/propiedades?${new URLSearchParams({
-    ...(answers.zone ? { zona: answers.zone } : {}),
-    ...(answers.asset && ASSET_TIPO[answers.asset]
-      ? { tipo: ASSET_TIPO[answers.asset] }
-      : {}),
-  }).toString()}`;
+  const curatedParams = new URLSearchParams();
+  if (answers.zone) curatedParams.set("zona", answers.zone);
+  if (answers.asset && ASSET_TIPO[answers.asset])
+    curatedParams.set("tipo", ASSET_TIPO[answers.asset]);
+  if (answers.budget && BUDGET_MAX[answers.budget])
+    curatedParams.set("precioMax", BUDGET_MAX[answers.budget]);
+  if (answers.beds && BEDS_MIN[answers.beds])
+    curatedParams.set("dormMin", BEDS_MIN[answers.beds]);
+  const curatedHref = `/propiedades?${curatedParams.toString()}`;
 
-  const waMessage = `Hola, soy ${form.name || "—"}. Busco una propiedad para ${
-    answers.intent ?? "—"
-  } en ${answers.zone ?? "—"} (${answers.asset ?? "—"}). Mi teléfono es ${
-    form.phone || "—"
-  } y prefiero que me contacten en el horario de ${form.bestTime}.`;
+  const waMessage = [
+    `Hola, soy ${form.name || "—"}.`,
+    `Busco ${answers.asset ?? "una propiedad"} para ${answers.intent ?? "—"} en ${answers.zone ?? "—"}.`,
+    `Horizonte de compra: ${answers.timeline ?? "—"}. Rango de inversión: ${answers.budget ?? "—"}.`,
+    `Configuración: ${answers.beds ?? "—"} / ${answers.baths ?? "—"}.`,
+    `Requisito clave: ${answers.preference ?? "—"}.`,
+    `Mi teléfono es ${form.phone || "—"}; prefiero que me contacten en el horario de ${form.bestTime}.`,
+  ].join(" ");
   const waHref = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(waMessage)}`;
-
-  const optionStep = step === "intent" || step === "asset" || step === "zone";
-  const dotIndex = step === "intent" ? 0 : step === "asset" ? 1 : 2;
 
   return (
     <>
@@ -162,46 +244,43 @@ export function AGenteConcierge() {
             </header>
 
             <div className="max-h-[62vh] overflow-y-auto px-5 py-5">
-              {optionStep && (
+              {phase === "options" && (
                 <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-1.5">
-                    {[0, 1, 2].map((i) => (
+                  <div className="flex items-center gap-1">
+                    {OPTION_STEPS.map((_, i) => (
                       <span
                         key={i}
-                        className={`h-1 w-6 ${i <= dotIndex ? "bg-sky-400" : "bg-white/15"}`}
+                        className={`h-1 flex-1 ${i <= stepIdx ? "bg-sky-400" : "bg-white/15"}`}
                       />
                     ))}
                   </div>
+                  <p className="text-[0.65rem] uppercase tracking-[0.18em] text-white/40">
+                    {current.kicker} · {stepIdx + 1} / {total}
+                  </p>
                   <p className="font-display text-lg leading-snug tracking-tight">
-                    {QUESTION[step]}
+                    {current.q}
                   </p>
                   <div className="flex flex-col gap-2.5">
-                    {(step === "intent" ? INTENT : step === "asset" ? ASSET : ZONE).map(
-                      (opt) => (
-                        <button
-                          key={opt}
-                          type="button"
-                          onClick={() => pick(step, opt)}
-                          className="border border-white/15 px-4 py-3 text-left text-sm transition-colors hover:border-white/45 hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/60"
-                        >
-                          {opt}
-                        </button>
-                      ),
-                    )}
+                    {current.options.map((opt) => (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => pick(opt)}
+                        className="border border-white/15 px-4 py-3 text-left text-sm transition-colors hover:border-white/45 hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+                      >
+                        {opt}
+                      </button>
+                    ))}
                   </div>
-                  {step !== "intent" && (
-                    <button
-                      type="button"
-                      onClick={() => setStep(step === "asset" ? "intent" : "asset")}
-                      className={`self-start ${backClass}`}
-                    >
+                  {stepIdx > 0 && (
+                    <button type="button" onClick={back} className={`self-start ${backClass}`}>
                       ← Volver
                     </button>
                   )}
                 </div>
               )}
 
-              {step === "form" && (
+              {phase === "form" && (
                 <form onSubmit={submit} className="flex flex-col gap-4">
                   <p className="font-display text-lg leading-snug tracking-tight">
                     Un asesor privado te contacta
@@ -254,18 +333,14 @@ export function AGenteConcierge() {
                     >
                       {submitting ? "Enviando…" : "Enviar"}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setStep("zone")}
-                      className={backClass}
-                    >
+                    <button type="button" onClick={back} className={backClass}>
                       ← Volver
                     </button>
                   </div>
                 </form>
               )}
 
-              {step === "done" && (
+              {phase === "done" && (
                 <div className="flex flex-col gap-4">
                   <Trident className="size-6 text-sky-400" />
                   <p className="font-display text-lg leading-snug tracking-tight">

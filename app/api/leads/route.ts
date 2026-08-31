@@ -15,11 +15,15 @@ export async function POST(request: Request) {
   const lead = {
     name: str(body.name),
     phone: str(body.phone, 60),
-    contactMethod: str(body.contactMethod, 40),
     bestTime: str(body.bestTime, 40),
     intent: str(body.intent, 60),
-    assetType: str(body.assetType, 60),
+    asset: str(body.asset, 60),
     zone: str(body.zone, 60),
+    timeline: str(body.timeline, 60),
+    budget: str(body.budget, 60),
+    beds: str(body.beds, 40),
+    baths: str(body.baths, 40),
+    preference: str(body.preference, 80),
   };
 
   if (!lead.name || !lead.phone) {
