@@ -1,26 +1,51 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* `@theme inline` so `--font-sans` resolves the Geist variables set on <html>. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-surface: #0a0a0a;
+  --color-surface-raised: #121212;
+  --color-ink: #f5f5f0;
+  --color-ink-muted: #a3a29d;
+  --color-hairline: #262625;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@utility tracking-luxury {
+  letter-spacing: 0.2em;
+}
+
+@utility tracking-wordmark {
+  letter-spacing: 0.35em;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline) var(--color-surface);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-hairline);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a38;
 }
