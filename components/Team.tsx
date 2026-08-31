@@ -21,8 +21,8 @@ export function Team() {
           </h2>
           <div className="mt-6 max-w-md space-y-4 text-base leading-relaxed text-ink-muted">
             <p>
-              Oceanus nació de una idea simple: comprar o vender una casa frente
-              al mar debería sentirse como una conversación entre conocidos, no
+              Oceanus nació de una idea simple: comprar o vender una casa en la
+              costa debería sentirse como una conversación entre conocidos, no
               como una transacción. Somos un equipo reducido de asesores con
               raíces en Punta del Este.
             </p>

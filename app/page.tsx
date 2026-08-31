@@ -5,6 +5,7 @@ import { BrandStatement } from "@/components/BrandStatement";
 import { Team } from "@/components/Team";
 import { Contact } from "@/components/Contact";
 import { SiteFooter } from "@/components/SiteFooter";
+import { AGenteConcierge } from "@/components/AGenteConcierge";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
       <Team />
       <Contact />
       <SiteFooter />
+      <AGenteConcierge />
     </>
   );
 }
