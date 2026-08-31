@@ -43,8 +43,12 @@ export function Zones() {
       <div className="container-page py-24 sm:py-32">
         <p className="text-xs uppercase tracking-luxury text-ink-muted">Dónde</p>
         <h2 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">
-          Cinco zonas
+          Las zonas más codiciadas
         </h2>
+        <p className="mt-4 max-w-md text-base leading-relaxed text-ink-muted">
+          Cinco enclaves donde se concentra la demanda. También asesoramos en el
+          resto del litoral esteño y en la costa de Rocha.
+        </p>
         <div className="mt-14 grid grid-cols-1 gap-4 sm:auto-rows-[240px] sm:grid-cols-6">
           {ZONES.map((zone) => (
             <a
