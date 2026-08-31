@@ -3,6 +3,7 @@ import { FeaturedProperties } from "@/components/FeaturedProperties";
 import { Zones } from "@/components/Zones";
 import { BrandStatement } from "@/components/BrandStatement";
 import { Contact } from "@/components/Contact";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <Zones />
       <BrandStatement />
       <Contact />
+      <SiteFooter />
     </>
   );
 }
