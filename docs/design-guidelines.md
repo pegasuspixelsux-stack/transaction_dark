@@ -4,10 +4,13 @@ Follow these for all UI, styling, and animation work. Concrete rules over taste 
 
 ## 1. Impeccable Design & High Taste
 
-- One type family (Geist). Weights: 300 for body and headings, 400 only for
-  emphasis. Never bold.
-- Uppercase display type always carries tracking: `tracking-luxury` (0.2em) for
-  headings and links, `tracking-wordmark` (0.35em) for the logotype.
+- Two typefaces. **Playfair Display** (`font-display`) for headings only —
+  title case, `tracking-tight`, weight 400–500, never uppercase. **Montserrat**
+  (`font-sans`, the default) for everything else — body, nav, eyebrows,
+  buttons, labels — weight 300–400. Never bold.
+- Uppercase + tracking belongs to Montserrat labels only: `tracking-luxury`
+  (0.2em) for eyebrows, nav links, and buttons; `tracking-wordmark` (0.35em)
+  for the logotype. Never set Playfair uppercase or heavily tracked.
 - Spacing uses the Tailwind scale only. No arbitrary pixel values for margin,
   padding, or gap.
 - Borders are hairlines: `border border-hairline`. No heavy rules, no shadows

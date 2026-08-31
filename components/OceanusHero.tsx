@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Menu } from "lucide-react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
 
@@ -30,17 +31,20 @@ export function OceanusHero() {
 
   return (
     <section className="relative flex min-h-screen w-full flex-col overflow-hidden bg-surface">
-      {/*
-        SWAP POINT — cinematic imagery.
-        Replace the gradient <div> below with:
-          <Image src={HERO_SRC} alt="" fill priority sizes="100vw" className="object-cover" />
-        and add the image host to next.config.ts -> images.remotePatterns.
-      */}
+      <Image
+        src="/images/hero/serena.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
+      />
+      {/* Scrim — tuned for a bright photo with the headline at lower-left (sm+). */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(120%_120%_at_50%_0%,#1c1c1c_0%,#0a0a0a_55%,#050505_100%)]"
+        className="absolute inset-0 bg-gradient-to-tr from-surface via-surface/55 to-surface/15"
       />
-      <div aria-hidden className="absolute inset-0 bg-black/40" />
+      <div aria-hidden className="absolute inset-0 bg-surface/20" />
 
       <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-hairline bg-surface/40 px-6 py-5 backdrop-blur-md">
         <span className="text-sm font-light uppercase tracking-wordmark">
@@ -79,7 +83,7 @@ export function OceanusHero() {
         </motion.p>
         <motion.h1
           variants={childVariants}
-          className="max-w-3xl text-4xl font-light uppercase leading-[1.05] tracking-luxury sm:text-6xl lg:text-7xl"
+          className="max-w-4xl font-display text-5xl font-normal leading-[1.05] tracking-tight sm:text-7xl lg:text-8xl"
         >
           Propiedades
           <br />
@@ -87,7 +91,7 @@ export function OceanusHero() {
         </motion.h1>
         <motion.p
           variants={childVariants}
-          className="max-w-md text-base font-light text-ink-muted sm:text-lg"
+          className="max-w-md text-base font-light leading-relaxed text-ink-muted sm:text-lg"
         >
           Una colección curada de residencias en José Ignacio, Manantiales, La
           Barra, Península y Mansa.
