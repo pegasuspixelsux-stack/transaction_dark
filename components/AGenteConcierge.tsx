@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { X } from "lucide-react";
@@ -77,21 +76,6 @@ const OPTION_STEPS: { key: AnswerKey; kicker: string; q: string; options: string
     ],
   },
 ];
-
-const ASSET_TIPO: Record<string, string> = {
-  "Residencia / Casa": "house",
-  "Finca en chacra": "house,land",
-  "Penthouse / Apartamento": "penthouse,apartment",
-};
-const BUDGET_MAX: Record<string, string> = {
-  "USD 1M — 3M": "3000000",
-  "USD 3M — 6M": "6000000",
-};
-const BEDS_MIN: Record<string, string> = {
-  "3 Dormitorios": "3",
-  "4 Dormitorios": "4",
-  "5+ Dormitorios": "4",
-};
 
 const BEST_TIMES = ["Mañana", "Mediodía", "Tarde", "Noche"];
 const SEEN_KEY = "agente-concierge-seen";
@@ -173,16 +157,6 @@ export function AGenteConcierge() {
       setSubmitting(false);
     }
   }
-
-  const curatedParams = new URLSearchParams();
-  if (answers.zone) curatedParams.set("zona", answers.zone);
-  if (answers.asset && ASSET_TIPO[answers.asset])
-    curatedParams.set("tipo", ASSET_TIPO[answers.asset]);
-  if (answers.budget && BUDGET_MAX[answers.budget])
-    curatedParams.set("precioMax", BUDGET_MAX[answers.budget]);
-  if (answers.beds && BEDS_MIN[answers.beds])
-    curatedParams.set("dormMin", BEDS_MIN[answers.beds]);
-  const curatedHref = `/propiedades?${curatedParams.toString()}`;
 
   const waMessage = [
     `Hola, soy ${form.name || "—"}.`,
@@ -347,11 +321,13 @@ export function AGenteConcierge() {
                     Gracias, {form.name.split(" ")[0] || "hola"}.
                   </p>
                   <p className="text-sm leading-relaxed text-white/70">
-                    Recibimos tu consulta. Un asesor privado de Oceanus te va a
-                    escribir en breve. Si querés, seguimos la conversación ahora
-                    mismo por WhatsApp.
+                    Hemos registrado sus preferencias. Un asesor privado de Oceanus
+                    curará una selección a su medida —&nbsp;incluyendo propiedades
+                    que rara vez llegan a publicarse&nbsp;— y se pondrá en contacto
+                    con usted a primera hora.
                   </p>
-                  <div className="flex flex-col gap-2.5 pt-1">
+
+                  <div className="flex flex-col gap-2 pt-1">
                     <a
                       href={waHref}
                       target="_blank"
@@ -360,17 +336,25 @@ export function AGenteConcierge() {
                     >
                       Continuar por WhatsApp
                     </a>
-                    <Link
-                      href={curatedHref}
-                      onClick={dismiss}
-                      className="inline-flex min-h-11 items-center justify-center border border-white/40 px-6 text-[0.7rem] uppercase tracking-[0.2em] transition-colors hover:border-white/70 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/60"
-                    >
-                      Ver una selección para vos
-                    </Link>
-                    <button type="button" onClick={dismiss} className={`self-center ${backClass}`}>
-                      Cerrar
-                    </button>
+                    <p className="text-[0.7rem] leading-relaxed text-white/40">
+                      Si escribe fuera de horario, le respondemos a primera hora del
+                      día siguiente.
+                    </p>
                   </div>
+
+                  <p className="border-t border-white/10 pt-4 text-xs leading-relaxed text-white/50">
+                    Su dossier queda en manos de un asesor dedicado, que revisará
+                    cada criterio y le acercará una cartera pensada exclusivamente
+                    para usted.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={dismiss}
+                    className={`self-start ${backClass}`}
+                  >
+                    Cerrar
+                  </button>
                 </div>
               )}
             </div>
