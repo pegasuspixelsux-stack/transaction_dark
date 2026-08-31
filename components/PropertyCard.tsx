@@ -5,7 +5,7 @@ export function PropertyCard({ property }: { property: Property }) {
   const { title, zone, price, bedrooms, type } = property;
   return (
     <article className="flex flex-col">
-      <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-surface-raised to-surface">
+      <div className="relative aspect-[4/5] overflow-hidden border border-hairline bg-mist/20">
         <span className="absolute bottom-4 left-4 text-xs uppercase tracking-luxury text-ink-muted">
           {zone}
         </span>
