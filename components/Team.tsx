@@ -19,7 +19,7 @@ export function Team() {
           <h2 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">
             Quiénes somos
           </h2>
-          <p className="mt-6 max-w-md text-base font-light leading-relaxed text-ink-muted">
+          <p className="mt-6 max-w-md text-base leading-relaxed text-ink-muted">
             Un equipo reducido de asesores con raíces en Punta del Este. Conocemos
             cada calle, cada playa y cada casa que representamos — y trabajamos con
             un número acotado de clientes por temporada.

@@ -14,7 +14,7 @@ export function Contact() {
             <h2 className="max-w-md font-display text-3xl font-normal tracking-tight sm:text-4xl">
               Conversemos sobre su próxima propiedad
             </h2>
-            <p className="mt-4 max-w-md text-base font-light leading-relaxed text-ink-muted">
+            <p className="mt-4 max-w-md text-base leading-relaxed text-ink-muted">
               Agende una visita privada o reciba nuestra cartera completa.
             </p>
             <dl className="mt-10 space-y-6">

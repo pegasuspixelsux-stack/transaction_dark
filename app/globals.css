@@ -5,8 +5,8 @@
 @theme inline {
   --color-surface: #f7fafb;
   --color-surface-raised: #eaf1f5;
-  --color-ink: #15323b;
-  --color-ink-muted: #4d6b74;
+  --color-ink: #10262e;
+  --color-ink-muted: #3a555e;
   --color-hairline: #d5e1e7;
   --color-mist: #a9cae0;
   --font-sans: var(--font-montserrat);
@@ -41,7 +41,7 @@ html {
 body {
   background: var(--color-surface);
   color: var(--color-ink);
-  font-weight: 300;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
 }
 
