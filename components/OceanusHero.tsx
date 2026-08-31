@@ -1,109 +1,57 @@
-"use client";
-
 import Image from "next/image";
-import { Menu } from "lucide-react";
-import { motion, useReducedMotion, type Variants } from "motion/react";
-
-const NAV_LINKS = ["Propiedades", "Zonas", "Nosotros", "Contacto"] as const;
-
-const container: Variants = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-};
-
-const item: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring", stiffness: 200, damping: 26 },
-  },
-};
 
 export function OceanusHero() {
-  const reduce = useReducedMotion();
-  const parentMotion = reduce
-    ? {}
-    : { variants: container, initial: "hidden" as const, animate: "show" as const };
-  const childVariants = reduce ? undefined : item;
-
   return (
-    <section className="relative flex min-h-screen w-full flex-col overflow-hidden bg-surface">
+    <section className="relative flex min-h-dvh w-full flex-col overflow-hidden bg-surface">
       <Image
         src="/images/hero/serena.png"
         alt=""
         fill
-        priority
+        fetchPriority="high"
         sizes="100vw"
         className="object-cover"
       />
-      {/* Scrim — tuned for a bright photo with the headline at lower-left (sm+). */}
+      {/* Directional scrim for the lower-left headline. */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-tr from-surface via-surface/55 to-surface/15"
+        className="absolute inset-0 bg-gradient-to-tr from-surface via-surface/50 to-surface/10"
       />
-      <div aria-hidden className="absolute inset-0 bg-surface/20" />
+      {/* Ocean-blue wash rising from the bottom edge. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-abyss/85 via-abyss/25 to-transparent"
+      />
 
-      <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-hairline bg-surface/40 px-6 py-5 backdrop-blur-md">
-        <span className="text-sm font-light uppercase tracking-wordmark">
-          Oceanus
-        </span>
-        <ul className="hidden items-center gap-10 md:flex">
-          {NAV_LINKS.map((link) => (
-            <li key={link}>
-              <a
-                href="#"
-                className="text-xs uppercase tracking-luxury text-ink-muted transition-colors hover:text-ink"
-              >
-                {link}
-              </a>
-            </li>
-          ))}
-        </ul>
-        <button
-          type="button"
-          aria-label="Abrir menú"
-          className="text-ink-muted transition-colors hover:text-ink md:hidden"
-        >
-          <Menu size={20} strokeWidth={1.5} />
-        </button>
-      </nav>
-
-      <motion.div
-        {...parentMotion}
-        className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6 px-6 pb-32 text-center sm:items-start sm:pb-40 sm:pl-16 sm:text-left"
-      >
-        <motion.p
-          variants={childVariants}
-          className="text-xs uppercase tracking-luxury text-ink-muted"
+      <div className="relative z-10 flex flex-1 flex-col items-start justify-end gap-5 px-6 pb-20 text-left sm:pb-28 sm:pl-16">
+        <p
+          data-rise
+          className="text-xs uppercase tracking-luxury text-ink/75 [animation-delay:0ms]"
         >
           Punta del Este · Uruguay
-        </motion.p>
-        <motion.h1
-          variants={childVariants}
-          className="max-w-4xl font-display text-5xl font-normal leading-[1.05] tracking-tight sm:text-7xl lg:text-8xl"
+        </p>
+        <h1
+          data-rise
+          className="max-w-3xl font-display text-4xl font-normal leading-[1.08] tracking-tight [animation-delay:60ms] sm:text-5xl lg:text-6xl"
         >
           Propiedades
           <br />
-          frente al mar
-        </motion.h1>
-        <motion.p
-          variants={childVariants}
-          className="max-w-md text-base font-light leading-relaxed text-ink-muted sm:text-lg"
+          <span className="italic">frente al mar</span>
+        </h1>
+        <p
+          data-rise
+          className="max-w-md text-base font-light leading-relaxed text-ink/80 [animation-delay:120ms] sm:text-lg"
         >
           Una colección curada de residencias en José Ignacio, Manantiales, La
           Barra, Península y Mansa.
-        </motion.p>
-        <motion.a
-          variants={childVariants}
+        </p>
+        <a
+          data-rise
           href="#"
-          className="mt-2 border border-ink/30 px-8 py-3 text-xs uppercase tracking-luxury transition-colors hover:bg-ink hover:text-surface"
+          className="mt-2 inline-flex min-h-11 items-center border border-ink/30 px-8 text-xs uppercase tracking-luxury transition-colors [animation-delay:180ms] hover:bg-ink hover:text-surface focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink"
         >
           Ver propiedades
-        </motion.a>
-      </motion.div>
+        </a>
+      </div>
     </section>
   );
 }

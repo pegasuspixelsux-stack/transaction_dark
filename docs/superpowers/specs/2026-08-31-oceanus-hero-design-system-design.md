@@ -1,5 +1,10 @@
 # Oceanus — Hero & Design-System Foundation (Cycle 1)
 
+> **Superseded in part (2026-08-31):** mid-cycle the hero gained a real photo
+> background and the type moved to Playfair Display + Montserrat (not Geist). The
+> entrance animation is CSS, not `motion`, and the nav lives in `components/SiteHeader.tsx`.
+> `docs/design-guidelines.md` is the current source of truth.
+
 **Date:** 2026-08-31
 **Status:** Approved (design), pending spec review
 **Branch:** `feat/oceanus-hero-design-system`

@@ -5,7 +5,7 @@ Follow these for all UI, styling, and animation work. Concrete rules over taste 
 ## 1. Impeccable Design & High Taste
 
 - Two typefaces. **Playfair Display** (`font-display`) for headings only —
-  title case, `tracking-tight`, weight 400–500, never uppercase. **Montserrat**
+  title case, `tracking-tight`, weight 400–500, never uppercase. Italic is allowed for one emphasised phrase inside a heading. **Montserrat**
   (`font-sans`, the default) for everything else — body, nav, eyebrows,
   buttons, labels — weight 300–400. Never bold.
 - Uppercase + tracking belongs to Montserrat labels only: `tracking-luxury`
@@ -15,8 +15,9 @@ Follow these for all UI, styling, and animation work. Concrete rules over taste 
   padding, or gap.
 - Borders are hairlines: `border border-hairline`. No heavy rules, no shadows
   for separation.
-- Color restraint: `surface`, `surface-raised`, `ink`, `ink-muted`, `hairline`.
-  Introduce a new color only with a documented reason.
+- Color restraint: `surface`, `surface-raised`, `ink`, `ink-muted`, `hairline`,
+  `abyss` (deep ocean blue — hero bottom scrim only), `sky-400` (brand accent —
+  the logotype trident only). Introduce any other color only with a documented reason.
 - Optical alignment over mathematical: nudge icons and punctuation to look
   centered, not to measure centered.
 
@@ -30,6 +31,11 @@ Follow these for all UI, styling, and animation work. Concrete rules over taste 
 - Touch targets >= 44x44px.
 - Line length for reading text: `max-w-md` to `max-w-prose`.
 - Respect `prefers-reduced-motion` everywhere motion exists.
+- Measure text contrast at 375px width and over the actual background image, not
+  just on desktop over a dark fill.
+- Pre-merge checklist for every new component: `focus-visible` present · contrast
+  measured at 375px · tap targets ≥ 44px · correct `lang` · reduced-motion path
+  renders visible content in the SSR HTML.
 
 ## 3. Frontend Engineering (Next.js 16 App Router)
 
@@ -49,8 +55,9 @@ Follow these for all UI, styling, and animation work. Concrete rules over taste 
 ## 4. Emil Kowalski — Micro-Interactions
 
 - Animate in response to a user action or a mount. Never animate idle UI.
-- Durations: 150–250ms for state feedback (hover, toggle), <= 500ms for
-  entrances. Anything slower feels broken.
+- Durations: 150–250ms for state feedback (hover, toggle); ≤ 450ms per element
+  for entrances. A short stagger across a small group may total up to ~600ms end
+  to end — no longer.
 - Easing: ease-out for enter, ease-in for exit. Linear only for continuous
   motion (spinners, marquees).
 - Transform origin matches the trigger — a menu opening from a button grows
@@ -74,3 +81,9 @@ Follow these for all UI, styling, and animation work. Concrete rules over taste 
   child every frame).
 - Every animated component computes `const reduce = useReducedMotion()` and
   renders static output when it is true.
+- `initial` / any motion prop must never hide content that is server-rendered.
+  `useReducedMotion()` is `null` on the server, so a JS-gated `opacity:0` ships
+  in the HTML for everyone. A simple mount entrance belongs in CSS —
+  `@keyframes` under `@media (prefers-reduced-motion: no-preference)` — not in JS.
+- Reserve `motion` for what CSS cannot do well: scroll-triggered reveals
+  (`whileInView`), drag, shared-layout transitions, interruptible gestures.

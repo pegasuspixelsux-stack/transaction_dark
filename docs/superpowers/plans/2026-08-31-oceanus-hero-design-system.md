@@ -1,5 +1,10 @@
 # Oceanus Hero & Design-System Foundation — Implementation Plan
 
+> **Superseded in part (2026-08-31):** mid-cycle the hero gained a real photo
+> background and the type moved to Playfair Display + Montserrat (not Geist). The
+> entrance animation is CSS, not `motion`, and the nav lives in `components/SiteHeader.tsx`.
+> `docs/design-guidelines.md` is the current source of truth.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Establish the luxury-dark visual foundation and ship the cinematic `OceanusHero` as the home page.
