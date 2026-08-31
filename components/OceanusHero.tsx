@@ -13,15 +13,15 @@ export function OceanusHero() {
         sizes="100vw"
         className="object-cover"
       />
-      {/* Directional scrim for the lower-left headline. */}
+      {/* Soft-white wash for the lower-left headline. */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-tr from-surface via-surface/50 to-surface/10"
+        className="absolute inset-0 bg-gradient-to-tr from-surface/92 via-surface/55 to-surface/5"
       />
-      {/* Ocean-blue wash rising from the bottom edge. */}
+      {/* Coastal-blue haze rising from the bottom edge. */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-t from-abyss/85 via-abyss/25 to-transparent"
+        className="absolute inset-0 bg-gradient-to-t from-mist/60 via-mist/15 to-transparent"
       />
 
       {/* Large transparent wordmark watermark, matching the header lockup. */}

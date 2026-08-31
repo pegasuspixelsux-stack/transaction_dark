@@ -16,7 +16,7 @@ export function SiteHeader() {
           aria-label="Oceanus — inicio"
           className={`flex items-center gap-2.5 ${focusRing}`}
         >
-          <Trident className="size-4 text-sky-400" />
+          <Trident className="size-4 text-sky-600" />
           <span className="text-sm font-light uppercase tracking-wordmark text-ink">
             Oceanus
           </span>

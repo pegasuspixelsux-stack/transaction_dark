@@ -15,9 +15,11 @@ Follow these for all UI, styling, and animation work. Concrete rules over taste 
   padding, or gap.
 - Borders are hairlines: `border border-hairline`. No heavy rules, no shadows
   for separation.
-- Color restraint: `surface`, `surface-raised`, `ink`, `ink-muted`, `hairline`,
-  `abyss` (deep ocean blue — hero bottom scrim only), `sky-400` (brand accent —
-  the logotype trident only). Introduce any other color only with a documented reason.
+- Light coastal palette: `surface` (soft white), `surface-raised` (soft light
+  blue), `ink` (deep slate-teal, the text color), `ink-muted` (secondary text,
+  AA on `surface` at ≥14px), `hairline` (soft blue-grey borders), `mist` (soft
+  coastal blue — hero bottom scrim only), `sky-600` (brand accent — the logotype
+  trident only). Introduce any other color only with a documented reason.
 - Optical alignment over mathematical: nudge icons and punctuation to look
   centered, not to measure centered.
 
