@@ -13,15 +13,11 @@ export function OceanusHero() {
         sizes="100vw"
         className="object-cover"
       />
-      {/* Soft-white wash for the lower-left headline — kept light so the photo reads through. */}
+      {/* Near-transparent overlay — a soft dark fade at the bottom so the white
+          lower-left text reads; the photo otherwise shows at full strength. */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-tr from-surface/70 via-surface/30 to-transparent"
-      />
-      {/* Coastal-blue haze rising from the bottom edge. */}
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-t from-mist/40 via-mist/10 to-transparent"
+        className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent"
       />
 
       {/* Large transparent wordmark watermark, matching the header lockup. */}
@@ -29,22 +25,22 @@ export function OceanusHero() {
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0 flex select-none items-center justify-center gap-4 sm:gap-8"
       >
-        <Trident className="size-16 text-ink/10 sm:size-24 lg:size-32" />
-        <span className="text-5xl font-light uppercase tracking-wordmark text-ink/10 sm:text-7xl lg:text-8xl">
+        <Trident className="size-16 text-white/15 sm:size-24 lg:size-32" />
+        <span className="text-5xl font-normal uppercase tracking-wordmark text-white/15 sm:text-7xl lg:text-8xl">
           Oceanus
         </span>
       </div>
 
-      <div className="relative z-10 flex flex-1 flex-col items-start justify-end gap-5 px-6 pb-20 text-left sm:pb-28 sm:pl-16">
+      <div className="relative z-10 flex flex-1 flex-col items-start justify-end gap-5 px-6 pb-20 text-left text-white [text-shadow:0_1px_18px_rgba(0,0,0,0.35)] sm:pb-28 sm:pl-16">
         <p
           data-rise
-          className="text-xs uppercase tracking-luxury text-ink/75 [animation-delay:0ms]"
+          className="text-xs font-normal uppercase tracking-luxury text-white/85 [animation-delay:0ms]"
         >
           Punta del Este · Uruguay
         </p>
         <h1
           data-rise
-          className="max-w-3xl font-display text-4xl font-normal leading-[1.08] tracking-tight [animation-delay:60ms] sm:text-5xl lg:text-6xl"
+          className="max-w-3xl font-display text-4xl font-medium leading-[1.08] tracking-tight [animation-delay:60ms] sm:text-5xl lg:text-6xl"
         >
           Propiedades
           <br />
@@ -52,7 +48,7 @@ export function OceanusHero() {
         </h1>
         <p
           data-rise
-          className="max-w-md text-base font-light leading-relaxed text-ink/80 [animation-delay:120ms] sm:text-lg"
+          className="max-w-md text-base font-normal leading-relaxed text-white/90 [animation-delay:120ms] sm:text-lg"
         >
           Una colección curada de residencias en José Ignacio, Manantiales, La
           Barra, Península y Mansa.
@@ -60,7 +56,7 @@ export function OceanusHero() {
         <a
           data-rise
           href="#"
-          className="mt-2 inline-flex min-h-11 items-center border border-ink/30 px-8 text-xs uppercase tracking-luxury transition-colors [animation-delay:150ms] hover:bg-ink hover:text-surface focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink"
+          className="mt-2 inline-flex min-h-11 items-center border border-white/50 px-8 text-xs font-normal uppercase tracking-luxury transition-colors [animation-delay:150ms] [text-shadow:none] hover:bg-white hover:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white"
         >
           Ver propiedades
         </a>
