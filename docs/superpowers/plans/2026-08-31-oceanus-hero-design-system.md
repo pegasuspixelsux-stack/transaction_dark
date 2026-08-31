@@ -12,6 +12,8 @@
 
 ## Global Constraints
 
+- Preflight ruling (Task 2): Task 2 also stubs `app/page.tsx` to drop starter
+  classes that reference removed color tokens; Task 4 replaces that stub.
 - Next.js is **16.3.3** with App Router; this is a modified Next — consult `node_modules/next/dist/docs/` before changing framework-touching code. Do not remove the auto-generated block in `AGENTS.md`.
 - **No `tailwind.config.ts`.** Tailwind v4 is CSS-first; all theme tokens and custom utilities live in `app/globals.css`.
 - **No test runner is added this cycle.** Verification gates per task are: `npm run build` (clean), `npm run lint` (clean), and — for visual tasks — `npm run dev` with a stated manual check. This is deliberate: the deliverables are CSS tokens, type declarations, and one visual component; a unit runner would only exercise third-party libraries.
@@ -75,6 +77,9 @@ git commit -m "build: add motion, lucide-react, clsx, tailwind-merge"
 **Files:**
 - Modify (rewrite): `app/globals.css`
 - Modify: `app/layout.tsx` (metadata only)
+- Modify (stub): `app/page.tsx` — remove starter markup that references the
+  now-deleted `--color-background` / `--color-foreground` tokens. Task 4
+  replaces this stub with the real hero.
 
 **Interfaces:**
 - Consumes: nothing.
@@ -147,20 +152,39 @@ export const metadata: Metadata = {
 };
 ```
 
-- [ ] **Step 3: Verify build + lint**
+- [ ] **Step 3: Stub `app/page.tsx`**
+
+The starter page uses `bg-foreground` / `text-background`, whose tokens this
+task removes. Replace the whole file with a minimal placeholder (Task 4 rewrites
+it again):
+
+```tsx
+export default function Home() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-surface">
+      <p className="text-xs uppercase tracking-luxury text-ink-muted">Oceanus</p>
+    </main>
+  );
+}
+```
+
+Delete `public/next.svg` and `public/vercel.svg` references only by removing the
+markup — leave the files in `public/` untouched.
+
+- [ ] **Step 4: Verify build + lint**
 
 Run: `npm run build && npm run lint`
-Expected: both clean. No "unknown utility" or "unknown at-rule" errors from the new `@utility` blocks.
+Expected: both clean. No "unknown utility" or "unknown at-rule" errors from the new `@utility` blocks. No unused-import errors in `app/page.tsx`.
 
-- [ ] **Step 4: Visual check**
+- [ ] **Step 5: Visual check**
 
 Run: `npm run dev`, open `http://localhost:3000`.
-Expected: the (still CNA-boilerplate) page now renders on a near-black `#0A0A0A` background with light text; scrollbar is thin and dark. Stop the dev server.
+Expected: near-black `#0A0A0A` background, a single small light-grey uppercase "OCEANUS" centered; scrollbar is thin and dark. Stop the dev server.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add app/globals.css app/layout.tsx
+git add app/globals.css app/layout.tsx app/page.tsx
 git commit -m "feat: luxury-dark Tailwind v4 theme and metadata"
 ```
 
