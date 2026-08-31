@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Trident } from "@/components/Trident";
 
 export function OceanusHero() {
   return (
@@ -22,6 +23,17 @@ export function OceanusHero() {
         aria-hidden
         className="absolute inset-0 bg-gradient-to-t from-abyss/85 via-abyss/25 to-transparent"
       />
+
+      {/* Large transparent wordmark watermark, matching the header lockup. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-0 flex select-none items-center justify-center gap-4 sm:gap-8"
+      >
+        <Trident className="size-16 text-ink/10 sm:size-24 lg:size-32" />
+        <span className="text-5xl font-light uppercase tracking-wordmark text-ink/10 sm:text-7xl lg:text-8xl">
+          Oceanus
+        </span>
+      </div>
 
       <div className="relative z-10 flex flex-1 flex-col items-start justify-end gap-5 px-6 pb-20 text-left sm:pb-28 sm:pl-16">
         <p
