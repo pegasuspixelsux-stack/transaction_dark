@@ -62,14 +62,17 @@ Replace the CNA starter theme block. Target shape:
 /* `@theme inline` so `--font-sans` resolves the Geist var set on <html>,
    matching the existing working setup. */
 @theme inline {
-  --color-base: #0a0a0a;
-  --color-base-raised: #121212;
+  --color-surface: #0a0a0a;
+  --color-surface-raised: #121212;
   --color-ink: #f5f5f0;
   --color-ink-muted: #a3a29d;   /* ~60% ink, for secondary text */
   --color-hairline: #262625;    /* borders / dividers */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
+
+/* NOTE: token is `surface`, not `base` — `text-base` is a built-in
+   Tailwind font-size utility and would collide. */
 
 @utility tracking-luxury {
   letter-spacing: 0.2em;
@@ -85,18 +88,18 @@ Replace the CNA starter theme block. Target shape:
 
 html {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-hairline) var(--color-base);
+  scrollbar-color: var(--color-hairline) var(--color-surface);
 }
 
 body {
-  background: var(--color-base);
+  background: var(--color-surface);
   color: var(--color-ink);
   font-weight: 300;
   -webkit-font-smoothing: antialiased;
 }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--color-base); }
+::-webkit-scrollbar-track { background: var(--color-surface); }
 ::-webkit-scrollbar-thumb {
   background: var(--color-hairline);
   border-radius: 9999px;
@@ -155,14 +158,14 @@ Client component: uses `motion/react` and `useReducedMotion`.
 
 Structure:
 
-- **Section wrapper** — `relative min-h-screen w-full overflow-hidden bg-base`.
+- **Section wrapper** — `relative min-h-screen w-full overflow-hidden bg-surface`.
 - **Background layer** — absolutely positioned. Placeholder:
   `bg-[radial-gradient(...)]` deep charcoal → near-black, plus a subtle
   vignette. Directly above it, a commented-out `<Image fill priority alt="">`
   block marked `SWAP POINT` so final art is a one-line change. A dark scrim
   (`bg-black/40`) sits over the media for text contrast.
 - **Sticky nav** — `sticky top-0 z-50 flex items-center justify-between px-6 py-5
-  backdrop-blur-md bg-base/40 border-b border-hairline`. Left: wordmark
+  backdrop-blur-md bg-surface/40 border-b border-hairline`. Left: wordmark
   `OCEANUS` in `uppercase tracking-wordmark text-sm font-light`. Right: 3–4 nav
   links (`Propiedades`, `Zonas`, `Nosotros`, `Contacto`) `uppercase
   tracking-luxury text-xs text-ink-muted hover:text-ink transition-colors`.
@@ -177,7 +180,7 @@ Structure:
     tracking-luxury leading-[1.05]` — two lines.
   - Subhead: `text-base sm:text-lg text-ink-muted font-light max-w-md`.
   - CTA: single ghost button — `border border-ink/30 px-8 py-3 uppercase
-    tracking-luxury text-xs hover:bg-ink hover:text-base transition-colors`.
+    tracking-luxury text-xs hover:bg-ink hover:text-surface transition-colors`.
 
 Animation:
 
