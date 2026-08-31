@@ -11,9 +11,9 @@ export function SiteFooter() {
     <footer className="border-t border-hairline">
       <div className="container-page py-16">
         <div className="flex flex-col gap-12 sm:flex-row sm:justify-between">
-          <div className="flex items-center gap-2.5">
-            <Trident className="size-4 text-sky-600" />
-            <span className="text-sm font-light uppercase tracking-wordmark text-ink">
+          <div className="flex items-center gap-3">
+            <Trident className="size-8 text-sky-600" />
+            <span className="text-xl uppercase tracking-wordmark text-ink">
               Oceanus
             </span>
           </div>
