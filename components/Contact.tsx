@@ -1,7 +1,7 @@
 export function Contact() {
   return (
     <section className="border-t border-hairline bg-surface-raised">
-      <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32">
+      <div className="container-page py-24 sm:py-32">
         <h2 className="max-w-2xl font-display text-3xl font-normal tracking-tight sm:text-4xl">
           Conversemos sobre su próxima propiedad
         </h2>

@@ -9,7 +9,7 @@ const ZONES: { name: string; blurb: string }[] = [
 export function Zones() {
   return (
     <section className="border-y border-hairline bg-surface-raised">
-      <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32">
+      <div className="container-page py-24 sm:py-32">
         <p className="text-xs uppercase tracking-luxury text-ink-muted">Dónde</p>
         <h2 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">
           Cinco zonas

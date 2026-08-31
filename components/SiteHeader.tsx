@@ -10,7 +10,7 @@ const focusRing =
 export function SiteHeader() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-hairline bg-surface/75 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+      <nav className="container-page flex items-center justify-between py-5">
         <Link
           href="/"
           aria-label="Oceanus — inicio"

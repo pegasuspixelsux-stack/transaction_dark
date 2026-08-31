@@ -9,7 +9,7 @@ const FOOTER_COLUMNS: { heading: string; items: string[] }[] = [
 export function SiteFooter() {
   return (
     <footer className="border-t border-hairline">
-      <div className="mx-auto max-w-7xl px-6 py-16">
+      <div className="container-page py-16">
         <div className="flex flex-col gap-12 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2.5">
             <Trident className="size-4 text-sky-600" />

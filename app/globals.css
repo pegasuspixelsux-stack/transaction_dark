@@ -21,6 +21,14 @@
   letter-spacing: 0.35em;
 }
 
+/* Shared page container — section content is boxed to 1440px. */
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 90rem; /* 1440px */
+  padding-inline: 1.5rem;
+}
+
 :root {
   color-scheme: light;
 }

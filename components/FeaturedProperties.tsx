@@ -3,7 +3,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 
 export function FeaturedProperties() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-24 sm:py-32">
+    <section className="container-page py-24 sm:py-32">
       <header className="mb-14 flex items-end justify-between gap-6">
         <div>
           <p className="text-xs uppercase tracking-luxury text-ink-muted">Selección</p>
@@ -18,8 +18,14 @@ export function FeaturedProperties() {
           Ver todas
         </a>
       </header>
-      <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-        {properties.map((property) => (
+      {/* First row: 2-up. Remaining rows: 3-up. */}
+      <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2">
+        {properties.slice(0, 2).map((property) => (
+          <PropertyCard key={property.id} property={property} />
+        ))}
+      </div>
+      <div className="mt-14 grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+        {properties.slice(2).map((property) => (
           <PropertyCard key={property.id} property={property} />
         ))}
       </div>

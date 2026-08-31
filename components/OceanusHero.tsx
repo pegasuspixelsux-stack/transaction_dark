@@ -31,7 +31,7 @@ export function OceanusHero() {
         </span>
       </div>
 
-      <div className="relative z-10 flex flex-1 flex-col items-start justify-end gap-5 px-6 pb-20 text-left text-white [text-shadow:0_1px_18px_rgba(0,0,0,0.35)] sm:pb-28 sm:pl-16">
+      <div className="container-page relative z-10 flex flex-1 flex-col items-start justify-end gap-5 pb-20 text-left text-white [text-shadow:0_1px_18px_rgba(0,0,0,0.35)] sm:pb-28">
         <p
           data-rise
           className="text-xs font-normal uppercase tracking-luxury text-white/85 [animation-delay:0ms]"
