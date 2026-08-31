@@ -45,13 +45,21 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  @keyframes rise {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
+}
+
+@keyframes heroSlide {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
   [data-rise] {
     animation: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
