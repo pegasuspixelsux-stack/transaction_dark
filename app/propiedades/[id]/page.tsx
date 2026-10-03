@@ -7,8 +7,9 @@ import { ContactForm } from "@/components/ContactForm";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
 
-export default function PropertyPage({ params }: { params: { id: string } }) {
-  const property = properties.find((p) => p.id === params.id);
+export default async function PropertyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const property = properties.find((p) => p.id === id);
 
   if (!property) {
     notFound();
