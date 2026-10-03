@@ -58,14 +58,14 @@ export function PropertySlideshow({ images, title }: PropertySlideshowProps) {
       />
 
       {/* Watermark */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-        <div className="flex items-center gap-4">
-          <div className="flex size-24 items-center justify-center rounded-full border-3 border-white/20 sm:size-32 sm:border-4 flex-shrink-0">
-            <span className="font-bold text-white/20 text-3xl sm:text-5xl">T</span>
+      <div className="pointer-events-none absolute inset-0 z-10 flex select-none items-center justify-center">
+        <div aria-hidden className="flex items-center justify-center gap-2 sm:gap-8">
+          <div className="flex size-10 items-center justify-center rounded-full border-[3px] border-white/50 text-2xl font-bold text-white/50 sm:size-24 sm:text-6xl lg:size-32 lg:text-7xl">
+            T
           </div>
-          <p className="text-xs font-bold uppercase tracking-luxury text-white/20 sm:text-sm whitespace-nowrap">
-            TRANSACTION
-          </p>
+          <span className="text-2xl font-normal uppercase tracking-wordmark text-white/50 sm:text-7xl lg:text-8xl">
+            Transaction
+          </span>
         </div>
       </div>
 
