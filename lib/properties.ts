@@ -5,7 +5,43 @@ const img = (id: string) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=80`;
 
 export const properties: Property[] = [
-  { id: "ji-01", title: "Casa de las Dunas", zone: "José Ignacio", price: 4200000, bedrooms: 5, type: "house", imageUrl: img("1613490493576-7fde63acd811") },
+  {
+    id: "ji-01",
+    title: "Casa de las Dunas",
+    zone: "José Ignacio",
+    price: 4200000,
+    bedrooms: 5,
+    bathrooms: 4,
+    area: 580,
+    yearBuilt: 2018,
+    type: "house",
+    imageUrl: img("1613490493576-7fde63acd811"),
+    images: [
+      img("1613490493576-7fde63acd811"),
+      img("1600596542815-ffad4c1539a9"),
+      img("1600585154340-be6161a56a0c"),
+    ],
+    description:
+      "Casa de las Dunas es una obra maestra arquitectónica ubicada en la costa de José Ignacio. Esta residencia de 580m² combina materiales nobles con diseño contemporáneo, ofreciendo vistas panorámicas al Atlántico. Cada ambiente ha sido pensado para maximizar la conexión con la naturaleza y el mar.",
+    features: [
+      "Acceso directo a playa privada",
+      "Piscina climatizada con vista al mar",
+      "Spa privado con sauna y ducha de vapor",
+      "Cine en casa con acústica profesional",
+      "Seguridad 24/7 con vigilancia",
+      "Garaje subterráneo para 4 vehículos",
+    ],
+    amenities: [
+      "Cocina gourmet con isla central",
+      "Biblioteca con chimenea",
+      "Sala de juegos",
+      "Bodega climatizada",
+      "Terraza panorámica de 150m²",
+      "Solarium con jacuzzi",
+      "Lavandería completa",
+      "Almacenamiento temperado",
+    ],
+  },
   { id: "ji-02", title: "Estancia del Este", zone: "José Ignacio", price: 6800000, bedrooms: 6, type: "house", imageUrl: img("1600596542815-ffad4c1539a9") },
   { id: "ji-03", title: "Casa Faro Norte", zone: "José Ignacio", price: 3550000, bedrooms: 4, type: "house", imageUrl: img("1600585154340-be6161a56a0c") },
   { id: "ji-04", title: "Terreno Camino de los Ceibos", zone: "José Ignacio", price: 1250000, bedrooms: 0, type: "land", imageUrl: img("1449844908441-8829872d2607") },

@@ -13,6 +13,13 @@ export interface Property {
   zone: PropertyZone;
   price: number; // USD, whole dollars
   bedrooms: number;
+  bathrooms?: number;
+  area?: number; // m²
+  yearBuilt?: number;
   type: PropertyType;
   imageUrl: string;
+  images?: string[]; // Array of image URLs for slideshow
+  description?: string;
+  features?: string[];
+  amenities?: string[];
 }
