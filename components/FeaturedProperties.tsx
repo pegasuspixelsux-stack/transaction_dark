@@ -26,9 +26,17 @@ export function FeaturedProperties() {
         ))}
       </div>
       <div className="mt-14 grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-        {properties.slice(2).map((property) => (
+        {properties.slice(2, 5).map((property) => (
           <PropertyCard key={property.id} property={property} />
         ))}
+      </div>
+      <div className="mt-14 flex justify-end">
+        <Link
+          href="/propiedades"
+          className="text-xs uppercase tracking-luxury text-ink-muted transition-colors hover:text-ink dark:text-white/75 dark:hover:text-white"
+        >
+          Ver todo el inventario
+        </Link>
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 import { OceanusHero } from "@/components/OceanusHero";
+import { ValuePropositions } from "@/components/ValuePropositions";
 import { FeaturedProperties } from "@/components/FeaturedProperties";
 import { Zones } from "@/components/Zones";
 import { BrandStatement } from "@/components/BrandStatement";
@@ -11,6 +12,7 @@ export default function Home() {
   return (
     <>
       <OceanusHero />
+      <ValuePropositions />
       <BrandStatement />
       <FeaturedProperties />
       <Zones />

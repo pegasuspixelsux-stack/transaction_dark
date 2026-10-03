@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { X } from "lucide-react";
-import { Trident } from "@/components/Trident";
+import { X, MessageCircle } from "lucide-react";
 
 type Phase = "options" | "form" | "done";
 type AnswerKey =
@@ -182,7 +181,7 @@ export function AGenteConcierge() {
             className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-[#0d0d0d] px-5 py-3.5 text-[#f5f5f0] shadow-[0_10px_40px_rgba(0,0,0,0.28)] transition-colors hover:bg-[#161616] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink"
             aria-label="Abrir el asistente AGENTE"
           >
-            <Trident className="size-4 text-sky-400" />
+            <MessageCircle className="size-4 text-sky-400" />
             <span className="text-[0.7rem] uppercase tracking-[0.24em]">AGENTE</span>
           </motion.button>
         )}
@@ -202,7 +201,7 @@ export function AGenteConcierge() {
           >
             <header className="flex items-center justify-between border-b border-white/10 px-5 py-4">
               <div className="flex items-center gap-2.5">
-                <Trident className="size-4 text-sky-400" />
+                <MessageCircle className="size-4 text-sky-400" />
                 <span className="text-[0.7rem] uppercase tracking-[0.26em] text-white/70">
                   AGENTE
                 </span>
@@ -316,12 +315,12 @@ export function AGenteConcierge() {
 
               {phase === "done" && (
                 <div className="flex flex-col gap-4">
-                  <Trident className="size-6 text-sky-400" />
+                  <MessageCircle className="size-6 text-sky-400" />
                   <p className="font-display text-lg leading-snug tracking-tight">
                     Gracias, {form.name.split(" ")[0] || "hola"}.
                   </p>
                   <p className="text-sm leading-relaxed text-white/70">
-                    Hemos registrado sus preferencias. Un asesor privado de Oceanus
+                    Hemos registrado sus preferencias. Un asesor privado de Transaction
                     curará una selección a su medida —&nbsp;incluyendo propiedades
                     que rara vez llegan a publicarse&nbsp;— y se pondrá en contacto
                     con usted a primera hora.

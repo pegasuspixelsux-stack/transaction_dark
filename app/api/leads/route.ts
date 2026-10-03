@@ -24,7 +24,10 @@ export async function POST(request: Request) {
     beds: str(body.beds, 40),
     baths: str(body.baths, 40),
     preference: str(body.preference, 80),
+    email: str(body.email, 120),
+    message: str(body.message, 1000),
   };
+  const source = body.source === "contact-form" ? "contact-form" : "a-gente-concierge";
 
   if (!lead.name || !lead.phone) {
     return NextResponse.json(
@@ -38,7 +41,8 @@ export async function POST(request: Request) {
       await addDoc(collection(db, "leads"), {
         ...lead,
         createdAt: serverTimestamp(),
-        source: "a-gente-concierge",
+        source,
+        status: "nuevo",
       });
     } else {
       // No Firebase project configured yet — record it in the function logs so

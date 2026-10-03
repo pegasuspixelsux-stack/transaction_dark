@@ -1,13 +1,26 @@
-import Image from "next/image";
+import { Lock, Users, Zap, Award } from "lucide-react";
 
-const pimg = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=600&q=80`;
-
-const TEAM: { name: string; role: string; image: string }[] = [
-  { name: "Valentina Rocha", role: "Dirección", image: pimg("1494790108377-be9c29b29330") },
-  { name: "Mateo Duarte", role: "Ventas · José Ignacio", image: pimg("1500648767791-00dcc994a43e") },
-  { name: "Sofía Beltrán", role: "Ventas · La Barra", image: pimg("1438761681033-6461ffad8d80") },
-  { name: "Joaquín Vidal", role: "Arquitectura", image: pimg("1507003211169-0a1dd7228f2d") },
+const SERVICES: { title: string; description: string; icon: React.ReactNode }[] = [
+  {
+    title: "Discreción garantizada",
+    description: "Mantenemos la confidencialidad de nuestros clientes y transacciones con estrictos protocolos de privacidad.",
+    icon: <Lock size={24} />,
+  },
+  {
+    title: "Equipo dedicado",
+    description: "Profesionales locales con profundo conocimiento de Punta del Este y experiencia en operaciones de lujo.",
+    icon: <Users size={24} />,
+  },
+  {
+    title: "Proceso eficiente",
+    description: "De la primera visita a la escritura, acompañamos cada paso con rapidez y profesionalismo.",
+    icon: <Zap size={24} />,
+  },
+  {
+    title: "Excelencia reconocida",
+    description: "Años de experiencia y referencias que hablan por nosotros en el mercado de propiedades premium.",
+    icon: <Award size={24} />,
+  },
 ];
 
 export function Team() {
@@ -21,7 +34,7 @@ export function Team() {
           </h2>
           <div className="mt-6 max-w-md space-y-4 text-base leading-relaxed text-ink-muted">
             <p>
-              Oceanus nació de una idea simple: comprar o vender una casa en la
+              Transaction nació de una idea simple: comprar o vender una casa en la
               costa debería sentirse como una conversación entre conocidos, no
               como una transacción. Somos un equipo reducido de asesores con
               raíces en Punta del Este.
@@ -40,27 +53,21 @@ export function Team() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6">
-          {TEAM.map((member) => (
-            <figure key={member.name} className="flex flex-col">
-              <div className="relative aspect-[4/5] overflow-hidden border border-hairline bg-mist/20">
-                <Image
-                  src={member.image}
-                  alt={member.name}
-                  fill
-                  sizes="(min-width: 1024px) 20vw, 45vw"
-                  className="object-cover"
-                />
+        <div className="grid grid-cols-2 gap-6 sm:gap-8">
+          {SERVICES.map((service) => (
+            <div key={service.title} className="flex flex-col gap-4 border border-hairline p-6 dark:border-white/10">
+              <div className="text-blue-400 dark:text-blue-400">
+                {service.icon}
               </div>
-              <figcaption className="mt-3">
-                <p className="font-display text-lg font-normal tracking-tight">
-                  {member.name}
+              <div>
+                <h3 className="font-display text-lg font-normal tracking-tight">
+                  {service.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-muted dark:text-white/75">
+                  {service.description}
                 </p>
-                <p className="mt-0.5 text-xs uppercase tracking-luxury text-ink-muted">
-                  {member.role}
-                </p>
-              </figcaption>
-            </figure>
+              </div>
+            </div>
           ))}
         </div>
       </div>
