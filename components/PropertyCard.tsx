@@ -1,11 +1,13 @@
+import Link from "next/link";
 import Image from "next/image";
 import type { Property } from "@/types/property";
 import { formatPrice, propertyTypeLabel } from "@/lib/properties";
 
 export function PropertyCard({ property }: { property: Property }) {
-  const { title, zone, price, bedrooms, type, imageUrl } = property;
+  const { id, title, zone, price, bedrooms, type, imageUrl } = property;
   return (
-    <article className="relative aspect-[4/5] overflow-hidden border border-hairline bg-mist/20">
+    <Link href={`/propiedades/${id}`}>
+      <article className="relative aspect-[4/5] overflow-hidden border border-hairline bg-mist/20 cursor-pointer transition-opacity hover:opacity-90">
       <Image
         src={imageUrl}
         alt={title}
@@ -33,6 +35,7 @@ export function PropertyCard({ property }: { property: Property }) {
           </p>
         </div>
       </div>
-    </article>
+      </article>
+    </Link>
   );
 }
