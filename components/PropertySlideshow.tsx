@@ -58,12 +58,12 @@ export function PropertySlideshow({ images, title }: PropertySlideshowProps) {
       />
 
       {/* Watermark */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex size-16 items-center justify-center rounded-full border-4 border-white/50 sm:size-20 sm:border-5">
-            <span className="font-bold text-white/50 text-xl sm:text-3xl">T</span>
+      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex size-32 items-center justify-center rounded-full border-4 border-white/25 sm:size-48 sm:border-5">
+            <span className="font-bold text-white/25 text-5xl sm:text-8xl">T</span>
           </div>
-          <p className="text-xs font-bold uppercase tracking-luxury text-white/50 sm:text-sm">
+          <p className="text-sm font-bold uppercase tracking-luxury text-white/25 sm:text-lg">
             TRANSACTION
           </p>
         </div>
