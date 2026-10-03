@@ -57,6 +57,18 @@ export function PropertySlideshow({ images, title }: PropertySlideshowProps) {
         className="absolute inset-0 bg-[radial-gradient(120%_95%_at_0%_100%,rgba(0,0,0,0.62),rgba(0,0,0,0.18)_38%,transparent_70%)]"
       />
 
+      {/* Watermark */}
+      <div className="absolute inset-0 z-10 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex size-16 items-center justify-center rounded-full border-4 border-white/50 sm:size-20 sm:border-5">
+            <span className="font-bold text-white/50 text-xl sm:text-3xl">T</span>
+          </div>
+          <p className="text-xs font-bold uppercase tracking-luxury text-white/50 sm:text-sm">
+            TRANSACTION
+          </p>
+        </div>
+      </div>
+
       {/* Navigation Buttons */}
       <button
         onClick={goToPrevious}
