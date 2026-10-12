@@ -93,7 +93,7 @@ export function SiteFooter() {
             </p>
             <div className="flex gap-6">
               <a
-                href="/admin"
+                href="/login"
                 className="text-xs text-ink-muted transition-colors hover:text-ink dark:text-white/75 dark:hover:text-white"
               >
                 Admin
