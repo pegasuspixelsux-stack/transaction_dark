@@ -1,4 +1,6 @@
-export type Role = "admin" | "manager" | "agent";
+/** `superadmin` is hardcoded server-side (env credentials) and never stored in the users table. */
+export type Role = "superadmin" | "admin" | "manager" | "agent";
+export type StoredRole = Exclude<Role, "superadmin">;
 
 export interface AdminUser {
   id: string;
@@ -6,13 +8,13 @@ export interface AdminUser {
   email: string;
   /** Mock only. A real backend stores a salted hash, never the password. */
   password: string;
-  role: Role;
+  role: StoredRole;
   active: boolean;
   lastLogin: string | null; // ISO
 }
 
 /** User shape that is safe to hand to UI state. */
-export type SessionUser = Omit<AdminUser, "password">;
+export type SessionUser = Omit<AdminUser, "password" | "role"> & { role: Role };
 
 export type ListingType = "sale" | "rent";
 export type Currency = "USD" | "UYU" | "EUR";

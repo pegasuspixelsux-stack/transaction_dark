@@ -70,13 +70,13 @@ export function LeadsBoard() {
 
   return (
     <div data-rise>
-      <PageHeader eyebrow="Sales" title="Leads Pipeline" />
+      <PageHeader eyebrow="Ventas" title="Pipeline de consultas" />
 
       <section
-        aria-label="Filters"
+        aria-label="Filtros"
         className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
-        <Field label="Search">
+        <Field label="Buscar">
           {({ id }) => (
             <div className="relative">
               <Search
@@ -88,14 +88,14 @@ export function LeadsBoard() {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Name or phone"
+                placeholder="Nombre o teléfono"
                 className={cn(inputClass, "pl-11")}
               />
             </div>
           )}
         </Field>
         {seesAll ? (
-          <Field label="Agent">
+          <Field label="Agente">
             {({ id }) => (
               <select
                 id={id}
@@ -103,8 +103,8 @@ export function LeadsBoard() {
                 onChange={(e) => setAgentFilter(e.target.value)}
                 className={inputClass}
               >
-                <option value="all">All agents</option>
-                <option value="unassigned">Unassigned</option>
+                <option value="all">Todos los agentes</option>
+                <option value="unassigned">Sin asignar</option>
                 {agents.map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.fullName}
@@ -114,12 +114,12 @@ export function LeadsBoard() {
             )}
           </Field>
         ) : null}
-        <Field label="Created from">
+        <Field label="Creado desde">
           {({ id }) => (
             <input id={id} type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} className={inputClass} />
           )}
         </Field>
-        <Field label="Created to">
+        <Field label="Creado hasta">
           {({ id }) => (
             <input id={id} type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} className={inputClass} />
           )}
@@ -132,17 +132,17 @@ export function LeadsBoard() {
 
       {leads.length === 0 ? (
         <EmptyState
-          title={seesAll ? "No leads yet" : "No leads assigned to you yet"}
+          title={seesAll ? "Aún no hay consultas" : "Aún no tenés consultas asignadas"}
           body={
             seesAll
-              ? "Inquiries from the website contact forms will appear here."
-              : "When a manager assigns you an inquiry, it will appear here."
+              ? "Las consultas de los formularios del sitio aparecerán acá."
+              : "Cuando un gerente te asigne una consulta, aparecerá acá."
           }
         />
       ) : filtered.length === 0 && filtersActive ? (
         <EmptyState
-          title="No leads match these filters"
-          body="Try a different name, agent or date range."
+          title="Ninguna consulta coincide con los filtros"
+          body="Probá con otro nombre, agente o rango de fechas."
         />
       ) : (
         <div className="-mx-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
@@ -164,7 +164,7 @@ export function LeadsBoard() {
                     endDrag();
                   }}
                   className={cn(
-                    "flex min-h-96 flex-col rounded-2xl border bg-admin-panel p-3 backdrop-blur-xl transition-colors duration-200",
+                    "flex min-h-96 flex-col rounded-2xl border bg-white p-3 transition-colors duration-200",
                     isOver ? "border-admin-accent bg-admin-panel-strong" : "border-admin-line",
                   )}
                 >
@@ -178,7 +178,7 @@ export function LeadsBoard() {
                   <div className="flex flex-1 flex-col gap-3">
                     {items.length === 0 ? (
                       <p className="rounded-xl border border-dashed border-admin-line px-3 py-8 text-center text-sm text-admin-muted">
-                        {canMove ? "Drop a lead here" : "Nothing here"}
+                        {canMove ? "Soltá una consulta acá" : "Nada por acá"}
                       </p>
                     ) : (
                       items.map((lead) => (
@@ -188,8 +188,8 @@ export function LeadsBoard() {
                           agents={agents}
                           agentName={
                             lead.assignedAgentId
-                              ? (nameById.get(lead.assignedAgentId) ?? "Unknown")
-                              : "Unassigned"
+                              ? (nameById.get(lead.assignedAgentId) ?? "Desconocido")
+                              : "Sin asignar"
                           }
                           canMove={canMove}
                           canReassign={canReassign}

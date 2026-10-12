@@ -44,3 +44,7 @@ next-env.d.ts
 
 # local scratch / credentials
 /temp/
+
+# Runtime-editable business config (written by the admin panel)
+/data/
+!.env.example

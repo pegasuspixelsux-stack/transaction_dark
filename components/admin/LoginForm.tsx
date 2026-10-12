@@ -28,6 +28,7 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [touched, setTouched] = useState({ email: false, password: false });
   const [formError, setFormError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (status === "ready" && user) router.replace("/admin");
@@ -38,8 +39,10 @@ export function LoginForm() {
   const passwordError =
     touched.password && password.length === 0 ? "Ingresa tu contraseña." : undefined;
 
-  function attempt(nextEmail: string, nextPassword: string) {
-    const result = login(nextEmail, nextPassword);
+  async function attempt(nextEmail: string, nextPassword: string) {
+    setBusy(true);
+    const result = await login(nextEmail, nextPassword);
+    setBusy(false);
     if (!result.ok) setFormError(result.error);
   }
 
@@ -52,7 +55,7 @@ export function LoginForm() {
   }
 
   return (
-    <main className="relative flex min-h-dvh w-full overflow-hidden">
+    <main className="admin-dark relative flex min-h-dvh w-full overflow-hidden">
       <Image
         src="/images/hero/serena.png"
         alt=""
@@ -135,7 +138,7 @@ export function LoginForm() {
               </p>
             ) : null}
 
-            <Button type="submit" variant="primary" className="w-full">
+            <Button type="submit" variant="primary" className="w-full" disabled={busy}>
               <LogIn className="size-4" aria-hidden />
               Ingresar
             </Button>
@@ -153,6 +156,7 @@ export function LoginForm() {
               {DEMO_ACCOUNTS.map(({ label, email: demoEmail, Icon }) => (
                 <Button
                   key={label}
+                  disabled={busy}
                   className="flex-col gap-1 px-2 py-3 text-center"
                   onClick={() => {
                     setFormError(null);

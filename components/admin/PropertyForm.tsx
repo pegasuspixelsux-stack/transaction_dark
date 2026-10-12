@@ -66,17 +66,17 @@ type Errors = Partial<Record<keyof FormState, string>>;
 
 function validate(f: FormState): Errors {
   const errors: Errors = {};
-  if (!f.title.trim()) errors.title = "Title is required.";
-  if (!f.location.trim()) errors.location = "Location is required.";
-  if (!(Number(f.price) > 0)) errors.price = "Enter a price above 0.";
-  if (!(Number(f.areaM2) > 0)) errors.areaM2 = "Enter the area in m².";
+  if (!f.title.trim()) errors.title = "El título es obligatorio.";
+  if (!f.location.trim()) errors.location = "La ubicación es obligatoria.";
+  if (!(Number(f.price) > 0)) errors.price = "Ingresá un precio mayor a 0.";
+  if (!(Number(f.areaM2) > 0)) errors.areaM2 = "Ingresá la superficie en m².";
   for (const key of ["bedrooms", "bathrooms"] as const) {
     if (!(Number.isInteger(Number(f[key])) && Number(f[key]) >= 0)) {
-      errors[key] = "Use a whole number, 0 or more.";
+      errors[key] = "Usá un número entero, 0 o más.";
     }
   }
   if (f.imageUrl && !/^https?:\/\//i.test(f.imageUrl)) {
-    errors.imageUrl = "Use a full URL starting with http(s)://";
+    errors.imageUrl = "Usá una URL completa que empiece con http(s)://";
   }
   return errors;
 }
@@ -137,35 +137,35 @@ export function PropertyForm({
 
   return (
     <form onSubmit={submit} noValidate className="space-y-5">
-      <Field label="Title" error={errors.title}>
+      <Field label="Título" error={errors.title}>
         {({ id, describedBy, invalid }) => (
           <input id={id} aria-invalid={invalid} aria-describedby={describedBy} value={form.title} onChange={(e) => set("title", e.target.value)} className={inputClass} />
         )}
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Listing type">
+        <Field label="Tipo de operación">
           {({ id }) => (
             <select id={id} value={form.listingType} onChange={(e) => set("listingType", e.target.value as ListingType)} className={inputClass}>
-              <option value="sale">For sale</option>
-              <option value="rent">For rent</option>
+              <option value="sale">En venta</option>
+              <option value="rent">En alquiler</option>
             </select>
           )}
         </Field>
-        <Field label="Status">
+        <Field label="Estado">
           {({ id }) => (
             <select id={id} value={form.status} onChange={(e) => set("status", e.target.value as PublishStatus)} className={inputClass}>
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
+              <option value="draft">Borrador</option>
+              <option value="published">Publicada</option>
             </select>
           )}
         </Field>
-        <Field label="Price" error={errors.price}>
+        <Field label="Precio" error={errors.price}>
           {({ id, describedBy, invalid }) => (
             <input id={id} type="number" min="0" inputMode="decimal" aria-invalid={invalid} aria-describedby={describedBy} value={form.price} onChange={(e) => set("price", e.target.value)} className={inputClass} />
           )}
         </Field>
-        <Field label="Currency">
+        <Field label="Moneda">
           {({ id }) => (
             <select id={id} value={form.currency} onChange={(e) => set("currency", e.target.value as Currency)} className={inputClass}>
               <option value="USD">USD</option>
@@ -176,36 +176,36 @@ export function PropertyForm({
         </Field>
       </div>
 
-      <Field label="Location" error={errors.location}>
+      <Field label="Ubicación" error={errors.location}>
         {({ id, describedBy, invalid }) => (
           <input id={id} aria-invalid={invalid} aria-describedby={describedBy} value={form.location} onChange={(e) => set("location", e.target.value)} className={inputClass} placeholder="José Ignacio, Maldonado" />
         )}
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-3">
-        <Field label="Beds" error={errors.bedrooms}>
+        <Field label="Dormitorios" error={errors.bedrooms}>
           {({ id, describedBy, invalid }) => (
             <input id={id} type="number" min="0" aria-invalid={invalid} aria-describedby={describedBy} value={form.bedrooms} onChange={(e) => set("bedrooms", e.target.value)} className={inputClass} />
           )}
         </Field>
-        <Field label="Baths" error={errors.bathrooms}>
+        <Field label="Baños" error={errors.bathrooms}>
           {({ id, describedBy, invalid }) => (
             <input id={id} type="number" min="0" aria-invalid={invalid} aria-describedby={describedBy} value={form.bathrooms} onChange={(e) => set("bathrooms", e.target.value)} className={inputClass} />
           )}
         </Field>
-        <Field label="Area (m²)" error={errors.areaM2}>
+        <Field label="Superficie (m²)" error={errors.areaM2}>
           {({ id, describedBy, invalid }) => (
             <input id={id} type="number" min="0" aria-invalid={invalid} aria-describedby={describedBy} value={form.areaM2} onChange={(e) => set("areaM2", e.target.value)} className={inputClass} />
           )}
         </Field>
       </div>
 
-      <Field label="Features" hint="Type a feature and press Enter.">
+      <Field label="Características" hint="Escribí una característica y presioná Enter.">
         {({ id, describedBy }) => (
           <>
             <div className="flex gap-2">
-              <input id={id} aria-describedby={describedBy} value={featureDraft} onChange={(e) => setFeatureDraft(e.target.value)} onKeyDown={onFeatureKey} className={inputClass} placeholder="Private pool" />
-              <Button onClick={addFeature} aria-label="Add feature" className="px-3">
+              <input id={id} aria-describedby={describedBy} value={featureDraft} onChange={(e) => setFeatureDraft(e.target.value)} onKeyDown={onFeatureKey} className={inputClass} placeholder="Piscina privada" />
+              <Button onClick={addFeature} aria-label="Agregar característica" className="px-3">
                 <Plus className="size-4" aria-hidden />
               </Button>
             </div>
@@ -216,7 +216,7 @@ export function PropertyForm({
                     {feature}
                     <button
                       type="button"
-                      aria-label={`Remove ${feature}`}
+                      aria-label={`Quitar ${feature}`}
                       onClick={() => set("features", form.features.filter((f) => f !== feature))}
                       className="inline-flex size-8 items-center justify-center rounded-full text-admin-muted hover:bg-admin-panel-strong hover:text-admin-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent"
                     >
@@ -231,30 +231,30 @@ export function PropertyForm({
       </Field>
 
       <div>
-        <p className="mb-2 text-xs uppercase tracking-luxury text-admin-ink">Image</p>
+        <p className="mb-2 text-xs uppercase tracking-luxury text-admin-ink">Imagen</p>
         <div
           aria-disabled
           className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-admin-line px-4 py-6 text-center text-admin-muted"
         >
           <Upload className="size-5" aria-hidden />
-          <p className="text-sm">File upload is not connected yet. Paste an image URL below.</p>
+          <p className="text-sm">La carga de archivos todavía no está conectada. Pegá abajo la URL de una imagen.</p>
         </div>
-        <Field label="Image URL" error={errors.imageUrl} className="mt-4">
+        <Field label="URL de la imagen" error={errors.imageUrl} className="mt-4">
           {({ id, describedBy, invalid }) => (
             <input id={id} type="url" aria-invalid={invalid} aria-describedby={describedBy} value={form.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} className={inputClass} placeholder="https://…" />
           )}
         </Field>
         {form.imageUrl && !errors.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin-supplied host
-          <img src={form.imageUrl} alt="Preview of the property" className="mt-4 h-40 w-full rounded-xl border border-admin-line object-cover" />
+          <img src={form.imageUrl} alt="Vista previa de la propiedad" className="mt-4 h-40 w-full rounded-xl border border-admin-line object-cover" />
         ) : null}
       </div>
 
       {agents.length > 0 ? (
-        <Field label="Assigned agent">
+        <Field label="Agente asignado">
           {({ id }) => (
             <select id={id} value={form.assignedAgentId} onChange={(e) => set("assignedAgentId", e.target.value)} className={inputClass}>
-              <option value="">Unassigned</option>
+              <option value="">Sin asignar</option>
               {agents.map((a) => (
                 <option key={a.id} value={a.id}>{a.fullName}</option>
               ))}
@@ -263,16 +263,16 @@ export function PropertyForm({
         </Field>
       ) : null}
 
-      <Field label="Description">
+      <Field label="Descripción">
         {({ id }) => (
           <textarea id={id} rows={4} value={form.description} onChange={(e) => set("description", e.target.value)} className={`${inputClass} py-3`} />
         )}
       </Field>
 
       <div className="flex flex-wrap justify-end gap-3 pt-2">
-        <Button onClick={onCancel}>Cancel</Button>
+        <Button onClick={onCancel}>Cancelar</Button>
         <Button type="submit" variant="primary">
-          {property ? "Save changes" : "Create property"}
+          {property ? "Guardar cambios" : "Crear propiedad"}
         </Button>
       </div>
     </form>

@@ -39,16 +39,16 @@ export function LeadCard({
   onDragStart,
   onDragEnd,
 }: LeadCardProps) {
-  const greeting = `Hello ${lead.name.split(" ")[0]}, this is Transaction about ${lead.propertyTitle}.`;
+  const greeting = `Hola ${lead.name.split(" ")[0]}, te escribimos de Transaction por ${lead.propertyTitle}.`;
 
   return (
     <article
       draggable={canMove}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      aria-label={`Lead ${lead.name}`}
+      aria-label={`Consulta de ${lead.name}`}
       className={cn(
-        "rounded-xl border border-admin-line bg-[#0e2033]/80 p-4 backdrop-blur-xl transition-[opacity,border-color] duration-200 hover:border-white/25",
+        "rounded-xl border border-admin-line bg-white p-4 transition-[opacity,border-color] duration-200 hover:border-slate-400",
         canMove && "cursor-grab active:cursor-grabbing",
         dragging && "opacity-40",
       )}
@@ -65,11 +65,11 @@ export function LeadCard({
 
       <dl className="mt-3 space-y-1 text-sm">
         <div>
-          <dt className="sr-only">Interested in</dt>
-          <dd className="text-admin-ink">{lead.propertyTitle || "General inquiry"}</dd>
+          <dt className="sr-only">Interesado en</dt>
+          <dd className="text-admin-ink">{lead.propertyTitle || "Consulta general"}</dd>
         </div>
         <div className="text-admin-muted">
-          <dt className="sr-only">Source and date</dt>
+          <dt className="sr-only">Origen y fecha</dt>
           <dd>
             {lead.source} · {formatDate(lead.createdAt)}
           </dd>
@@ -77,21 +77,21 @@ export function LeadCard({
       </dl>
 
       <div className="mt-3 flex items-center gap-2">
-        <a href={telLink(lead.phone)} aria-label={`Call ${lead.name}`} title="Call" className={iconLink}>
+        <a href={telLink(lead.phone)} aria-label={`Llamar a ${lead.name}`} title="Llamar" className={iconLink}>
           <Phone className="size-4" aria-hidden />
         </a>
         <a
           href={whatsappLink(lead.phone, greeting)}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`WhatsApp ${lead.name}`}
+          aria-label={`WhatsApp a ${lead.name}`}
           title="WhatsApp"
           className={iconLink}
         >
           <MessageCircle className="size-4" aria-hidden />
         </a>
         {lead.stage === "closed" ? (
-          <div role="group" aria-label="Outcome" className="ml-auto flex gap-1">
+          <div role="group" aria-label="Resultado" className="ml-auto flex gap-1">
             {(["won", "lost"] as const).map((o) => (
               <button
                 key={o}
@@ -108,7 +108,7 @@ export function LeadCard({
                     : "border-admin-line text-admin-muted hover:bg-admin-panel-strong",
                 )}
               >
-                {o}
+                {o === "won" ? "Ganada" : "Perdida"}
               </button>
             ))}
           </div>
@@ -118,7 +118,7 @@ export function LeadCard({
       <div className="mt-3 space-y-2">
         <label className="block">
           <span className="mb-1 block text-xs uppercase tracking-luxury text-admin-ink">
-            Stage
+            Etapa
           </span>
           <select
             value={lead.stage}
@@ -137,14 +137,14 @@ export function LeadCard({
         {canReassign ? (
           <label className="block">
             <span className="mb-1 block text-xs uppercase tracking-luxury text-admin-ink">
-              Assigned agent
+              Agente asignado
             </span>
             <select
               value={lead.assignedAgentId ?? ""}
               onChange={(e) => onReassign(e.target.value || null)}
               className={inputClass}
             >
-              <option value="">Unassigned</option>
+              <option value="">Sin asignar</option>
               {agents.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.fullName}
@@ -154,7 +154,7 @@ export function LeadCard({
           </label>
         ) : (
           <p className="text-sm text-admin-muted">
-            Agent: <span className="text-admin-ink">{agentName}</span>
+            Agente: <span className="text-admin-ink">{agentName}</span>
           </p>
         )}
       </div>

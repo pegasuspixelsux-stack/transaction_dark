@@ -39,17 +39,17 @@ export function OverviewDashboard() {
   if (status === "loading" || !user) return <Spinner />;
 
   const metrics = [
-    { label: "Published properties", value: stats.published, note: `${stats.drafts} in draft` },
-    { label: "Open leads", value: stats.open, note: `${stats.newThisWeek} new this week` },
+    { label: "Propiedades publicadas", value: stats.published, note: `${stats.drafts} en borrador` },
+    { label: "Consultas abiertas", value: stats.open, note: `${stats.newThisWeek} nuevas esta semana` },
     {
-      label: can("leads:view-all") ? "Unassigned leads" : "Deals won",
+      label: can("leads:view-all") ? "Consultas sin asignar" : "Operaciones ganadas",
       value: can("leads:view-all") ? stats.unassigned : stats.won,
-      note: can("leads:view-all") ? "Waiting for an agent" : "Closed as won",
+      note: can("leads:view-all") ? "Esperando un agente" : "Cerradas como ganadas",
     },
     {
-      label: "Win rate",
+      label: "Tasa de cierre",
       value: stats.winRate === null ? "—" : `${stats.winRate}%`,
-      note: `${stats.won} won deals`,
+      note: `${stats.won} operaciones ganadas`,
     },
   ];
 
@@ -60,9 +60,9 @@ export function OverviewDashboard() {
 
   return (
     <div data-rise>
-      <PageHeader eyebrow="Dashboard" title={`Good to see you, ${user.fullName.split(" ")[0]}`} />
+      <PageHeader eyebrow="Panel" title={`Qué bueno verte, ${user.fullName.split(" ")[0]}`} />
 
-      <section aria-label="Key metrics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Métricas clave" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map((m) => (
           <GlassCard key={m.label} className="p-6">
             <p className="text-xs uppercase tracking-luxury text-admin-muted">{m.label}</p>
@@ -76,7 +76,7 @@ export function OverviewDashboard() {
         <GlassCard className="p-6 lg:col-span-3">
           <h2 className="font-display text-xl font-normal tracking-tight">Pipeline</h2>
           {leads.length === 0 ? (
-            <p className="mt-4 text-sm text-admin-muted">No leads yet.</p>
+            <p className="mt-4 text-sm text-admin-muted">Aún no hay consultas.</p>
           ) : (
             <ul className="mt-6 space-y-4">
               {LEAD_STAGES.map((stage) => (
@@ -100,17 +100,17 @@ export function OverviewDashboard() {
           )}
           <Link
             href="/admin/leads"
-            className="mt-6 inline-flex min-h-11 items-center gap-2 text-xs uppercase tracking-luxury text-admin-accent hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent"
+            className="mt-6 inline-flex min-h-11 items-center gap-2 text-xs uppercase tracking-luxury text-admin-accent hover:text-admin-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent"
           >
-            Open pipeline <ArrowRight className="size-4" aria-hidden />
+            Abrir pipeline <ArrowRight className="size-4" aria-hidden />
           </Link>
         </GlassCard>
 
         <GlassCard className="p-6 lg:col-span-2">
-          <h2 className="font-display text-xl font-normal tracking-tight">Latest inquiries</h2>
+          <h2 className="font-display text-xl font-normal tracking-tight">Últimas consultas</h2>
           {recent.length === 0 ? (
             <div className="mt-4">
-              <EmptyState title="Nothing yet" body="New inquiries from the website will land here." />
+              <EmptyState title="Todavía no hay nada" body="Las nuevas consultas del sitio aparecerán acá." />
             </div>
           ) : (
             <ul className="mt-4 divide-y divide-admin-line">
@@ -129,12 +129,12 @@ export function OverviewDashboard() {
 
       {can("users:manage") ? (
         <p className="mt-6 text-sm text-admin-muted">
-          {stats.activeUsers} active team members ·{" "}
+          {stats.activeUsers} miembros activos del equipo ·{" "}
           <Link
             href="/admin/users"
             className="text-admin-accent underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent"
           >
-            Manage users
+            Gestionar usuarios
           </Link>
         </p>
       ) : null}

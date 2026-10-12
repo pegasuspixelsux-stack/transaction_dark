@@ -17,9 +17,9 @@ import type {
   Lead,
   LeadOutcome,
   LeadStage,
-  Role,
   Session,
   SessionUser,
+  StoredRole,
 } from "@/types/admin";
 import { loadDb, resetDb, saveDb } from "./db";
 import { can, type Permission } from "./rbac";
@@ -42,7 +42,7 @@ export interface UserInput {
   email: string;
   /** Required when creating; blank on edit keeps the current password. */
   password?: string;
-  role: Role;
+  role: StoredRole;
   active: boolean;
 }
 
@@ -56,7 +56,7 @@ interface AdminContextValue {
   leads: Lead[];
   can: (permission: Permission) => boolean;
 
-  login: (email: string, password: string) => Result;
+  login: (email: string, password: string) => Promise<Result>;
   logout: () => void;
 
   moveLead: (id: string, stage: LeadStage, outcome?: LeadOutcome) => Result;
@@ -114,6 +114,9 @@ const newId = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [db, setDb] = useState<DbState | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  // The hardcoded super admin lives only in a server cookie, never in `db`.
+  const [superUser, setSuperUser] = useState<SessionUser | null>(null);
+  const [serverChecked, setServerChecked] = useState(false);
   const dbRef = useRef<DbState | null>(null);
 
   // localStorage only exists in the browser, so the first client render must
@@ -125,6 +128,20 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     setDb(loaded);
     setSession(readSession());
     /* eslint-enable react-hooks/set-state-in-effect */
+
+    let cancelled = false;
+    fetch("/api/admin/session", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { user: SessionUser | null } | null) => {
+        if (!cancelled && data?.user?.role === "superadmin") setSuperUser(data.user);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setServerChecked(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const commit = useCallback((next: DbState) => {
@@ -134,10 +151,12 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const currentUser = useMemo(() => {
-    if (!db || !session) return null;
+    if (!db) return null;
+    if (superUser) return superUser;
+    if (!session) return null;
     const found = db.users.find((u) => u.id === session.userId && u.active);
     return found ? toSessionUser(found) : null;
-  }, [db, session]);
+  }, [db, session, superUser]);
 
   const role = currentUser?.role;
   const allowed = useCallback((p: Permission) => can(role, p), [role]);
@@ -162,18 +181,40 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   );
 
   const login = useCallback<AdminContextValue["login"]>(
-    (email, password) => {
+    async (email, password) => {
       const state = dbRef.current;
-      if (!state) return fail("Still loading — try again in a moment.");
+      if (!state) return fail("Todavía se está cargando — probá de nuevo en un momento.");
       const match = state.users.find(
         (u) => u.email.toLowerCase() === email.trim().toLowerCase(),
       );
       // Same message for unknown email and wrong password.
       if (!match || match.password !== password) {
-        return fail("Incorrect email or password.");
+        // Not a regular user: the only other identity is the env-defined super
+        // admin, which only the server can verify.
+        try {
+          const res = await fetch("/api/admin/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+          const data = (await res.json().catch(() => ({}))) as {
+            user?: SessionUser;
+            error?: string;
+          };
+          if (res.ok && data.user?.role === "superadmin") {
+            writeSession(null);
+            setSession(null);
+            setSuperUser(data.user);
+            return ok;
+          }
+          if (res.status === 429 && data.error) return fail(data.error);
+        } catch {
+          // Offline / no server: fall through to the generic message.
+        }
+        return fail("Correo o contraseña incorrectos.");
       }
       if (!match.active) {
-        return fail("This account has been deactivated. Contact an admin.");
+        return fail("Esta cuenta fue desactivada. Contactá a un administrador.");
       }
       const next: Session = {
         token: btoa(JSON.stringify({ sub: match.id, iat: Date.now() })),
@@ -188,6 +229,15 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         ),
       });
       setSession(next);
+      setSuperUser(null);
+      if (match.role === "admin") {
+        // Lets the config API verify this admin server-side (best effort).
+        void fetch("/api/admin/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }).catch(() => {});
+      }
       return ok;
     },
     [commit],
@@ -196,19 +246,21 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     writeSession(null);
     setSession(null);
+    setSuperUser(null);
+    void fetch("/api/admin/session", { method: "DELETE" }).catch(() => {});
   }, []);
 
   const patchLead = useCallback(
     (id: string, patch: (lead: Lead) => Lead): Result => {
       const state = dbRef.current;
       const actor = currentUser;
-      if (!state || !actor) return fail("You are signed out.");
+      if (!state || !actor) return fail("Tu sesión se cerró.");
       const lead = state.leads.find((l) => l.id === id);
-      if (!lead) return fail("Lead not found.");
+      if (!lead) return fail("No se encontró la consulta.");
       const mayEdit =
         can(actor.role, "leads:view-all") || lead.assignedAgentId === actor.id;
       if (!mayEdit || !can(actor.role, "leads:move")) {
-        return fail("You can only edit leads assigned to you.");
+        return fail("Solo podés editar las consultas asignadas a vos.");
       }
       commit({
         ...state,
@@ -237,7 +289,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const reassignLead = useCallback<AdminContextValue["reassignLead"]>(
     (id, agentId) => {
-      if (!allowed("leads:reassign")) return fail("Only managers can reassign.");
+      if (!allowed("leads:reassign")) return fail("Solo los gerentes pueden reasignar.");
       return patchLead(id, (l) => ({ ...l, assignedAgentId: agentId }));
     },
     [allowed, patchLead],
@@ -247,7 +299,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     (input) => {
       const state = dbRef.current;
       if (!state || !allowed("properties:write")) {
-        return fail("You don't have permission to edit properties.");
+        return fail("No tenés permiso para editar propiedades.");
       }
       const now = new Date().toISOString();
       if (input.id) {
@@ -278,7 +330,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     (id) => {
       const state = dbRef.current;
       if (!state || !allowed("properties:write")) {
-        return fail("You don't have permission to edit properties.");
+        return fail("No tenés permiso para editar propiedades.");
       }
       commit({
         ...state,
@@ -301,7 +353,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     (id) => {
       const state = dbRef.current;
       if (!state || !allowed("properties:write")) {
-        return fail("You don't have permission to delete properties.");
+        return fail("No tenés permiso para eliminar propiedades.");
       }
       commit({
         ...state,
@@ -316,15 +368,15 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     (input) => {
       const state = dbRef.current;
       if (!state || !allowed("users:manage")) {
-        return fail("Only admins can manage users.");
+        return fail("Solo los administradores pueden gestionar usuarios.");
       }
       const email = input.email.trim().toLowerCase();
       if (state.users.some((u) => u.id !== input.id && u.email.toLowerCase() === email)) {
-        return fail("A user with this email already exists.");
+        return fail("Ya existe un usuario con este correo.");
       }
       if (input.id) {
         const target = state.users.find((u) => u.id === input.id);
-        if (!target) return fail("User not found.");
+        if (!target) return fail("No se encontró el usuario.");
         const adminsLeft = state.users.filter(
           (u) => u.id !== input.id && u.role === "admin" && u.active,
         ).length;
@@ -333,7 +385,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           target.active &&
           (input.role !== "admin" || !input.active);
         if (losesAdmin && adminsLeft === 0) {
-          return fail("At least one active admin is required.");
+          return fail("Se requiere al menos un administrador activo.");
         }
         commit({
           ...state,
@@ -352,7 +404,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         });
         return ok;
       }
-      if (!input.password) return fail("A password is required.");
+      if (!input.password) return fail("La contraseña es obligatoria.");
       const created: AdminUser = {
         id: newId("u"),
         fullName: input.fullName.trim(),
@@ -372,7 +424,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     (id, active) => {
       const state = dbRef.current;
       const target = state?.users.find((u) => u.id === id);
-      if (!target) return fail("User not found.");
+      if (!target) return fail("No se encontró el usuario.");
       return saveUser({ ...target, password: undefined, active });
     },
     [saveUser],
@@ -382,7 +434,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AdminContextValue>(
     () => ({
-      status: db ? "ready" : "loading",
+      status: db && serverChecked ? "ready" : "loading",
       user: currentUser,
       users,
       properties,
@@ -402,6 +454,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     }),
     [
       db,
+      serverChecked,
       currentUser,
       users,
       properties,

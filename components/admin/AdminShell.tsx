@@ -32,11 +32,11 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { href: "/admin", label: "Overview", Icon: LayoutDashboard },
-  { href: "/admin/properties", label: "Properties", Icon: Building2 },
-  { href: "/admin/leads", label: "Leads Pipeline", Icon: SquareKanban },
-  { href: "/admin/users", label: "User Management", Icon: Users, requires: "users:manage" },
-  { href: "/admin/settings", label: "Site Configuration", Icon: Settings },
+  { href: "/admin", label: "Resumen", Icon: LayoutDashboard },
+  { href: "/admin/properties", label: "Propiedades", Icon: Building2 },
+  { href: "/admin/leads", label: "Pipeline de consultas", Icon: SquareKanban },
+  { href: "/admin/users", label: "Gestión de usuarios", Icon: Users, requires: "users:manage" },
+  { href: "/admin/settings", label: "Configuración del sitio", Icon: Settings, requires: "config:manage" },
 ];
 
 const COLLAPSE_KEY = "oceanus-admin-sidebar-collapsed";
@@ -72,7 +72,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   }
 
   if (status === "loading" || !user) {
-    return <Spinner label={status === "loading" ? "Loading" : "Redirecting to sign in"} />;
+    return <Spinner label={status === "loading" ? "Cargando" : "Redirigiendo al inicio de sesión"} />;
   }
 
   const items = NAV.filter((item) => !item.requires || can(item.requires));
@@ -82,16 +82,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
       {drawerOpen ? (
         <button
           type="button"
-          aria-label="Close menu"
+          aria-label="Cerrar menú"
           onClick={() => setDrawerOpen(false)}
-          className="fixed inset-0 z-30 bg-black/60 lg:hidden"
+          className="fixed inset-0 z-30 bg-slate-900/60 lg:hidden"
         />
       ) : null}
 
       <aside
         id="admin-sidebar"
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-admin-line bg-[#0a1827]/95 backdrop-blur-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:bg-admin-panel",
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col admin-dark border-r border-white/10 bg-slate-900 transition-transform duration-200 ease-out motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
           drawerOpen ? "translate-x-0" : "-translate-x-full",
           collapsed ? "lg:w-20" : "lg:w-64",
         )}
@@ -106,7 +106,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             {siteConfig.agency.name}
           </span>
           <IconButton
-            label="Close menu"
+            label="Cerrar menú"
             className="lg:hidden"
             onClick={() => setDrawerOpen(false)}
           >
@@ -114,7 +114,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </IconButton>
         </div>
 
-        <nav aria-label="Admin" className="flex-1 space-y-1 p-3">
+        <nav aria-label="Administración" className="flex-1 space-y-1 p-3">
           {items.map(({ href, label, Icon }) => {
             const active =
               href === "/admin" ? pathname === href : pathname.startsWith(href);
@@ -129,12 +129,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   "flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent",
                   collapsed && "lg:justify-center",
                   active
-                    ? "bg-admin-panel-strong text-admin-ink"
-                    : "text-admin-muted hover:bg-admin-panel hover:text-admin-ink active:bg-admin-panel-strong",
+                    ? "bg-white/15 text-white"
+                    : "text-white/80 hover:bg-white/10 hover:text-white active:bg-white/15",
                 )}
               >
                 <Icon
-                  className={cn("size-5 shrink-0", active && "text-admin-accent")}
+                  className={cn("size-5 shrink-0", active && "text-white")}
                   aria-hidden
                 />
                 <span className={cn(collapsed && "lg:sr-only")}>{label}</span>
@@ -149,9 +149,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
             onClick={toggleCollapsed}
             aria-pressed={collapsed}
             aria-controls="admin-sidebar"
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={collapsed ? "Expandir barra lateral" : "Contraer barra lateral"}
             className={cn(
-              "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-admin-muted transition-colors duration-200 hover:bg-admin-panel hover:text-admin-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent active:bg-admin-panel-strong",
+              "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-white/80 transition-colors duration-200 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:bg-white/15",
               collapsed && "justify-center",
             )}
           >
@@ -160,7 +160,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             ) : (
               <PanelLeftClose className="size-5" aria-hidden />
             )}
-            <span className={cn(collapsed && "sr-only")}>Collapse</span>
+            <span className={cn(collapsed && "sr-only")}>Contraer</span>
           </button>
         </div>
       </aside>
@@ -168,7 +168,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-admin-line bg-admin-bg/80 px-4 backdrop-blur-xl sm:px-6">
           <IconButton
-            label="Open menu"
+            label="Abrir menú"
             className="lg:hidden"
             aria-controls="admin-sidebar"
             aria-expanded={drawerOpen}
@@ -195,11 +195,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 logout();
                 router.replace("/login");
               }}
-              aria-label="Log out"
+              aria-label="Cerrar sesión"
               className="px-3 sm:px-5"
             >
               <LogOut className="size-4" aria-hidden />
-              <span className="hidden sm:inline">Log out</span>
+              <span className="hidden sm:inline">Cerrar sesión</span>
             </Button>
           </div>
         </header>

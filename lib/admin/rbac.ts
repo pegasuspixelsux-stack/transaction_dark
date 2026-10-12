@@ -2,6 +2,7 @@ import type { Role } from "@/types/admin";
 
 export type Permission =
   | "users:manage"
+  | "config:manage"
   | "properties:view-all"
   | "properties:write"
   | "leads:view-all"
@@ -9,8 +10,19 @@ export type Permission =
   | "leads:move";
 
 const PERMISSIONS: Record<Role, readonly Permission[]> = {
+  // Full system privileges. Not a database user: see lib/server/admin-session.ts.
+  superadmin: [
+    "users:manage",
+    "config:manage",
+    "properties:view-all",
+    "properties:write",
+    "leads:view-all",
+    "leads:reassign",
+    "leads:move",
+  ],
   admin: [
     "users:manage",
+    "config:manage",
     "properties:view-all",
     "properties:write",
     "leads:view-all",
@@ -33,7 +45,8 @@ export function can(role: Role | undefined, permission: Permission): boolean {
 }
 
 export const ROLE_LABELS: Record<Role, string> = {
-  admin: "Admin",
-  manager: "Manager",
-  agent: "Sales Agent",
+  superadmin: "Super administrador",
+  admin: "Administrador",
+  manager: "Gerente",
+  agent: "Agente de ventas",
 };

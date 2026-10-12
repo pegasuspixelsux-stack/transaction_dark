@@ -23,6 +23,9 @@ import {
 
 type View = "table" | "grid";
 
+const listingLabel = (t: AdminProperty["listingType"]) =>
+  t === "sale" ? "En venta" : "En alquiler";
+
 export function PropertiesManager() {
   const { status, properties, users, can, saveProperty, togglePropertyStatus, deleteProperty } =
     useAdmin();
@@ -37,7 +40,7 @@ export function PropertiesManager() {
 
   const agents = useMemo(() => users.filter((u) => u.role === "agent" && u.active), [users]);
   const agentName = (id: string | null) =>
-    id ? (users.find((u) => u.id === id)?.fullName ?? "Unknown") : "Unassigned";
+    id ? (users.find((u) => u.id === id)?.fullName ?? "Desconocido") : "Sin asignar";
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -58,31 +61,33 @@ export function PropertiesManager() {
   const rowActions = (p: AdminProperty) =>
     canWrite ? (
       <div className="flex">
-        <IconButton label={p.status === "published" ? `Unpublish ${p.title}` : `Publish ${p.title}`} onClick={() => report(togglePropertyStatus(p.id))}>
+        <IconButton label={p.status === "published" ? `Despublicar ${p.title}` : `Publicar ${p.title}`} onClick={() => report(togglePropertyStatus(p.id))}>
           {p.status === "published" ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
         </IconButton>
-        <IconButton label={`Edit ${p.title}`} onClick={() => setEditing(p)}>
+        <IconButton label={`Editar ${p.title}`} onClick={() => setEditing(p)}>
           <Pencil className="size-4" aria-hidden />
         </IconButton>
-        <IconButton label={`Delete ${p.title}`} onClick={() => setDeleting(p)} className="hover:text-admin-bad">
+        <IconButton label={`Eliminar ${p.title}`} onClick={() => setDeleting(p)} className="hover:text-admin-bad">
           <Trash2 className="size-4" aria-hidden />
         </IconButton>
       </div>
     ) : null;
 
   const statusBadge = (s: PublishStatus) => (
-    <Badge tone={s === "published" ? "ok" : "warn"}>{s}</Badge>
+    <Badge tone={s === "published" ? "ok" : "warn"}>
+      {s === "published" ? "Publicada" : "Borrador"}
+    </Badge>
   );
 
   return (
     <div data-rise>
       <PageHeader
-        eyebrow="Inventory"
-        title="Properties"
+        eyebrow="Inventario"
+        title="Propiedades"
         actions={
           canWrite ? (
             <Button variant="primary" onClick={() => setEditing("new")}>
-              <Plus className="size-4" aria-hidden /> Create property
+              <Plus className="size-4" aria-hidden /> Crear propiedad
             </Button>
           ) : null
         }
@@ -90,33 +95,33 @@ export function PropertiesManager() {
 
       {!canWrite ? (
         <p className="mb-6 text-sm text-admin-muted">
-          You are viewing the properties assigned to you. Only managers and admins can edit listings.
+          Estás viendo las propiedades asignadas a vos. Solo gerentes y administradores pueden editar publicaciones.
         </p>
       ) : null}
 
-      <section aria-label="Filters" className="mb-6 grid gap-4 sm:grid-cols-[1fr_12rem_auto]">
-        <Field label="Search">
+      <section aria-label="Filtros" className="mb-6 grid gap-4 sm:grid-cols-[1fr_12rem_auto]">
+        <Field label="Buscar">
           {({ id }) => (
             <div className="relative">
               <Search aria-hidden className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-admin-muted" />
-              <input id={id} type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Title or location" className={cn(inputClass, "pl-11")} />
+              <input id={id} type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Título o ubicación" className={cn(inputClass, "pl-11")} />
             </div>
           )}
         </Field>
-        <Field label="Status">
+        <Field label="Estado">
           {({ id }) => (
             <select id={id} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className={inputClass}>
-              <option value="all">All</option>
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
+              <option value="all">Todas</option>
+              <option value="published">Publicadas</option>
+              <option value="draft">Borradores</option>
             </select>
           )}
         </Field>
-        <div role="group" aria-label="View" className="flex items-end gap-1">
+        <div role="group" aria-label="Vista" className="flex items-end gap-1">
           {(["table", "grid"] as const).map((v) => (
             <IconButton
               key={v}
-              label={v === "table" ? "Table view" : "Grid view"}
+              label={v === "table" ? "Vista de tabla" : "Vista de cuadrícula"}
               aria-pressed={view === v}
               onClick={() => setView(v)}
               className={cn("border border-admin-line", view === v && "bg-admin-panel-strong text-admin-ink")}
@@ -133,37 +138,37 @@ export function PropertiesManager() {
 
       {properties.length === 0 ? (
         <EmptyState
-          title="No properties yet"
-          body={canWrite ? "Create your first listing to get started." : "No properties have been assigned to you."}
-          action={canWrite ? <Button variant="primary" onClick={() => setEditing("new")}>Create property</Button> : undefined}
+          title="Aún no hay propiedades"
+          body={canWrite ? "Creá tu primera publicación para empezar." : "No tenés propiedades asignadas."}
+          action={canWrite ? <Button variant="primary" onClick={() => setEditing("new")}>Crear propiedad</Button> : undefined}
         />
       ) : filtered.length === 0 ? (
-        <EmptyState title="No properties match" body="Try a different search or status filter." />
+        <EmptyState title="Ninguna propiedad coincide" body="Probá con otra búsqueda o filtro de estado." />
       ) : view === "table" ? (
         <GlassCard className="overflow-x-auto">
           <table className="w-full min-w-[48rem] text-left text-sm">
             <thead>
               <tr className="border-b border-admin-line text-xs uppercase tracking-luxury text-admin-ink">
-                <th scope="col" className="px-5 py-4 font-normal">Property</th>
-                <th scope="col" className="px-5 py-4 font-normal">Type</th>
-                <th scope="col" className="px-5 py-4 font-normal">Price</th>
-                <th scope="col" className="px-5 py-4 font-normal">Specs</th>
-                <th scope="col" className="px-5 py-4 font-normal">Agent</th>
-                <th scope="col" className="px-5 py-4 font-normal">Status</th>
-                <th scope="col" className="px-5 py-4"><span className="sr-only">Actions</span></th>
+                <th scope="col" className="px-5 py-4 font-normal">Propiedad</th>
+                <th scope="col" className="px-5 py-4 font-normal">Tipo</th>
+                <th scope="col" className="px-5 py-4 font-normal">Precio</th>
+                <th scope="col" className="px-5 py-4 font-normal">Detalles</th>
+                <th scope="col" className="px-5 py-4 font-normal">Agente</th>
+                <th scope="col" className="px-5 py-4 font-normal">Estado</th>
+                <th scope="col" className="px-5 py-4"><span className="sr-only">Acciones</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-admin-line">
               {filtered.map((p) => (
-                <tr key={p.id} className="transition-colors duration-200 hover:bg-admin-panel">
+                <tr key={p.id} className="transition-colors duration-200 hover:bg-slate-50">
                   <td className="px-5 py-3">
                     <p className="text-admin-ink">{p.title}</p>
                     <p className="text-admin-muted">{p.location}</p>
                   </td>
-                  <td className="px-5 py-3 capitalize text-admin-muted">For {p.listingType}</td>
+                  <td className="px-5 py-3 text-admin-muted">{listingLabel(p.listingType)}</td>
                   <td className="px-5 py-3">{formatMoney(p.price, p.currency)}</td>
                   <td className="px-5 py-3 text-admin-muted">
-                    {p.bedrooms} bd · {p.bathrooms} ba · {p.areaM2} m²
+                    {p.bedrooms} dorm. · {p.bathrooms} baños · {p.areaM2} m²
                   </td>
                   <td className="px-5 py-3 text-admin-muted">{agentName(p.assignedAgentId)}</td>
                   <td className="px-5 py-3">{statusBadge(p.status)}</td>
@@ -177,12 +182,12 @@ export function PropertiesManager() {
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((p) => (
             <li key={p.id}>
-              <GlassCard className="overflow-hidden transition-colors duration-200 hover:border-white/25">
+              <GlassCard className="overflow-hidden transition-colors duration-200 hover:border-slate-400">
                 {p.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin-supplied host
                   <img src={p.imageUrl} alt={p.title} loading="lazy" className="h-44 w-full object-cover" />
                 ) : (
-                  <div className="flex h-44 items-center justify-center bg-admin-panel text-sm text-admin-muted">No image</div>
+                  <div className="flex h-44 items-center justify-center bg-admin-panel text-sm text-admin-muted">Sin imagen</div>
                 )}
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-3">
@@ -192,10 +197,10 @@ export function PropertiesManager() {
                   <p className="mt-1 text-sm text-admin-muted">{p.location}</p>
                   <p className="mt-3 text-admin-ink">
                     {formatMoney(p.price, p.currency)}
-                    <span className="text-sm text-admin-muted"> · For {p.listingType}</span>
+                    <span className="text-sm text-admin-muted"> · {listingLabel(p.listingType)}</span>
                   </p>
                   <p className="mt-1 text-sm text-admin-muted">
-                    {p.bedrooms} bd · {p.bathrooms} ba · {p.areaM2} m²
+                    {p.bedrooms} dorm. · {p.bathrooms} baños · {p.areaM2} m²
                   </p>
                   <div className="-mb-2 -ml-3 mt-3">{rowActions(p)}</div>
                 </div>
@@ -208,7 +213,7 @@ export function PropertiesManager() {
       <Modal
         open={editing !== null}
         onClose={() => setEditing(null)}
-        title={editing === "new" ? "Create property" : "Edit property"}
+        title={editing === "new" ? "Crear propiedad" : "Editar propiedad"}
         wide
       >
         {editing !== null ? (
@@ -225,9 +230,9 @@ export function PropertiesManager() {
 
       <ConfirmDialog
         open={deleting !== null}
-        title="Delete property?"
-        body={deleting ? `“${deleting.title}” will be permanently removed. This can't be undone.` : ""}
-        confirmLabel="Delete"
+        title="¿Eliminar propiedad?"
+        body={deleting ? `“${deleting.title}” se eliminará de forma permanente. Esta acción no se puede deshacer.` : ""}
+        confirmLabel="Eliminar"
         onClose={() => setDeleting(null)}
         onConfirm={() => deleting && report(deleteProperty(deleting.id))}
       />

@@ -1,11 +1,11 @@
 import type { LeadStage } from "@/types/admin";
 
 export const STAGE_LABELS: Record<LeadStage, string> = {
-  new: "New Inquiry",
-  contacted: "Initial Contact",
-  viewing: "Viewing Scheduled",
-  negotiation: "Negotiation / Offer",
-  closed: "Closed",
+  new: "Nueva consulta",
+  contacted: "Primer contacto",
+  viewing: "Visita agendada",
+  negotiation: "Negociación / Oferta",
+  closed: "Cerrado",
 };
 
 /** Tailwind classes for the small dot beside each stage title. */

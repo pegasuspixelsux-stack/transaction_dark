@@ -19,7 +19,7 @@ const buttonBase =
 
 const buttonVariants = {
   primary:
-    "bg-admin-accent text-admin-accent-ink hover:bg-white active:bg-admin-muted",
+    "bg-admin-accent text-admin-accent-ink hover:bg-admin-accent-hover active:bg-admin-muted",
   ghost:
     "border border-admin-line text-admin-ink hover:bg-admin-panel-strong active:bg-admin-panel",
   danger:
@@ -80,7 +80,7 @@ export function GlassCard({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-admin-line bg-admin-panel backdrop-blur-xl",
+        "rounded-2xl border border-admin-line bg-white",
         className,
       )}
     >
@@ -160,7 +160,7 @@ export function EmptyState({
   );
 }
 
-export function Spinner({ label = "Loading" }: { label?: string }) {
+export function Spinner({ label = "Cargando" }: { label?: string }) {
   return (
     <div role="status" className="flex items-center justify-center gap-3 py-24">
       <span
@@ -177,7 +177,7 @@ export function Spinner({ label = "Loading" }: { label?: string }) {
 /* ------------------------------------------------------------------ */
 
 export const inputClass =
-  "min-h-11 w-full rounded-lg border border-admin-line bg-admin-panel px-4 text-sm text-admin-ink transition-colors duration-200 placeholder:text-admin-muted hover:border-white/25 focus-visible:border-admin-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-admin-bad";
+  "min-h-11 w-full rounded-lg border border-admin-line bg-admin-field px-4 text-sm text-admin-ink transition-colors duration-200 placeholder:text-admin-muted hover:border-slate-400 focus-visible:border-admin-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-admin-bad";
 
 export function Field({
   label,
@@ -259,7 +259,7 @@ export function Modal({
         if (e.target === e.currentTarget) onClose();
       }}
       className={cn(
-        "m-auto max-h-[90vh] w-[calc(100%-2rem)] overflow-y-auto rounded-2xl border border-admin-line bg-[#0b1b2b]/95 p-0 text-admin-ink backdrop-blur-xl",
+        "m-auto max-h-[90vh] w-[calc(100%-2rem)] overflow-y-auto rounded-2xl border border-admin-line bg-white p-0 text-admin-ink",
         wide ? "max-w-3xl" : "max-w-lg",
       )}
     >
@@ -272,7 +272,7 @@ export function Modal({
             >
               {title}
             </h2>
-            <IconButton label="Close dialog" onClick={onClose} className="-mr-2 -mt-2">
+            <IconButton label="Cerrar diálogo" onClick={onClose} className="-mr-2 -mt-2">
               <X className="size-5" aria-hidden />
             </IconButton>
           </div>
@@ -302,7 +302,7 @@ export function ConfirmDialog({
     <Modal open={open} onClose={onClose} title={title}>
       <p className="text-sm text-admin-muted">{body}</p>
       <div className="mt-8 flex flex-wrap justify-end gap-3">
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>Cancelar</Button>
         <Button
           variant="danger"
           onClick={() => {

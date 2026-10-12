@@ -1,23 +1,47 @@
 @import "tailwindcss";
 
-/* Admin palette. Dark by request (see docs/design-guidelines.md §1: any color
-   outside the coastal palette needs a documented reason). Values are taken from
-   the public site's dark theme (#0a1a2e navy, #64b5f6 accent) so both surfaces
-   feel like one brand. */
+/* Admin palette. The dashboard canvas is white with slate-900 ink (requested
+   light theme, see docs/design-guidelines.md §1: any color outside the coastal
+   palette needs a documented reason). Colors are NOT inlined so a subtree can
+   re-theme itself: `.admin-dark` below restores the original navy/sky values
+   for the sidebar and the login screen, which sit on dark surfaces. */
+@theme {
+  --color-admin-bg: #ffffff;
+  --color-admin-panel: #f8fafc;
+  --color-admin-panel-strong: #f1f5f9;
+  --color-admin-field: #ffffff;
+  --color-admin-ink: #0f172a;
+  --color-admin-muted: #475569;
+  --color-admin-line: #e2e8f0;
+  --color-admin-accent: #0f172a;
+  --color-admin-accent-hover: #334155;
+  --color-admin-accent-ink: #ffffff;
+  --color-admin-ok: #15803d;
+  --color-admin-warn: #b45309;
+  --color-admin-bad: #b91c1c;
+}
+
 @theme inline {
+  --font-sans: var(--font-montserrat);
+  --font-display: var(--font-playfair);
+}
+
+.admin-dark {
   --color-admin-bg: #07131f;
   --color-admin-panel: rgb(255 255 255 / 0.05);
   --color-admin-panel-strong: rgb(255 255 255 / 0.09);
+  --color-admin-field: rgb(255 255 255 / 0.05);
   --color-admin-ink: #f3f7fa;
   --color-admin-muted: #a7b9c8;
   --color-admin-line: rgb(255 255 255 / 0.12);
   --color-admin-accent: #64b5f6;
+  --color-admin-accent-hover: #ffffff;
   --color-admin-accent-ink: #06121d;
   --color-admin-ok: #6fd3a0;
   --color-admin-warn: #f2c46d;
   --color-admin-bad: #f0899b;
-  --font-sans: var(--font-montserrat);
-  --font-display: var(--font-playfair);
+  color: var(--color-admin-ink);
+  color-scheme: dark;
 }
 
 @utility tracking-luxury {
@@ -29,22 +53,18 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  background:
-    radial-gradient(60rem 40rem at 90% -10%, rgb(100 181 246 / 0.14), transparent 60%),
-    radial-gradient(50rem 40rem at -10% 110%, rgb(169 202 224 / 0.1), transparent 60%),
-    var(--color-admin-bg);
-  background-attachment: fixed;
+  background: #ffffff;
   color: var(--color-admin-ink);
   font-weight: 300;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Native <select> popups and date pickers follow the dark scheme. */
-select option {
+/* Native <select> popups inside dark surfaces. */
+.admin-dark select option {
   background: #0d1f30;
   color: var(--color-admin-ink);
 }
@@ -82,7 +102,7 @@ select option {
 }
 
 dialog::backdrop {
-  background: rgb(3 9 15 / 0.7);
+  background: rgb(15 23 42 / 0.5);
   backdrop-filter: blur(4px);
 }
 

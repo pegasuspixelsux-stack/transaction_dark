@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function AdminRootLayout({ children }: { children: ReactNode }) {
   return (
     <html
-      lang="en"
+      lang="es-UY"
       className={`${playfair.variable} ${montserrat.variable} h-full antialiased`}
     >
       <body className="min-h-full font-sans">

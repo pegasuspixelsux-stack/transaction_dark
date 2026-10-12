@@ -13,8 +13,8 @@ export function initials(name: string): string {
 }
 
 export function formatDate(iso: string | null, withTime = false): string {
-  if (!iso) return "Never";
-  return new Intl.DateTimeFormat("en-GB", {
+  if (!iso) return "Nunca";
+  return new Intl.DateTimeFormat("es-UY", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -23,7 +23,7 @@ export function formatDate(iso: string | null, withTime = false): string {
 }
 
 export function formatMoney(value: number, currency: Currency): string {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("es-UY", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
