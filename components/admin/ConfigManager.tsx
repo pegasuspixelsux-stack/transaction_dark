@@ -17,6 +17,7 @@ import {
 
 type Load =
   | { state: "loading" }
+  | { state: "auth" }
   | { state: "error"; message: string }
   | { state: "ready" };
 
@@ -47,6 +48,10 @@ export function ConfigManager() {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<{ tone: "ok" | "bad"; text: string } | null>(null);
   const [flagDraft, setFlagDraft] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+  const [reauthPassword, setReauthPassword] = useState("");
+  const [reauthError, setReauthError] = useState<string | null>(null);
+  const [reauthBusy, setReauthBusy] = useState(false);
 
   const allowed = status === "ready" && can("config:manage");
 
@@ -61,11 +66,7 @@ export function ConfigManager() {
           setDraft(data.config);
           setLoad({ state: "ready" });
         } else if (res.status === 401) {
-          setLoad({
-            state: "error",
-            message:
-              "Tu sesión no está habilitada en el servidor. Cerrá sesión y volvé a ingresar para editar la configuración.",
-          });
+          setLoad({ state: "auth" });
         } else {
           setLoad({ state: "error", message: data.error ?? "No pudimos cargar la configuración." });
         }
@@ -76,7 +77,43 @@ export function ConfigManager() {
     return () => {
       cancelled = true;
     };
-  }, [allowed]);
+  }, [allowed, reloadKey]);
+
+  async function reauthenticate(e: FormEvent) {
+    e.preventDefault();
+    if (!user) return;
+    setReauthBusy(true);
+    setReauthError(null);
+    try {
+      const res = await fetch("/api/admin/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email, password: reauthPassword }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (res.ok) {
+        setReauthPassword("");
+        if (draft) {
+          // Unsaved edits are kept; just let the admin save again.
+          setLoad({ state: "ready" });
+          setNotice({ tone: "ok", text: "Sesión verificada. Guardá los cambios de nuevo." });
+        } else {
+          setLoad({ state: "loading" });
+          setReloadKey((k) => k + 1);
+        }
+      } else {
+        setReauthError(
+          res.status === 401
+            ? "No pudimos verificar esta cuenta en el servidor. Revisá la contraseña; las cuentas creadas solo en este navegador no se pueden verificar."
+            : (data.error ?? "No pudimos verificar tu sesión."),
+        );
+      }
+    } catch {
+      setReauthError("No pudimos conectar con el servidor.");
+    } finally {
+      setReauthBusy(false);
+    }
+  }
 
   if (status === "loading" || !user) return <Spinner />;
   if (!allowed) {
@@ -88,6 +125,38 @@ export function ConfigManager() {
     );
   }
   if (load.state === "loading") return <Spinner />;
+  if (load.state === "auth") {
+    return (
+      <div data-rise>
+        <PageHeader eyebrow="Negocio" title="Configuración del sitio" />
+        <GlassCard className="max-w-md p-6">
+          <h2 className="font-display text-xl font-normal tracking-tight">Confirmá tu identidad</h2>
+          <p className="mt-2 text-sm text-admin-muted">
+            Para editar la configuración, el servidor necesita verificar tu contraseña ({user.email}).
+          </p>
+          <form onSubmit={reauthenticate} noValidate className="mt-5 space-y-4">
+            <Field label="Contraseña" error={reauthError ?? undefined}>
+              {({ id, describedBy, invalid }) => (
+                <input
+                  id={id}
+                  type="password"
+                  autoComplete="current-password"
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  value={reauthPassword}
+                  onChange={(e) => setReauthPassword(e.target.value)}
+                  className={inputClass}
+                />
+              )}
+            </Field>
+            <Button type="submit" variant="primary" disabled={reauthBusy || !reauthPassword}>
+              {reauthBusy ? "Verificando…" : "Verificar"}
+            </Button>
+          </form>
+        </GlassCard>
+      </div>
+    );
+  }
   if (load.state === "error" || !draft) {
     return (
       <div data-rise>
@@ -158,13 +227,8 @@ export function ConfigManager() {
         setNotice({ tone: "ok", text: "Configuración guardada. Los cambios persisten tras reiniciar." });
       } else {
         if (data.errors) setErrors(data.errors);
-        setNotice({
-          tone: "bad",
-          text:
-            res.status === 401
-              ? "Tu sesión del servidor venció. Cerrá sesión y volvé a ingresar."
-              : (data.error ?? "No pudimos guardar los cambios."),
-        });
+        if (res.status === 401) setLoad({ state: "auth" });
+        else setNotice({ tone: "bad", text: data.error ?? "No pudimos guardar los cambios." });
       }
     } catch {
       setNotice({ tone: "bad", text: "No pudimos conectar con el servidor." });
