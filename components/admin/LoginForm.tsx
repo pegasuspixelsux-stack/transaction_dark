@@ -35,9 +35,13 @@ export function LoginForm() {
   }, [status, user, router]);
 
   const emailError =
-    touched.email && !EMAIL_RE.test(email) ? "Ingresa un correo válido." : undefined;
+    touched.email && !EMAIL_RE.test(email)
+      ? "Ingresa un correo válido."
+      : undefined;
   const passwordError =
-    touched.password && password.length === 0 ? "Ingresa tu contraseña." : undefined;
+    touched.password && password.length === 0
+      ? "Ingresa tu contraseña."
+      : undefined;
 
   async function attempt(nextEmail: string, nextPassword: string) {
     setBusy(true);
@@ -138,37 +142,44 @@ export function LoginForm() {
               </p>
             ) : null}
 
-            <Button type="submit" variant="primary" className="w-full" disabled={busy}>
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full"
+              disabled={busy}
+            >
               <LogIn className="size-4" aria-hidden />
               Ingresar
             </Button>
           </form>
 
-          <div className="border-t border-admin-line pt-6">
-            <p className="text-xs uppercase tracking-luxury text-admin-ink">
-              Cuentas demo
-            </p>
-            <p className="mt-2 text-sm text-white/80">
-              Un clic para ingresar. Contraseña:{" "}
-              <code className="text-admin-ink">{DEMO_PASSWORD}</code>
-            </p>
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              {DEMO_ACCOUNTS.map(({ label, email: demoEmail, Icon }) => (
-                <Button
-                  key={label}
-                  disabled={busy}
-                  className="flex-col gap-1 px-2 py-3 text-center"
-                  onClick={() => {
-                    setFormError(null);
-                    attempt(demoEmail, DEMO_PASSWORD);
-                  }}
-                >
-                  <Icon className="size-4" aria-hidden />
-                  {label}
-                </Button>
-              ))}
+          {process.env.NODE_ENV !== "production" ? (
+            <div className="border-t border-admin-line pt-6">
+              <p className="text-xs uppercase tracking-luxury text-admin-ink">
+                Cuentas demo
+              </p>
+              <p className="mt-2 text-sm text-white/80">
+                Un clic para ingresar. Contraseña:{" "}
+                <code className="text-admin-ink">{DEMO_PASSWORD}</code>
+              </p>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {DEMO_ACCOUNTS.map(({ label, email: demoEmail, Icon }) => (
+                  <Button
+                    key={label}
+                    disabled={busy}
+                    className="flex-col gap-1 px-2 py-3 text-center"
+                    onClick={() => {
+                      setFormError(null);
+                      attempt(demoEmail, DEMO_PASSWORD);
+                    }}
+                  >
+                    <Icon className="size-4" aria-hidden />
+                    {label}
+                  </Button>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : null}
 
           <div className="text-center">
             <Link href="/" className={linkClass}>

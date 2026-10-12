@@ -130,10 +130,22 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     /* eslint-enable react-hooks/set-state-in-effect */
 
     let cancelled = false;
+    const local = readSession();
     fetch("/api/admin/session", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((data: { user: SessionUser | null } | null) => {
-        if (!cancelled && data?.user?.role === "superadmin") setSuperUser(data.user);
+        if (cancelled) return;
+        const server = data?.user ?? null;
+        if (server?.role === "superadmin") {
+          setSuperUser(server);
+          writeSession(null);
+          setSession(null);
+        } else if (!server || (local && local.userId !== server.id)) {
+          // The dashboard is gated server-side: a local session without a
+          // matching signed cookie is stale, so drop it (prevents redirect loops).
+          writeSession(null);
+          setSession(null);
+        }
       })
       .catch(() => {})
       .finally(() => {
@@ -175,8 +187,15 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       : db.leads.filter((l) => l.assignedAgentId === currentUser.id);
   }, [db, currentUser]);
 
+  // The super admin is never part of the directory; filter defensively in case
+  // a stored record ever carries that role.
   const users = useMemo(
-    () => (db ? db.users.map(toSessionUser) : []),
+    () =>
+      db
+        ? db.users
+            .filter((u) => (u.role as string) !== "superadmin")
+            .map(toSessionUser)
+        : [],
     [db],
   );
 
@@ -216,6 +235,25 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       if (!match.active) {
         return fail("Esta cuenta fue desactivada. Contactá a un administrador.");
       }
+      // The server must vouch for the account (signed cookie) before the
+      // dashboard route guard will let it in.
+      try {
+        const res = await fetch("/api/admin/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          return fail(
+            res.status === 429 || res.status === 500
+              ? (data.error ?? "No pudimos iniciar sesión.")
+              : "Esta cuenta no está habilitada en el servidor.",
+          );
+        }
+      } catch {
+        return fail("No pudimos conectar con el servidor.");
+      }
       const next: Session = {
         token: btoa(JSON.stringify({ sub: match.id, iat: Date.now() })),
         userId: match.id,
@@ -230,14 +268,6 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       });
       setSession(next);
       setSuperUser(null);
-      if (match.role === "admin") {
-        // Lets the config API verify this admin server-side (best effort).
-        void fetch("/api/admin/session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }).catch(() => {});
-      }
       return ok;
     },
     [commit],
@@ -369,6 +399,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       const state = dbRef.current;
       if (!state || !allowed("users:manage")) {
         return fail("Solo los administradores pueden gestionar usuarios.");
+      }
+      if ((input.role as string) === "superadmin") {
+        return fail("Ese rol no se puede asignar.");
       }
       const email = input.email.trim().toLowerCase();
       if (state.users.some((u) => u.id !== input.id && u.email.toLowerCase() === email)) {

@@ -11,77 +11,30 @@
  *   (lib/admin/db.ts); when a real user store replaces it, swap
  *   `verifyStoredUser` below for a lookup against that store.
  */
-import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { createSeed } from "@/lib/admin/seed";
-import type { Role, SessionUser } from "@/types/admin";
+import type { SessionUser } from "@/types/admin";
+import {
+  SESSION_COOKIE,
+  SESSION_TTL_S,
+  safeEqual,
+  signSession,
+  verifySessionToken,
+  type ServerSession,
+} from "./session-token";
 
-export const SESSION_COOKIE = "tx_admin";
-const SESSION_TTL_S = 8 * 60 * 60;
-
-export interface ServerSession {
-  sub: string;
-  email: string;
-  name: string;
-  role: Role;
-  exp: number; // epoch seconds
-}
-
-/* ---------------------------- secrets ----------------------------- */
-
-let ephemeralSecret: string | null = null;
-
-function signingKey(): string | null {
-  const explicit = process.env.ADMIN_SESSION_SECRET;
-  if (explicit && explicit.length >= 16) return explicit;
-  const pw = process.env.SUPER_ADMIN_PASSWORD;
-  if (pw) return createHash("sha256").update(`tx-admin:${pw}`).digest("hex");
-  // Dev convenience only: sessions last until the process restarts.
-  if (process.env.NODE_ENV !== "production") {
-    return (ephemeralSecret ??= randomBytes(32).toString("hex"));
-  }
-  return null;
-}
-
-const digest = (v: string) => createHash("sha256").update(v).digest();
-const safeEqual = (a: string, b: string) => timingSafeEqual(digest(a), digest(b));
-
-/* ----------------------------- tokens ----------------------------- */
-
-const b64 = (s: string) => Buffer.from(s).toString("base64url");
-
-function sign(payload: ServerSession): string | null {
-  const key = signingKey();
-  if (!key) return null;
-  const body = b64(JSON.stringify(payload));
-  const mac = createHmac("sha256", key).update(body).digest("base64url");
-  return `${body}.${mac}`;
-}
-
-function verify(token: string | undefined): ServerSession | null {
-  const key = signingKey();
-  if (!key || !token) return null;
-  const [body, mac, extra] = token.split(".");
-  if (!body || !mac || extra !== undefined) return null;
-  const expected = createHmac("sha256", key).update(body).digest("base64url");
-  if (!safeEqual(mac, expected)) return null;
-  try {
-    const s = JSON.parse(Buffer.from(body, "base64url").toString()) as ServerSession;
-    return s.exp > Date.now() / 1000 ? s : null;
-  } catch {
-    return null;
-  }
-}
+export { SESSION_COOKIE };
+export type { ServerSession };
 
 /* ---------------------------- cookie I/O --------------------------- */
 
 export async function getServerSession(): Promise<ServerSession | null> {
   const store = await cookies();
-  return verify(store.get(SESSION_COOKIE)?.value);
+  return verifySessionToken(store.get(SESSION_COOKIE)?.value);
 }
 
 export async function setServerSession(session: Omit<ServerSession, "exp">): Promise<boolean> {
-  const token = sign({ ...session, exp: Math.floor(Date.now() / 1000) + SESSION_TTL_S });
+  const token = signSession({ ...session, exp: Math.floor(Date.now() / 1000) + SESSION_TTL_S });
   if (!token) return false;
   const store = await cookies();
   store.set(SESSION_COOKIE, token, {
@@ -118,6 +71,11 @@ export function verifySuperAdmin(email: string, password: string): ServerSession
 
 /** Demo accounts from the seed; replace with a real user-store lookup. */
 export function verifyStoredUser(email: string, password: string): ServerSession | null {
+  // Seed accounts ship with a public demo password, so they must never be
+  // accepted in production unless explicitly enabled.
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_DEMO_ACCOUNTS !== "true") {
+    return null;
+  }
   const match = createSeed().users.find(
     (u) => u.active && u.email.toLowerCase() === email.trim().toLowerCase(),
   );
