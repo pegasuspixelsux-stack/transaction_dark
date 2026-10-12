@@ -2,19 +2,15 @@
 export type Role = "superadmin" | "admin" | "manager" | "agent";
 export type StoredRole = Exclude<Role, "superadmin">;
 
-export interface AdminUser {
+/** A signed-in staff member (Firebase account) or the env-defined super admin. */
+export interface SessionUser {
   id: string;
   fullName: string;
   email: string;
-  /** Mock only. A real backend stores a salted hash, never the password. */
-  password: string;
-  role: StoredRole;
+  role: Role;
   active: boolean;
   lastLogin: string | null; // ISO
 }
-
-/** User shape that is safe to hand to UI state. */
-export type SessionUser = Omit<AdminUser, "password" | "role"> & { role: Role };
 
 export type ListingType = "sale" | "rent";
 export type Currency = "USD" | "UYU" | "EUR";
@@ -64,13 +60,7 @@ export interface Lead {
 }
 
 export interface DbState {
-  users: AdminUser[];
   properties: AdminProperty[];
   leads: Lead[];
 }
 
-export interface Session {
-  token: string;
-  userId: string;
-  expiresAt: number; // epoch ms
-}

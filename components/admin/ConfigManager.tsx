@@ -41,7 +41,7 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
 }
 
 export function ConfigManager() {
-  const { status, user, can } = useAdmin();
+  const { status, user, can, login } = useAdmin();
   const [load, setLoad] = useState<Load>({ state: "loading" });
   const [draft, setDraft] = useState<SiteConfig | null>(null);
   const [errors, setErrors] = useState<ConfigErrors>({});
@@ -85,13 +85,8 @@ export function ConfigManager() {
     setReauthBusy(true);
     setReauthError(null);
     try {
-      const res = await fetch("/api/admin/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email, password: reauthPassword }),
-      });
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
-      if (res.ok) {
+      const result = await login(user.email, reauthPassword);
+      if (result.ok) {
         setReauthPassword("");
         if (draft) {
           // Unsaved edits are kept; just let the admin save again.
@@ -102,11 +97,7 @@ export function ConfigManager() {
           setReloadKey((k) => k + 1);
         }
       } else {
-        setReauthError(
-          res.status === 401
-            ? "No pudimos verificar esta cuenta en el servidor. Revisá la contraseña; las cuentas creadas solo en este navegador no se pueden verificar."
-            : (data.error ?? "No pudimos verificar tu sesión."),
-        );
+        setReauthError(result.error);
       }
     } catch {
       setReauthError("No pudimos conectar con el servidor.");

@@ -6,7 +6,7 @@ import { createSeed } from "./seed";
  * `saveDb` only, so swapping in Firestore, Supabase or Prisma means
  * re-implementing these functions (async) — nothing else changes.
  */
-const DB_KEY = "oceanus-admin-db-v2";
+const DB_KEY = "oceanus-admin-db-v3";
 
 export function loadDb(): DbState {
   try {

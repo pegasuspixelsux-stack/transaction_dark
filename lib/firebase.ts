@@ -1,4 +1,5 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -22,3 +23,10 @@ function getDb(): Firestore | null {
 }
 
 export const db = getDb();
+
+/** Browser-side Firebase Auth (email/password). `null` if Firebase isn't configured. */
+export function getFirebaseAuth(): Auth | null {
+  if (!firebaseEnabled) return null;
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+  return getAuth(app);
+}

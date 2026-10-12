@@ -10,27 +10,25 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import type {
   AdminProperty,
-  AdminUser,
   DbState,
   Lead,
   LeadOutcome,
   LeadStage,
-  Session,
   SessionUser,
   StoredRole,
 } from "@/types/admin";
+import { getFirebaseAuth } from "@/lib/firebase";
 import { loadDb, resetDb, saveDb } from "./db";
 import { can, type Permission } from "./rbac";
-
-const SESSION_KEY = "oceanus-admin-session";
-const COOKIE_NAME = "admin_session";
-const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 
 export type Result = { ok: true } | { ok: false; error: string };
 const ok: Result = { ok: true };
 const fail = (error: string): Result => ({ ok: false, error });
+
+const BAD_CREDENTIALS = "Correo o contraseña incorrectos.";
 
 export type PropertyInput = Omit<AdminProperty, "id" | "updatedAt"> & {
   id?: string;
@@ -47,9 +45,10 @@ export interface UserInput {
 }
 
 interface AdminContextValue {
-  /** `loading` until localStorage has been read on the client. */
+  /** `loading` until the server session and local data have been read. */
   status: "loading" | "ready";
   user: SessionUser | null;
+  /** Staff directory from Firebase (never includes the super admin). */
   users: SessionUser[];
   /** Already scoped to what the signed-in role may see. */
   properties: AdminProperty[];
@@ -67,55 +66,25 @@ interface AdminContextValue {
   togglePropertyStatus: (id: string) => Result;
   deleteProperty: (id: string) => Result;
 
-  saveUser: (input: UserInput) => Result;
-  setUserActive: (id: string, active: boolean) => Result;
+  saveUser: (input: UserInput) => Promise<Result>;
+  setUserActive: (id: string, active: boolean) => Promise<Result>;
 
   resetDemoData: () => void;
 }
 
 const AdminContext = createContext<AdminContextValue | null>(null);
 
-const toSessionUser = (u: AdminUser): SessionUser => ({
-  id: u.id,
-  fullName: u.fullName,
-  email: u.email,
-  role: u.role,
-  active: u.active,
-  lastLogin: u.lastLogin,
-});
-
-function readSession(): Session | null {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    if (!raw) return null;
-    const session = JSON.parse(raw) as Session;
-    return session.expiresAt > Date.now() ? session : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeSession(session: Session | null) {
-  try {
-    if (session) localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    else localStorage.removeItem(SESSION_KEY);
-  } catch {
-    // Storage blocked: the session simply won't survive a reload.
-  }
-  // Cookie mirrors the session so a proxy / server component can later gate
-  // routes without touching localStorage. Mock token only — not a real JWT.
-  document.cookie = session
-    ? `${COOKIE_NAME}=${session.token}; Path=/; Max-Age=${SESSION_TTL_MS / 1000}; SameSite=Lax`
-    : `${COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
-}
-
 const newId = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
+
+async function readJson<T>(res: Response): Promise<T> {
+  return (await res.json().catch(() => ({}))) as T;
+}
 
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [db, setDb] = useState<DbState | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  // The hardcoded super admin lives only in a server cookie, never in `db`.
-  const [superUser, setSuperUser] = useState<SessionUser | null>(null);
+  // The signed server cookie is the only source of truth for who is signed in.
+  const [authUser, setAuthUser] = useState<SessionUser | null>(null);
+  const [staff, setStaff] = useState<SessionUser[]>([]);
   const [serverChecked, setServerChecked] = useState(false);
   const dbRef = useRef<DbState | null>(null);
 
@@ -126,26 +95,13 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     dbRef.current = loaded;
     /* eslint-disable react-hooks/set-state-in-effect */
     setDb(loaded);
-    setSession(readSession());
     /* eslint-enable react-hooks/set-state-in-effect */
 
     let cancelled = false;
-    const local = readSession();
     fetch("/api/admin/session", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((data: { user: SessionUser | null } | null) => {
-        if (cancelled) return;
-        const server = data?.user ?? null;
-        if (server?.role === "superadmin") {
-          setSuperUser(server);
-          writeSession(null);
-          setSession(null);
-        } else if (!server || (local && local.userId !== server.id)) {
-          // The dashboard is gated server-side: a local session without a
-          // matching signed cookie is stale, so drop it (prevents redirect loops).
-          writeSession(null);
-          setSession(null);
-        }
+        if (!cancelled) setAuthUser(data?.user ?? null);
       })
       .catch(() => {})
       .finally(() => {
@@ -162,16 +118,32 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     saveDb(next);
   }, []);
 
-  const currentUser = useMemo(() => {
-    if (!db) return null;
-    if (superUser) return superUser;
-    if (!session) return null;
-    const found = db.users.find((u) => u.id === session.userId && u.active);
-    return found ? toSessionUser(found) : null;
-  }, [db, session, superUser]);
-
+  const currentUser = db ? authUser : null;
   const role = currentUser?.role;
   const allowed = useCallback((p: Permission) => can(role, p), [role]);
+
+  const refreshStaff = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/users", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await readJson<{ users?: SessionUser[] }>(res);
+      // Defensive: the super admin must never appear in any directory.
+      setStaff((data.users ?? []).filter((u) => (u.role as string) !== "superadmin"));
+    } catch {
+      // Leave the previous list in place.
+    }
+  }, []);
+
+  const userId = currentUser?.id;
+  useEffect(() => {
+    if (userId && (can(role, "users:manage") || can(role, "leads:reassign"))) {
+      // Fetch-on-identity-change; state is only set after the request resolves.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void refreshStaff();
+    }
+  }, [userId, role, refreshStaff]);
+
+  const users = useMemo(() => (currentUser ? staff : []), [currentUser, staff]);
 
   const properties = useMemo(() => {
     if (!db || !currentUser) return [];
@@ -187,96 +159,60 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       : db.leads.filter((l) => l.assignedAgentId === currentUser.id);
   }, [db, currentUser]);
 
-  // The super admin is never part of the directory; filter defensively in case
-  // a stored record ever carries that role.
-  const users = useMemo(
-    () =>
-      db
-        ? db.users
-            .filter((u) => (u.role as string) !== "superadmin")
-            .map(toSessionUser)
-        : [],
-    [db],
-  );
+  const login = useCallback<AdminContextValue["login"]>(async (email, password) => {
+    if (!dbRef.current) return fail("Todavía se está cargando — probá de nuevo en un momento.");
+    const post = (body: unknown) =>
+      fetch("/api/admin/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-  const login = useCallback<AdminContextValue["login"]>(
-    async (email, password) => {
-      const state = dbRef.current;
-      if (!state) return fail("Todavía se está cargando — probá de nuevo en un momento.");
-      const match = state.users.find(
-        (u) => u.email.toLowerCase() === email.trim().toLowerCase(),
-      );
-      // Same message for unknown email and wrong password.
-      if (!match || match.password !== password) {
-        // Not a regular user: the only other identity is the env-defined super
-        // admin, which only the server can verify.
-        try {
-          const res = await fetch("/api/admin/session", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-          });
-          const data = (await res.json().catch(() => ({}))) as {
-            user?: SessionUser;
-            error?: string;
-          };
-          if (res.ok && data.user?.role === "superadmin") {
-            writeSession(null);
-            setSession(null);
-            setSuperUser(data.user);
-            return ok;
-          }
-          if (res.status === 429 && data.error) return fail(data.error);
-        } catch {
-          // Offline / no server: fall through to the generic message.
-        }
-        return fail("Correo o contraseña incorrectos.");
+    // 1) The env-defined super admin: only the server can verify it.
+    try {
+      const res = await post({ email, password });
+      const data = await readJson<{ user?: SessionUser; error?: string }>(res);
+      if (res.ok && data.user) {
+        setAuthUser(data.user);
+        return ok;
       }
-      if (!match.active) {
+      if (res.status === 429 && data.error) return fail(data.error);
+    } catch {
+      return fail("No pudimos conectar con el servidor.");
+    }
+
+    // 2) Staff: sign in with Firebase, then let the server verify the ID token.
+    const auth = getFirebaseAuth();
+    if (!auth) return fail("El inicio de sesión no está configurado.");
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+      const res = await post({ idToken: await cred.user.getIdToken() });
+      const data = await readJson<{ user?: SessionUser; error?: string }>(res);
+      if (!res.ok || !data.user) return fail(data.error ?? BAD_CREDENTIALS);
+      setAuthUser(data.user);
+      return ok;
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      if (code === "auth/too-many-requests") {
+        return fail("Demasiados intentos. Probá de nuevo en unos minutos.");
+      }
+      if (code === "auth/user-disabled") {
         return fail("Esta cuenta fue desactivada. Contactá a un administrador.");
       }
-      // The server must vouch for the account (signed cookie) before the
-      // dashboard route guard will let it in.
-      try {
-        const res = await fetch("/api/admin/session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        if (!res.ok) {
-          const data = (await res.json().catch(() => ({}))) as { error?: string };
-          return fail(
-            res.status === 429 || res.status === 500
-              ? (data.error ?? "No pudimos iniciar sesión.")
-              : "Esta cuenta no está habilitada en el servidor.",
-          );
-        }
-      } catch {
+      if (code === "auth/network-request-failed") {
         return fail("No pudimos conectar con el servidor.");
       }
-      const next: Session = {
-        token: btoa(JSON.stringify({ sub: match.id, iat: Date.now() })),
-        userId: match.id,
-        expiresAt: Date.now() + SESSION_TTL_MS,
-      };
-      writeSession(next);
-      commit({
-        ...state,
-        users: state.users.map((u) =>
-          u.id === match.id ? { ...u, lastLogin: new Date().toISOString() } : u,
-        ),
-      });
-      setSession(next);
-      setSuperUser(null);
-      return ok;
-    },
-    [commit],
-  );
+      // Same message for unknown email and wrong password.
+      return fail(BAD_CREDENTIALS);
+    } finally {
+      // The server cookie is the session; don't keep a second one in the browser.
+      void signOut(auth).catch(() => {});
+    }
+  }, []);
 
   const logout = useCallback(() => {
-    writeSession(null);
-    setSession(null);
-    setSuperUser(null);
+    setAuthUser(null);
+    setStaff([]);
     void fetch("/api/admin/session", { method: "DELETE" }).catch(() => {});
   }, []);
 
@@ -395,72 +331,54 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   );
 
   const saveUser = useCallback<AdminContextValue["saveUser"]>(
-    (input) => {
-      const state = dbRef.current;
-      if (!state || !allowed("users:manage")) {
+    async (input) => {
+      if (!allowed("users:manage")) {
         return fail("Solo los administradores pueden gestionar usuarios.");
       }
-      if ((input.role as string) === "superadmin") {
-        return fail("Ese rol no se puede asignar.");
-      }
-      const email = input.email.trim().toLowerCase();
-      if (state.users.some((u) => u.id !== input.id && u.email.toLowerCase() === email)) {
-        return fail("Ya existe un usuario con este correo.");
-      }
-      if (input.id) {
-        const target = state.users.find((u) => u.id === input.id);
-        if (!target) return fail("No se encontró el usuario.");
-        const adminsLeft = state.users.filter(
-          (u) => u.id !== input.id && u.role === "admin" && u.active,
-        ).length;
-        const losesAdmin =
-          target.role === "admin" &&
-          target.active &&
-          (input.role !== "admin" || !input.active);
-        if (losesAdmin && adminsLeft === 0) {
-          return fail("Se requiere al menos un administrador activo.");
-        }
-        commit({
-          ...state,
-          users: state.users.map((u) =>
-            u.id === input.id
-              ? {
-                  ...u,
-                  fullName: input.fullName.trim(),
-                  email,
-                  role: input.role,
-                  active: input.active,
-                  password: input.password ? input.password : u.password,
-                }
-              : u,
-          ),
+      if ((input.role as string) === "superadmin") return fail("Ese rol no se puede asignar.");
+      try {
+        const res = await fetch(input.id ? `/api/admin/users/${encodeURIComponent(input.id)}` : "/api/admin/users", {
+          method: input.id ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName: input.fullName,
+            email: input.email,
+            password: input.password || undefined,
+            role: input.role,
+            active: input.active,
+          }),
         });
+        const data = await readJson<{ error?: string }>(res);
+        if (!res.ok) return fail(data.error ?? "No pudimos guardar el usuario.");
+        await refreshStaff();
         return ok;
+      } catch {
+        return fail("No pudimos conectar con el servidor.");
       }
-      if (!input.password) return fail("La contraseña es obligatoria.");
-      const created: AdminUser = {
-        id: newId("u"),
-        fullName: input.fullName.trim(),
-        email,
-        password: input.password,
-        role: input.role,
-        active: input.active,
-        lastLogin: null,
-      };
-      commit({ ...state, users: [...state.users, created] });
-      return ok;
     },
-    [allowed, commit],
+    [allowed, refreshStaff],
   );
 
   const setUserActive = useCallback<AdminContextValue["setUserActive"]>(
-    (id, active) => {
-      const state = dbRef.current;
-      const target = state?.users.find((u) => u.id === id);
-      if (!target) return fail("No se encontró el usuario.");
-      return saveUser({ ...target, password: undefined, active });
+    async (id, active) => {
+      if (!allowed("users:manage")) {
+        return fail("Solo los administradores pueden gestionar usuarios.");
+      }
+      try {
+        const res = await fetch(`/api/admin/users/${encodeURIComponent(id)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ active }),
+        });
+        const data = await readJson<{ error?: string }>(res);
+        if (!res.ok) return fail(data.error ?? "No pudimos actualizar el usuario.");
+        await refreshStaff();
+        return ok;
+      } catch {
+        return fail("No pudimos conectar con el servidor.");
+      }
     },
-    [saveUser],
+    [allowed, refreshStaff],
   );
 
   const resetDemoData = useCallback(() => commit(resetDb()), [commit]);

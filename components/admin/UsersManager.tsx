@@ -38,7 +38,7 @@ function UserForm({
   serverError,
 }: {
   target: SessionUser | null;
-  onSubmit: (input: UserInput) => void;
+  onSubmit: (input: UserInput) => void | Promise<void>;
   onCancel: () => void;
   serverError: string | null;
 }) {
@@ -192,8 +192,8 @@ export function UsersManager() {
                     <IconButton
                       label={u.active ? `Desactivar a ${u.fullName}` : `Activar a ${u.fullName}`}
                       disabled={u.id === user.id}
-                      onClick={() => {
-                        const result = setUserActive(u.id, !u.active);
+                      onClick={async () => {
+                        const result = await setUserActive(u.id, !u.active);
                         setNotice(result.ok ? null : result.error);
                       }}
                     >
@@ -217,8 +217,8 @@ export function UsersManager() {
             target={editing === "new" ? null : editing}
             serverError={serverError}
             onCancel={() => setEditing(null)}
-            onSubmit={(input) => {
-              const result = saveUser(input);
+            onSubmit={async (input) => {
+              const result = await saveUser(input);
               if (result.ok) {
                 setEditing(null);
                 setNotice(null);

@@ -2,18 +2,20 @@
  * Server-only admin identity. Imported by route handlers only — never from a
  * client component (it reads secrets from process.env).
  *
- * - The **super admin** is defined by SUPER_ADMIN_EMAIL / SUPER_ADMIN_PASSWORD.
- *   It is deliberately absent from the users DB, so no user grid can list or
- *   edit it. If either variable is unset, super-admin login is disabled.
- * - Sessions are HMAC-signed httpOnly cookies (`tx_admin`).
- * - Seeded demo admins can also obtain a session so the config API can verify
- *   them. The rest of the admin app still uses the mock localStorage layer
- *   (lib/admin/db.ts); when a real user store replaces it, swap
- *   `verifyStoredUser` below for a lookup against that store.
+ * Two kinds of staff identity can obtain a session:
+ *  - the hardcoded **super admin** (SUPER_ADMIN_EMAIL / SUPER_ADMIN_PASSWORD).
+ *    It is not a Firebase user and not in any user list. Login is disabled if
+ *    either variable is unset.
+ *  - **staff** (admin / manager / agent): Firebase Authentication accounts whose
+ *    role lives in a custom claim. The browser signs in with Firebase, sends the
+ *    ID token here, and we verify it with the Admin SDK.
+ *
+ * Either way the result is an HMAC-signed httpOnly cookie (`tx_admin`) that
+ * `proxy.ts` and the admin APIs trust.
  */
 import { cookies } from "next/headers";
-import { createSeed } from "@/lib/admin/seed";
-import type { SessionUser } from "@/types/admin";
+import type { Role, SessionUser } from "@/types/admin";
+import { adminAuth } from "./firebase-admin";
 import {
   SESSION_COOKIE,
   SESSION_TTL_S,
@@ -25,6 +27,11 @@ import {
 
 export { SESSION_COOKIE };
 export type { ServerSession };
+
+export const STAFF_ROLES = ["admin", "manager", "agent"] as const;
+export type StaffRole = (typeof STAFF_ROLES)[number];
+export const isStaffRole = (v: unknown): v is StaffRole =>
+  typeof v === "string" && (STAFF_ROLES as readonly string[]).includes(v);
 
 /* ---------------------------- cookie I/O --------------------------- */
 
@@ -51,11 +58,15 @@ export async function clearServerSession(): Promise<void> {
   (await cookies()).delete(SESSION_COOKIE);
 }
 
-/* --------------------------- credentials --------------------------- */
+/* ------------------------- super admin (env) ----------------------- */
 
-export function superAdminConfigured(): boolean {
-  return Boolean(process.env.SUPER_ADMIN_EMAIL && process.env.SUPER_ADMIN_PASSWORD);
+export function superAdminEmail(): string | null {
+  const e = process.env.SUPER_ADMIN_EMAIL?.trim().toLowerCase();
+  return e || null;
 }
+
+export const isSuperAdminEmail = (email: string | undefined | null) =>
+  Boolean(email && superAdminEmail() && email.trim().toLowerCase() === superAdminEmail());
 
 /** Constant-time check of the env-defined super admin credentials. */
 export function verifySuperAdmin(email: string, password: string): ServerSession | null {
@@ -69,25 +80,52 @@ export function verifySuperAdmin(email: string, password: string): ServerSession
   return { sub: "superadmin", email: e.trim(), name: "Super administrador", role: "superadmin", exp: 0 };
 }
 
-/** Demo accounts from the seed; replace with a real user-store lookup. */
-export function verifyStoredUser(email: string, password: string): ServerSession | null {
-  // Seed accounts ship with a public demo password, so they must never be
-  // accepted in production unless explicitly enabled.
-  if (process.env.NODE_ENV === "production" && process.env.ALLOW_DEMO_ACCOUNTS !== "true") {
-    return null;
+/* --------------------------- staff (Firebase) ---------------------- */
+
+export type StaffLogin =
+  | { ok: true; session: ServerSession }
+  | { ok: false; status: number; error: string };
+
+/** Verify a Firebase ID token from a fresh sign-in and map it to a session. */
+export async function sessionFromIdToken(idToken: string): Promise<StaffLogin> {
+  const auth = adminAuth();
+  if (!auth) {
+    return { ok: false, status: 500, error: "El inicio de sesión del personal no está configurado en el servidor." };
   }
-  const match = createSeed().users.find(
-    (u) => u.active && u.email.toLowerCase() === email.trim().toLowerCase(),
-  );
-  if (!match || !safeEqual(password, match.password)) return null;
-  return { sub: match.id, email: match.email, name: match.fullName, role: match.role, exp: 0 };
+  try {
+    const decoded = await auth.verifyIdToken(idToken, true);
+    // Only accept a token minted by a sign-in that just happened.
+    if (Date.now() / 1000 - decoded.auth_time > 300) {
+      return { ok: false, status: 401, error: "Correo o contraseña incorrectos." };
+    }
+    const user = await auth.getUser(decoded.uid);
+    if (user.disabled) {
+      return { ok: false, status: 403, error: "Esta cuenta fue desactivada. Contactá a un administrador." };
+    }
+    const role = (user.customClaims ?? {}).role;
+    if (!isStaffRole(role) || isSuperAdminEmail(user.email)) {
+      return { ok: false, status: 403, error: "Esta cuenta no tiene acceso al panel." };
+    }
+    return {
+      ok: true,
+      session: {
+        sub: user.uid,
+        email: user.email ?? "",
+        name: user.displayName || user.email || "Usuario",
+        role,
+        exp: 0,
+      },
+    };
+  } catch {
+    return { ok: false, status: 401, error: "Correo o contraseña incorrectos." };
+  }
 }
 
-export const toSessionUser = (s: ServerSession): SessionUser => ({
+export const toSessionUser = (s: Pick<ServerSession, "sub" | "email" | "name" | "role">): SessionUser => ({
   id: s.sub,
   fullName: s.name,
   email: s.email,
-  role: s.role,
+  role: s.role as Role,
   active: true,
   lastLogin: new Date().toISOString(),
 });
