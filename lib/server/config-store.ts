@@ -16,7 +16,7 @@ const filePath = () =>
 
 export async function readSiteConfig(): Promise<SiteConfig> {
   try {
-    return withDefaults(JSON.parse(await fs.readFile(filePath(), "utf8")));
+    return withDefaults(JSON.parse(await fs.readFile(/*turbopackIgnore: true*/ filePath(), "utf8")));
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return DEFAULT_SITE_CONFIG;
     console.error("[config] could not read stored config, using defaults:", error);
@@ -26,8 +26,8 @@ export async function readSiteConfig(): Promise<SiteConfig> {
 
 export async function writeSiteConfig(config: SiteConfig): Promise<void> {
   const target = filePath();
-  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.mkdir(/*turbopackIgnore: true*/ path.dirname(target), { recursive: true });
   const tmp = `${target}.${process.pid}.tmp`;
-  await fs.writeFile(tmp, JSON.stringify(config, null, 2), "utf8");
-  await fs.rename(tmp, target);
+  await fs.writeFile(/*turbopackIgnore: true*/ tmp, JSON.stringify(config, null, 2), "utf8");
+  await fs.rename(/*turbopackIgnore: true*/ tmp, target);
 }
