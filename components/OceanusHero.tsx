@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { HeroSlideshow } from "@/components/HeroSlideshow";
 import { Trident } from "@/components/Trident";
+import { WatermarkIcon } from "@/components/WatermarkIcon";
 import { properties } from "@/lib/properties";
 
 const HERO_PROPERTIES = properties.slice(0, 5);
@@ -28,14 +29,7 @@ export function OceanusHero() {
 
       {/* Centered watermark and button. */}
       <div className="pointer-events-none absolute inset-0 z-10 flex select-none flex-col items-center justify-center gap-8 sm:gap-12">
-        <div aria-hidden className="flex items-center justify-center gap-2 sm:gap-8">
-          <div className="flex size-10 items-center justify-center rounded-full border-[3px] border-white/50 text-2xl font-bold text-white/50 sm:size-24 sm:text-6xl lg:size-32 lg:text-7xl">
-            T
-          </div>
-          <span className="text-2xl font-normal uppercase tracking-wordmark text-white/50 sm:text-7xl lg:text-8xl">
-            Transaction
-          </span>
-        </div>
+        <WatermarkIcon />
         <Link
           href="/propiedades"
           className="pointer-events-auto border border-white/50 px-8 py-3 text-xs uppercase tracking-luxury text-white transition-all hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white backdrop-blur-sm"

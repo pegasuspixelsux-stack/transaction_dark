@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* Admin palette. Dark by request (see docs/design-guidelines.md §1: any color
+   outside the coastal palette needs a documented reason). Values are taken from
+   the public site's dark theme (#0a1a2e navy, #64b5f6 accent) so both surfaces
+   feel like one brand. */
+@theme inline {
+  --color-admin-bg: #07131f;
+  --color-admin-panel: rgb(255 255 255 / 0.05);
+  --color-admin-panel-strong: rgb(255 255 255 / 0.09);
+  --color-admin-ink: #f3f7fa;
+  --color-admin-muted: #a7b9c8;
+  --color-admin-line: rgb(255 255 255 / 0.12);
+  --color-admin-accent: #64b5f6;
+  --color-admin-accent-ink: #06121d;
+  --color-admin-ok: #6fd3a0;
+  --color-admin-warn: #f2c46d;
+  --color-admin-bad: #f0899b;
+  --font-sans: var(--font-montserrat);
+  --font-display: var(--font-playfair);
+}
+
+@utility tracking-luxury {
+  letter-spacing: 0.2em;
+}
+
+@utility tracking-wordmark {
+  letter-spacing: 0.35em;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background:
+    radial-gradient(60rem 40rem at 90% -10%, rgb(100 181 246 / 0.14), transparent 60%),
+    radial-gradient(50rem 40rem at -10% 110%, rgb(169 202 224 / 0.1), transparent 60%),
+    var(--color-admin-bg);
+  background-attachment: fixed;
+  color: var(--color-admin-ink);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Native <select> popups and date pickers follow the dark scheme. */
+select option {
+  background: #0d1f30;
+  color: var(--color-admin-ink);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-rise] {
+    animation: rise 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  dialog[open] {
+    animation: pop 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  dialog[open]::backdrop {
+    animation: fade 0.2s ease-out both;
+  }
+}
+
+dialog::backdrop {
+  background: rgb(3 9 15 / 0.7);
+  backdrop-filter: blur(4px);
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-admin-line) transparent;
+}

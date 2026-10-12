@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { WatermarkIcon } from "@/components/WatermarkIcon";
 
 interface PropertySlideshowProps {
   images: string[];
@@ -59,14 +60,7 @@ export function PropertySlideshow({ images, title }: PropertySlideshowProps) {
 
       {/* Watermark */}
       <div className="pointer-events-none absolute inset-0 z-10 flex select-none items-center justify-center">
-        <div aria-hidden className="flex items-center justify-center gap-2 sm:gap-8">
-          <div className="flex size-10 items-center justify-center rounded-full border-[3px] border-white/50 text-2xl font-bold text-white/50 sm:size-24 sm:text-6xl lg:size-32 lg:text-7xl">
-            T
-          </div>
-          <span className="text-2xl font-normal uppercase tracking-wordmark text-white/50 sm:text-7xl lg:text-8xl">
-            Transaction
-          </span>
-        </div>
+        <WatermarkIcon />
       </div>
 
       {/* Navigation Buttons */}

@@ -1,18 +1,7 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Montserrat } from "next/font/google";
 import { SiteHeader } from "@/components/SiteHeader";
-import "./globals.css";
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-});
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-});
+import { montserrat, playfair } from "@/lib/fonts";
+import "../globals.css";
 
 export const metadata: Metadata = {
   title: "Transaction",
