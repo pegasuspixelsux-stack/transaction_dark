@@ -55,6 +55,10 @@ export interface AdminProperty {
   propertyType?: PropertyType;
   images?: string[];
   yearBuilt?: number;
+  /** Monthly common expenses, in the property currency. */
+  commonExpenses?: number;
+  /** Yearly property taxes (e.g. contribución inmobiliaria), in the property currency. */
+  annualTaxes?: number;
   amenities?: string[];
   /** "Propiedades destacadas" on the homepage (max 5). */
   featured?: boolean;
@@ -90,6 +94,8 @@ export interface Lead {
   message?: string;
   /** Finished the concierge questions (intent, timeframe, budget): a pre-qualified lead. */
   qualified?: boolean;
+  /** Buying-intent score from the concierge answers; casual browsing is "baja". */
+  priority?: "alta" | "media" | "baja";
 }
 
 

@@ -23,7 +23,7 @@ export interface ImportReport {
 
 const KNOWN_COLUMNS = [
   "id", "title", "listingType", "price", "currency", "location", "zone", "propertyType",
-  "bedrooms", "bathrooms", "areaM2", "yearBuilt", "features", "amenities", "imageUrl",
+  "bedrooms", "bathrooms", "areaM2", "yearBuilt", "commonExpenses", "annualTaxes", "features", "amenities", "imageUrl",
   "images", "description", "status", "featured", "hero",
 ] as const;
 /** Spanish headers (what the template uses) and the original English ones both work. */
@@ -40,6 +40,8 @@ const HEADER_ALIASES: Record<(typeof KNOWN_COLUMNS)[number], string[]> = {
   bathrooms: ["banos", "bathrooms"],
   areaM2: ["superficiem", "superficiem2", "superficie", "aream2"],
   yearBuilt: ["anodeconstruccion", "aniodeconstruccion", "ano", "anio", "yearbuilt"],
+  commonExpenses: ["gastoscomunes", "gastoscomunesmensual", "commonexpenses"],
+  annualTaxes: ["impuestos", "impuestosanuales", "annualtaxes"],
   features: ["caracteristicas", "features"],
   amenities: ["amenidades", "comodidades", "amenities"],
   imageUrl: ["imagenprincipal", "imagen", "imageurl"],
@@ -159,6 +161,8 @@ export function applyInventoryRows(
       bathrooms: number(v.bathrooms),
       areaM2: number(v.areaM2),
       ...("yearBuilt" in v ? { yearBuilt: number(v.yearBuilt) } : {}),
+      ...("commonExpenses" in v ? { commonExpenses: number(v.commonExpenses) } : {}),
+      ...("annualTaxes" in v ? { annualTaxes: number(v.annualTaxes) } : {}),
       features: splitList(v.features),
       ...("amenities" in v ? { amenities: splitList(v.amenities) } : {}),
       imageUrl: text(v.imageUrl),

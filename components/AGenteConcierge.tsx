@@ -97,8 +97,8 @@ const PROPERTY_STEPS: typeof OPTION_STEPS = [
   {
     key: "tradeIn",
     kicker: "Permuta",
-    q: "¿Tenés una propiedad para entregar como parte de pago?",
-    options: ["Sí", "No", "Lo evaluaría"],
+    q: "¿Tenés un inmueble o vehículo para entregar como parte de pago?",
+    options: ["Sí, un inmueble", "Sí, un vehículo", "Inmueble y vehículo", "No"],
   },
 ];
 

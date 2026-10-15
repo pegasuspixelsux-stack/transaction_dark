@@ -22,6 +22,8 @@ interface FormState {
   bedrooms: string;
   bathrooms: string;
   areaM2: string;
+  commonExpenses: string;
+  annualTaxes: string;
   features: string[];
   /** Gallery in display order; the first photo is the cover. */
   photos: string[];
@@ -51,6 +53,8 @@ const empty: FormState = {
   bedrooms: "0",
   bathrooms: "0",
   areaM2: "",
+  commonExpenses: "",
+  annualTaxes: "",
   features: [],
   photos: [],
   description: "",
@@ -72,6 +76,8 @@ function fromProperty(p: AdminProperty): FormState {
     bedrooms: String(p.bedrooms),
     bathrooms: String(p.bathrooms),
     areaM2: String(p.areaM2),
+    commonExpenses: p.commonExpenses === undefined ? "" : String(p.commonExpenses),
+    annualTaxes: p.annualTaxes === undefined ? "" : String(p.annualTaxes),
     features: p.features,
     photos: [...new Set([p.imageUrl, ...(p.images ?? [])].filter(Boolean))],
     description: p.description,
@@ -231,6 +237,8 @@ export function PropertyForm({
       bedrooms: Number(form.bedrooms),
       bathrooms: Number(form.bathrooms),
       areaM2: Number(form.areaM2),
+      commonExpenses: form.commonExpenses.trim() ? Number(form.commonExpenses) : null,
+      annualTaxes: form.annualTaxes.trim() ? Number(form.annualTaxes) : null,
       features: form.features,
       imageUrl: form.photos[0] ?? "",
       images: form.photos,
@@ -326,6 +334,19 @@ export function PropertyForm({
         <Field label="Superficie (m²)" error={errors.areaM2}>
           {({ id, describedBy, invalid }) => (
             <input id={id} type="number" min="0" aria-invalid={invalid} aria-describedby={describedBy} value={form.areaM2} onChange={(e) => set("areaM2", e.target.value)} className={inputClass} />
+          )}
+        </Field>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Gastos comunes (mensual)" hint="Opcional. Se muestra en el desglose de costos.">
+          {({ id, describedBy }) => (
+            <input id={id} type="number" min="0" aria-describedby={describedBy} value={form.commonExpenses} onChange={(e) => set("commonExpenses", e.target.value)} className={inputClass} />
+          )}
+        </Field>
+        <Field label="Impuestos (anual)" hint="Opcional. Contribución inmobiliaria e impuesto de primaria.">
+          {({ id, describedBy }) => (
+            <input id={id} type="number" min="0" aria-describedby={describedBy} value={form.annualTaxes} onChange={(e) => set("annualTaxes", e.target.value)} className={inputClass} />
           )}
         </Field>
       </div>

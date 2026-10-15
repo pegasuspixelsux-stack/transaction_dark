@@ -59,9 +59,17 @@ export function LeadCard({
         <div className="min-w-0">
           <h3 className="truncate text-sm text-admin-ink">
             {lead.name}
-            {lead.qualified ? (
-              <span className="ml-2 border border-admin-ok px-1.5 py-0.5 text-[10px] uppercase tracking-luxury text-admin-ok">
-                Calificado
+            {lead.priority ? (
+              <span
+                className={`ml-2 border px-1.5 py-0.5 text-[10px] uppercase tracking-luxury ${
+                  lead.priority === "alta"
+                    ? "border-admin-ok text-admin-ok"
+                    : lead.priority === "media"
+                      ? "border-admin-warn text-admin-warn"
+                      : "border-admin-line text-admin-muted"
+                }`}
+              >
+                Prioridad {lead.priority}
               </span>
             ) : null}
           </h3>

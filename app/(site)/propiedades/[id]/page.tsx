@@ -141,11 +141,31 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           {/* Contact Section */}
           <div className="border-t border-hairline pt-24 dark:border-white/10">
             <h2 className="font-display text-2xl font-normal tracking-tight text-ink dark:text-white sm:text-3xl">
-              Información de contacto
+              Costos e información de contacto
             </h2>
-            <p className="mt-3 text-base text-ink-muted dark:text-white/75">
-              Precio: <span className="font-display text-2xl text-ink dark:text-white">US$ {property.price.toLocaleString()}</span>
-            </p>
+            <dl className="mt-8 max-w-xl divide-y divide-hairline border-y border-hairline text-base dark:divide-white/10 dark:border-white/10">
+              <div className="flex items-baseline justify-between gap-4 py-4">
+                <dt className="text-ink-muted dark:text-white/75">Precio</dt>
+                <dd className="font-display text-2xl text-ink dark:text-white">US$ {property.price.toLocaleString("es-UY")}</dd>
+              </div>
+              {property.commonExpenses !== undefined ? (
+                <div className="flex items-baseline justify-between gap-4 py-4">
+                  <dt className="text-ink-muted dark:text-white/75">Gastos comunes (mensual)</dt>
+                  <dd className="text-ink dark:text-white">US$ {property.commonExpenses.toLocaleString("es-UY")}</dd>
+                </div>
+              ) : null}
+              {property.annualTaxes !== undefined ? (
+                <div className="flex items-baseline justify-between gap-4 py-4">
+                  <dt className="text-ink-muted dark:text-white/75">Impuestos (anual)</dt>
+                  <dd className="text-ink dark:text-white">US$ {property.annualTaxes.toLocaleString("es-UY")}</dd>
+                </div>
+              ) : null}
+            </dl>
+            {property.commonExpenses === undefined && property.annualTaxes === undefined ? (
+              <p className="mt-4 text-sm text-ink-muted dark:text-white/75">
+                Consultá por gastos comunes e impuestos con un asesor.
+              </p>
+            ) : null}
 
             <div className="mt-8 flex gap-4">
               <a

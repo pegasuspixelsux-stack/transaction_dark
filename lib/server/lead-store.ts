@@ -50,6 +50,7 @@ function normalise(id: string, d: Raw): Lead {
     ...(s(d.intent) ? { intent: s(d.intent) } : {}),
     ...(s(d.message) ? { message: s(d.message) } : {}),
     ...(d.qualified === true ? { qualified: true } : {}),
+    ...(d.priority === "alta" || d.priority === "media" || d.priority === "baja" ? { priority: d.priority } : {}),
   };
 }
 
@@ -89,6 +90,7 @@ export interface NewLead {
   intent: string;
   message: string;
   qualified?: boolean;
+  priority?: "alta" | "media" | "baja";
 }
 
 export async function createLead(input: NewLead): Promise<Lead> {

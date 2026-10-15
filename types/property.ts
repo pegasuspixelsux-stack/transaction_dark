@@ -18,6 +18,10 @@ export interface Property {
   bathrooms?: number;
   area?: number; // m²
   yearBuilt?: number;
+  /** Monthly common expenses (gastos comunes). */
+  commonExpenses?: number;
+  /** Yearly property taxes. */
+  annualTaxes?: number;
   type: PropertyType;
   imageUrl: string;
   images?: string[]; // Array of image URLs for slideshow

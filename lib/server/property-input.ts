@@ -74,6 +74,12 @@ export function saveIntoCatalog(
     const y = num(input.yearBuilt);
     extra.yearBuilt = Number.isInteger(y) && y >= 1500 && y <= 2200 ? y : undefined;
   }
+  for (const key of ["commonExpenses", "annualTaxes"] as const) {
+    if (key in input) {
+      const n = num(input[key]);
+      extra[key] = Number.isFinite(n) && n >= 0 ? n : undefined;
+    }
+  }
   if ("amenities" in input) extra.amenities = list_(input.amenities, 120, 40);
   if ("images" in input) {
     const imgs = list_(input.images, 500, 20);

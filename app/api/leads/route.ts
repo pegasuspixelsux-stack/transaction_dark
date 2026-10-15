@@ -6,6 +6,16 @@ const str = (v: unknown, max = 200) => String(v ?? "").trim().slice(0, max);
 
 const SOURCES = { "contact-form": "contact-form", "a-gente-concierge": "a-gente-concierge" } as const;
 
+/** Rule-based intent score from the concierge answers (no AI involved). */
+function scoreIntent(body: Record<string, unknown>): "alta" | "media" | "baja" {
+  const timeline = str(body.timeline, 60);
+  const timelineScore = /inmediata/i.test(timeline) ? 3 : /6 meses/i.test(timeline) ? 2 : /1 a.o/i.test(timeline) ? 1 : 0;
+  const paymentScore = /fondos|cr[eé]dito|combinaci/i.test(str(body.payment, 60)) ? 1 : 0;
+  const budgetScore = str(body.budget, 60) ? 1 : 0;
+  const total = timelineScore + paymentScore + budgetScore;
+  return total >= 4 ? "alta" : total >= 2 ? "media" : "baja";
+}
+
 const MAX_BODY_BYTES = 10_000;
 
 export async function POST(request: Request) {
@@ -66,8 +76,10 @@ export async function POST(request: Request) {
       propertyTitle: str(body.propertyTitle, 120),
       source,
       intent: str(body.intent, 60),
-      // Finished the budget + timeframe questions: worth a call first.
-      qualified: source === "a-gente-concierge" && Boolean(str(body.timeline) && str(body.budget)),
+      // Concierge leads get a priority; "baja" (just browsing) is not counted as qualified.
+      ...(source === "a-gente-concierge"
+        ? { priority: scoreIntent(body), qualified: scoreIntent(body) !== "baja" }
+        : {}),
       message: [typed, source === "a-gente-concierge" ? answers : ""].filter(Boolean).join("\n"),
     });
     return NextResponse.json({ ok: true });

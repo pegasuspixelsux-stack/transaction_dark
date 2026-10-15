@@ -21,6 +21,8 @@ function toPublic(p: AdminProperty): Property {
     bathrooms: p.bathrooms,
     area: p.areaM2,
     yearBuilt: p.yearBuilt,
+    commonExpenses: p.commonExpenses,
+    annualTaxes: p.annualTaxes,
     type: p.propertyType ?? "house",
     imageUrl: p.imageUrl,
     images: p.images?.length ? p.images : undefined,

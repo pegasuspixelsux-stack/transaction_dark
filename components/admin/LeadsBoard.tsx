@@ -149,7 +149,11 @@ export function LeadsBoard() {
         <div className="-mx-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
           <div className="grid auto-cols-[minmax(17rem,1fr)] grid-flow-col gap-4">
             {LEAD_STAGES.map((stage) => {
-              const items = filtered.filter((l) => l.stage === stage);
+              const rank = { alta: 0, media: 1, baja: 3 } as const;
+              // High-intent leads first; plain form enquiries sit between "media" and "baja".
+              const items = filtered
+                .filter((l) => l.stage === stage)
+                .sort((a, b) => (a.priority ? rank[a.priority] : 2) - (b.priority ? rank[b.priority] : 2));
               const isOver = overStage === stage && draggingId !== null;
               return (
                 <section
