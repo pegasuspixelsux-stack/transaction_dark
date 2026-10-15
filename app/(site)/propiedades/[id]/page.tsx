@@ -6,9 +6,12 @@ import { PropertySlideshow } from "@/components/PropertySlideshow";
 import { ContactForm } from "@/components/ContactForm";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
+import { getSiteConfig, waNumber } from "@/lib/server/public-config";
 
 export default async function PropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const config = await getSiteConfig();
+  const whatsapp = waNumber(config.whatsapp.primary.number);
   const property = properties.find((p) => p.id === id);
 
   if (!property) {
@@ -140,14 +143,14 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
 
             <div className="mt-8 flex gap-4">
               <a
-                href={`mailto:hola@transaction.uy?subject=${encodeURIComponent(`Consulta sobre ${property.title}`)}`}
+                href={`mailto:${config.contact.emails[0]}?subject=${encodeURIComponent(`Consulta sobre ${property.title}`)}`}
                 className="inline-flex items-center gap-2 border border-blue-400 px-6 py-3 text-sm uppercase tracking-luxury text-blue-400 transition-colors hover:bg-blue-400 hover:text-white dark:border-blue-400"
               >
                 <Mail size={18} />
                 Email
               </a>
               <a
-                href="https://wa.me/59842771234"
+                href={`https://wa.me/${whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 border border-blue-400 px-6 py-3 text-sm uppercase tracking-luxury text-blue-400 transition-colors hover:bg-blue-400 hover:text-white dark:border-blue-400"
@@ -161,7 +164,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
       </main>
 
       <SiteFooter />
-      <AGenteConcierge />
+      <AGenteConcierge whatsapp={whatsapp} />
     </>
   );
 }

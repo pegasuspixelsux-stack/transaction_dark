@@ -7,8 +7,10 @@ import { Team } from "@/components/Team";
 import { Contact } from "@/components/Contact";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
+import { getSiteConfig, waNumber } from "@/lib/server/public-config";
 
-export default function Home() {
+export default async function Home() {
+  const config = await getSiteConfig();
   return (
     <>
       <TransactionHero />
@@ -19,7 +21,7 @@ export default function Home() {
       <Team />
       <Contact />
       <SiteFooter />
-      <AGenteConcierge />
+      <AGenteConcierge whatsapp={waNumber(config.whatsapp.primary.number)} />
     </>
   );
 }

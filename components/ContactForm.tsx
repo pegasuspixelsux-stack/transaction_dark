@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const WHATSAPP = "59842771234";
+const DEFAULT_WHATSAPP = "59842771234";
 
 const INTERESTS = ["Comprar", "Vender", "Inversión", "Alquiler de temporada"] as const;
 
@@ -14,7 +14,7 @@ const buttonClass =
 
 type Status = "idle" | "loading" | "sent" | "error";
 
-export function ContactForm({ propertyTitle }: { propertyTitle?: string }) {
+export function ContactForm({ propertyTitle, whatsapp = DEFAULT_WHATSAPP }: { propertyTitle?: string; whatsapp?: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
   const [form, setForm] = useState({
@@ -57,7 +57,7 @@ export function ContactForm({ propertyTitle }: { propertyTitle?: string }) {
         `Me interesa: ${form.interest}.\n` +
         (propertyTitle ? `Propiedad: ${propertyTitle}\n` : "") +
         (form.message ? `Mensaje: ${form.message}` : "");
-      window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+      window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
     } catch (err) {
       setError(err instanceof Error ? err.message : "No pudimos registrar su consulta.");
       setStatus("error");

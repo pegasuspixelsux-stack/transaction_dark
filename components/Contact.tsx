@@ -1,10 +1,13 @@
 import { ContactForm } from "@/components/ContactForm";
+import { getSiteConfig, telHref, waNumber } from "@/lib/server/public-config";
 
 const focusRing =
   "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink dark:focus-visible:outline-white";
 
 
-export function Contact() {
+export async function Contact() {
+  const config = await getSiteConfig();
+  const { street, city } = config.address;
   return (
     <section id="contacto" className="scroll-mt-24 border-t border-hairline bg-surface-raised dark:border-white/10 dark:bg-zinc-900">
       <div className="container-page py-24 sm:py-32">
@@ -21,28 +24,28 @@ export function Contact() {
               <div>
                 <dt className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">Email</dt>
                 <dd className="mt-1 text-sm dark:text-white">
-                  <a href="mailto:hola@transaction.uy" className={`transition-colors hover:text-ink dark:hover:text-white ${focusRing}`}>
-                    hola@transaction.uy
+                  <a href={`mailto:${config.contact.emails[0]}`} className={`transition-colors hover:text-ink dark:hover:text-white ${focusRing}`}>
+                    {config.contact.emails[0]}
                   </a>
                 </dd>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">Teléfono</dt>
                 <dd className="mt-1 text-sm dark:text-white">
-                  <a href="tel:+59842771234" className={`transition-colors hover:text-ink dark:hover:text-white ${focusRing}`}>
-                    +598 42 77 1234
+                  <a href={telHref(config.contact.phones[0])} className={`transition-colors hover:text-ink dark:hover:text-white ${focusRing}`}>
+                    {config.contact.phones[0]}
                   </a>
                 </dd>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">Oficina</dt>
-                <dd className="mt-1 text-sm text-ink-muted dark:text-white/75">Ruta 10, km 161 · José Ignacio</dd>
+                <dd className="mt-1 text-sm text-ink-muted dark:text-white/75">{street} · {city}</dd>
               </div>
             </dl>
           </div>
 
           {/* Right — enquiry form */}
-          <ContactForm />
+          <ContactForm whatsapp={waNumber(config.whatsapp.primary.number)} />
         </div>
       </div>
     </section>

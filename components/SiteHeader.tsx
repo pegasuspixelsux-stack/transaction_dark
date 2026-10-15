@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Menu, MapPin, Clock, Phone } from "lucide-react";
 import { Trident } from "@/components/Trident";
+import { getSiteConfig, telHref } from "@/lib/server/public-config";
 
 const NAV_LINKS: { label: string; href: string }[] = [
   { label: "Inicio", href: "/" },
@@ -13,7 +14,8 @@ const NAV_LINKS: { label: string; href: string }[] = [
 const focusRing =
   "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink dark:focus-visible:outline-white";
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const config = await getSiteConfig();
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-hairline bg-surface/75 backdrop-blur-md transition-colors dark:border-white/10 dark:bg-zinc-950/75 dark:text-white">
       <nav className="container-page flex items-center justify-between py-5">
@@ -26,7 +28,7 @@ export function SiteHeader() {
             T
           </div>
           <span className="text-sm font-light uppercase tracking-wordmark text-ink dark:text-white">
-            Transaction
+            {config.agency.name}
           </span>
         </Link>
 
@@ -59,7 +61,7 @@ export function SiteHeader() {
             <Clock size={18} strokeWidth={1.5} />
           </a>
           <a
-            href="tel:+59842771234"
+            href={telHref(config.contact.phones[0])}
             aria-label="Llamar"
             className={`-m-3 p-3 text-ink/85 transition-colors hover:text-ink dark:text-white/85 dark:hover:text-white ${focusRing}`}
           >

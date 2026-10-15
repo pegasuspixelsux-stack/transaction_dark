@@ -78,7 +78,7 @@ const OPTION_STEPS: { key: AnswerKey; kicker: string; q: string; options: string
 
 const BEST_TIMES = ["Mañana", "Mediodía", "Tarde", "Noche"];
 const SEEN_KEY = "agente-concierge-seen";
-const WHATSAPP = "59842771234";
+const DEFAULT_WHATSAPP = "59842771234";
 
 const fieldClass =
   "w-full border border-white/15 bg-white/[0.04] px-3 py-2.5 text-sm text-[#f5f5f0] outline-none transition-colors placeholder:text-white/40 focus-visible:border-white/50";
@@ -86,7 +86,7 @@ const labelClass = "text-[0.7rem] uppercase tracking-[0.18em] text-white/50";
 const backClass =
   "text-[0.7rem] uppercase tracking-[0.18em] text-white/45 transition-colors hover:text-white/80";
 
-export function AGenteConcierge() {
+export function AGenteConcierge({ whatsapp = DEFAULT_WHATSAPP }: { whatsapp?: string }) {
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("options");
@@ -165,7 +165,7 @@ export function AGenteConcierge() {
     `Requisito clave: ${answers.preference ?? "—"}.`,
     `Mi teléfono es ${form.phone || "—"}; prefiero que me contacten en el horario de ${form.bestTime}.`,
   ].join(" ");
-  const waHref = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(waMessage)}`;
+  const waHref = `https://wa.me/${whatsapp}?text=${encodeURIComponent(waMessage)}`;
 
   return (
     <>

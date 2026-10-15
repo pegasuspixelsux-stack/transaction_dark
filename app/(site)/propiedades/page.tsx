@@ -6,6 +6,7 @@ import { PropertyFilters } from "@/components/PropertyFilters";
 import { MobilePropertyFilters } from "@/components/MobilePropertyFilters";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
+import { getSiteConfig, waNumber } from "@/lib/server/public-config";
 
 export const metadata: Metadata = {
   title: "Propiedades · Transaction",
@@ -23,6 +24,7 @@ export default async function PropiedadesPage({
   searchParams: SearchParams;
 }) {
   const sp = await searchParams;
+  const config = await getSiteConfig();
   const zonas = one(sp.zona)?.split(",").filter(Boolean) ?? [];
   const tipos = one(sp.tipo)?.split(",").filter(Boolean) ?? [];
   const precioMax = Number(one(sp.precioMax)) || Infinity;
@@ -127,7 +129,7 @@ export default async function PropiedadesPage({
         </div>
       </div>
       <SiteFooter />
-      <AGenteConcierge />
+      <AGenteConcierge whatsapp={waNumber(config.whatsapp.primary.number)} />
     </main>
   );
 }
