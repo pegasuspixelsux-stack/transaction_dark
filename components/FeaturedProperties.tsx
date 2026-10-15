@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { properties } from "@/lib/properties";
+import { getPublicProperties, pickFeatured } from "@/lib/server/public-properties";
 import { PropertyCard } from "@/components/PropertyCard";
 
-export function FeaturedProperties() {
+export async function FeaturedProperties() {
+  const featured = pickFeatured(await getPublicProperties());
   return (
     <section className="container-page py-24 sm:py-32">
       <header className="mb-14 flex items-end justify-between gap-6">
@@ -21,12 +22,12 @@ export function FeaturedProperties() {
       </header>
       {/* First row: 2-up. Remaining rows: 3-up. */}
       <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2">
-        {properties.slice(0, 2).map((property) => (
+        {featured.slice(0, 2).map((property) => (
           <PropertyCard key={property.id} property={property} />
         ))}
       </div>
       <div className="mt-14 grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-        {properties.slice(2, 5).map((property) => (
+        {featured.slice(2, 5).map((property) => (
           <PropertyCard key={property.id} property={property} />
         ))}
       </div>

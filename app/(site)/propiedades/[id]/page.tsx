@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Mail, MessageCircle, Bed, Bath, Ruler, Calendar } from "lucide-react";
-import { properties } from "@/lib/properties";
 import { propertyTypeLabel } from "@/lib/properties";
+import { getPublicProperties } from "@/lib/server/public-properties";
 import { PropertySlideshow } from "@/components/PropertySlideshow";
 import { ContactForm } from "@/components/ContactForm";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -12,7 +12,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
   const { id } = await params;
   const config = await getSiteConfig();
   const whatsapp = waNumber(config.whatsapp.primary.number);
-  const property = properties.find((p) => p.id === id);
+  const property = (await getPublicProperties()).find((p) => p.id === id);
 
   if (!property) {
     notFound();

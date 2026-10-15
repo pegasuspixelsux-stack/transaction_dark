@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { countByZone } from "@/lib/properties";
+import { getPublicProperties } from "@/lib/server/public-properties";
 import type { PropertyZone } from "@/types/property";
 
 const zimg = (id: string) =>
@@ -45,7 +46,8 @@ const ZONES: {
   },
 ];
 
-export function Zones() {
+export async function Zones() {
+  const properties = await getPublicProperties();
   return (
     <section id="zonas" className="scroll-mt-24 border-y border-hairline bg-surface-raised">
       <div className="container-page py-24 sm:py-32">
@@ -59,7 +61,7 @@ export function Zones() {
         </p>
         <div className="mt-14 grid grid-cols-1 gap-4 sm:auto-rows-[240px] sm:grid-cols-6">
           {ZONES.map((zone) => {
-            const count = countByZone(zone.name);
+            const count = countByZone(properties, zone.name);
             return (
               <Link
                 key={zone.name}

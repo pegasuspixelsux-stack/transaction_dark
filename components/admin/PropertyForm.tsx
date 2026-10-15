@@ -10,6 +10,7 @@ import type {
   SessionUser,
 } from "@/types/admin";
 import type { PropertyInput } from "@/lib/admin/admin-context";
+import type { PropertyType, PropertyZone } from "@/types/property";
 import { Button, Field, inputClass } from "./ui";
 
 interface FormState {
@@ -26,7 +27,19 @@ interface FormState {
   description: string;
   status: PublishStatus;
   assignedAgentId: string;
+  zone: PropertyZone;
+  propertyType: PropertyType;
+  featured: boolean;
+  hero: boolean;
 }
+
+const ZONES: PropertyZone[] = ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"];
+const TYPES: { value: PropertyType; label: string }[] = [
+  { value: "house", label: "Casa" },
+  { value: "apartment", label: "Apartamento" },
+  { value: "penthouse", label: "Penthouse" },
+  { value: "land", label: "Terreno" },
+];
 
 const empty: FormState = {
   title: "",
@@ -42,6 +55,10 @@ const empty: FormState = {
   description: "",
   status: "draft",
   assignedAgentId: "",
+  zone: "José Ignacio",
+  propertyType: "house",
+  featured: false,
+  hero: false,
 };
 
 function fromProperty(p: AdminProperty): FormState {
@@ -59,6 +76,10 @@ function fromProperty(p: AdminProperty): FormState {
     description: p.description,
     status: p.status,
     assignedAgentId: p.assignedAgentId ?? "",
+    zone: p.zone ?? "José Ignacio",
+    propertyType: p.propertyType ?? "house",
+    featured: !!p.featured,
+    hero: !!p.hero,
   };
 }
 
@@ -84,12 +105,17 @@ function validate(f: FormState): Errors {
 export function PropertyForm({
   property,
   agents,
+  featuredFull,
+  heroFull,
   onSubmit,
   onCancel,
 }: {
   property: AdminProperty | null;
   agents: SessionUser[];
-  onSubmit: (input: PropertyInput) => void;
+  /** True when 5 other properties already hold the slot, so this one cannot take it. */
+  featuredFull: boolean;
+  heroFull: boolean;
+  onSubmit: (input: PropertyInput) => void | Promise<void>;
   onCancel: () => void;
 }) {
   const [form, setForm] = useState<FormState>(property ? fromProperty(property) : empty);
@@ -132,6 +158,10 @@ export function PropertyForm({
       description: form.description.trim(),
       status: form.status,
       assignedAgentId: form.assignedAgentId || null,
+      zone: form.zone,
+      propertyType: form.propertyType,
+      featured: form.featured,
+      hero: form.hero,
     });
   }
 
@@ -171,6 +201,27 @@ export function PropertyForm({
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
               <option value="UYU">UYU</option>
+            </select>
+          )}
+        </Field>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field label="Zona">
+          {({ id }) => (
+            <select id={id} value={form.zone} onChange={(e) => set("zone", e.target.value as PropertyZone)} className={inputClass}>
+              {ZONES.map((z) => (
+                <option key={z} value={z}>{z}</option>
+              ))}
+            </select>
+          )}
+        </Field>
+        <Field label="Tipo de propiedad">
+          {({ id }) => (
+            <select id={id} value={form.propertyType} onChange={(e) => set("propertyType", e.target.value as PropertyType)} className={inputClass}>
+              {TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
             </select>
           )}
         </Field>
@@ -262,6 +313,33 @@ export function PropertyForm({
           )}
         </Field>
       ) : null}
+
+      <fieldset className="space-y-2">
+        <legend className="mb-2 text-xs uppercase tracking-luxury text-admin-ink">Página principal</legend>
+        {([
+          { key: "featured", label: "Propiedad destacada", full: featuredFull, hint: "Aparece en “Propiedades destacadas” (máx. 5)." },
+          { key: "hero", label: "Mostrar en el hero", full: heroFull, hint: "Aparece en el carrusel principal (máx. 5)." },
+        ] as const).map(({ key, label, full, hint }) => {
+          const blocked = full && !property?.[key] && !form[key];
+          return (
+            <label key={key} className={`flex min-h-11 items-start gap-3 text-sm ${blocked ? "opacity-60" : "cursor-pointer"}`}>
+              <input
+                type="checkbox"
+                checked={form[key]}
+                disabled={blocked}
+                onChange={(e) => set(key, e.target.checked)}
+                className="mt-0.5 size-5 accent-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent"
+              />
+              <span>
+                {label}
+                <span className="block text-admin-muted">
+                  {blocked ? "Ya hay 5. Quitá una desde la lista para liberar un lugar." : hint}
+                </span>
+              </span>
+            </label>
+          );
+        })}
+      </fieldset>
 
       <Field label="Descripción">
         {({ id }) => (

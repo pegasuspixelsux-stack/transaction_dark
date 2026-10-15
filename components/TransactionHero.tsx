@@ -5,16 +5,16 @@ import React, { useState } from "react";
 import { HeroSlideshow } from "@/components/HeroSlideshow";
 import { Trident } from "@/components/Trident";
 import { WatermarkIcon } from "@/components/WatermarkIcon";
-import { properties } from "@/lib/properties";
+import type { Property } from "@/types/property";
 
-const HERO_PROPERTIES = properties.slice(0, 5);
-
-export function TransactionHero() {
+export function TransactionHero({ properties: HERO_PROPERTIES }: { properties: Property[] }) {
   const [activeSlide, setActiveSlide] = useState(0);
 
   return (
     <section className="relative flex h-[75vh] sm:min-h-dvh w-full flex-col overflow-hidden bg-surface dark:bg-zinc-950">
-      <HeroSlideshow properties={HERO_PROPERTIES} onSlideChange={setActiveSlide} />
+      {HERO_PROPERTIES.length > 0 ? (
+        <HeroSlideshow properties={HERO_PROPERTIES} onSlideChange={setActiveSlide} />
+      ) : null}
 
       {/* Scrims so the property detail reads over any slide:
           a soft bottom fade + a stronger radial pool anchored bottom-left. */}

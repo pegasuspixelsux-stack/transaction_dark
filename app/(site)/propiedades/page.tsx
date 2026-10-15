@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { properties } from "@/lib/properties";
+import { getPublicProperties } from "@/lib/server/public-properties";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyFilters } from "@/components/PropertyFilters";
 import { MobilePropertyFilters } from "@/components/MobilePropertyFilters";
@@ -25,6 +25,7 @@ export default async function PropiedadesPage({
 }) {
   const sp = await searchParams;
   const config = await getSiteConfig();
+  const properties = await getPublicProperties();
   const zonas = one(sp.zona)?.split(",").filter(Boolean) ?? [];
   const tipos = one(sp.tipo)?.split(",").filter(Boolean) ?? [];
   const precioMax = Number(one(sp.precioMax)) || Infinity;

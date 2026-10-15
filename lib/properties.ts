@@ -66,8 +66,8 @@ export function propertyTypeLabel(type: PropertyType): string {
   return TYPE_LABELS[type];
 }
 
-export function countByZone(zone: PropertyZone): number {
-  return properties.filter((p) => p.zone === zone).length;
+export function countByZone(list: Property[], zone: PropertyZone): number {
+  return list.filter((p) => p.zone === zone).length;
 }
 
 const priceFormatter = new Intl.NumberFormat("es-UY", {

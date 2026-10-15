@@ -62,9 +62,11 @@ interface AdminContextValue {
   setLeadOutcome: (id: string, outcome: LeadOutcome) => Result;
   reassignLead: (id: string, agentId: string | null) => Result;
 
-  saveProperty: (input: PropertyInput) => Result;
-  togglePropertyStatus: (id: string) => Result;
-  deleteProperty: (id: string) => Result;
+  saveProperty: (input: PropertyInput) => Promise<Result>;
+  togglePropertyStatus: (id: string) => Promise<Result>;
+  /** Turn the homepage "Destacada" / "Hero" choice on or off (max 5 each). */
+  togglePropertyFlag: (id: string, flag: "featured" | "hero") => Promise<Result>;
+  deleteProperty: (id: string) => Promise<Result>;
 
   saveUser: (input: UserInput) => Promise<Result>;
   setUserActive: (id: string, active: boolean) => Promise<Result>;
@@ -73,8 +75,6 @@ interface AdminContextValue {
 }
 
 const AdminContext = createContext<AdminContextValue | null>(null);
-
-const newId = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
 
 async function readJson<T>(res: Response): Promise<T> {
   return (await res.json().catch(() => ({}))) as T;
@@ -86,6 +86,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [authUser, setAuthUser] = useState<SessionUser | null>(null);
   const [staff, setStaff] = useState<SessionUser[]>([]);
   const [serverChecked, setServerChecked] = useState(false);
+  const [catalog, setCatalog] = useState<AdminProperty[]>([]);
   const dbRef = useRef<DbState | null>(null);
 
   // localStorage only exists in the browser, so the first client render must
@@ -145,12 +146,22 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const users = useMemo(() => (currentUser ? staff : []), [currentUser, staff]);
 
-  const properties = useMemo(() => {
-    if (!db || !currentUser) return [];
-    return can(currentUser.role, "properties:view-all")
-      ? db.properties
-      : db.properties.filter((p) => p.assignedAgentId === currentUser.id);
-  }, [db, currentUser]);
+  // The server already scopes the catalog to what this role may see.
+  const properties = useMemo(() => (currentUser ? catalog : []), [currentUser, catalog]);
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    fetch("/api/admin/properties", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { properties?: AdminProperty[] } | null) => {
+        if (!cancelled && data?.properties) setCatalog(data.properties);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const leads = useMemo(() => {
     if (!db || !currentUser) return [];
@@ -261,73 +272,54 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     [allowed, patchLead],
   );
 
-  const saveProperty = useCallback<AdminContextValue["saveProperty"]>(
-    (input) => {
-      const state = dbRef.current;
-      if (!state || !allowed("properties:write")) {
-        return fail("No tenés permiso para editar propiedades.");
+  const sendProperty = useCallback(
+    async (init: RequestInit, url = "/api/admin/properties"): Promise<Result> => {
+      if (!allowed("properties:write")) return fail("No tenés permiso para editar propiedades.");
+      try {
+        const res = await fetch(url, init);
+        const data = await readJson<{ properties?: AdminProperty[]; error?: string }>(res);
+        if (!res.ok || !data.properties) return fail(data.error ?? "No pudimos guardar los cambios.");
+        setCatalog(data.properties);
+        return ok;
+      } catch {
+        return fail("No pudimos conectar con el servidor.");
       }
-      const now = new Date().toISOString();
-      if (input.id) {
-        commit({
-          ...state,
-          properties: state.properties.map((p) =>
-            p.id === input.id
-              ? { ...p, ...input, id: p.id, updatedAt: now }
-              : p,
-          ),
-        });
-      } else {
-        const created: AdminProperty = {
-          ...input,
-          id: newId("p"),
-          updatedAt: now,
-        };
-        commit({ ...state, properties: [created, ...state.properties] });
-      }
-      return ok;
     },
-    [allowed, commit],
+    [allowed],
   );
 
-  const togglePropertyStatus = useCallback<
-    AdminContextValue["togglePropertyStatus"]
-  >(
-    (id) => {
-      const state = dbRef.current;
-      if (!state || !allowed("properties:write")) {
-        return fail("No tenés permiso para editar propiedades.");
-      }
-      commit({
-        ...state,
-        properties: state.properties.map((p) =>
-          p.id === id
-            ? {
-                ...p,
-                status: p.status === "published" ? "draft" : "published",
-                updatedAt: new Date().toISOString(),
-              }
-            : p,
-        ),
-      });
-      return ok;
+  const saveProperty = useCallback<AdminContextValue["saveProperty"]>(
+    (input) =>
+      sendProperty({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      }),
+    [sendProperty],
+  );
+
+  const patchProperty = useCallback(
+    (id: string, patch: (p: AdminProperty) => Partial<AdminProperty>): Promise<Result> => {
+      const current = catalog.find((p) => p.id === id);
+      if (!current) return Promise.resolve(fail("No se encontró la propiedad."));
+      return saveProperty({ ...current, ...patch(current) });
     },
-    [allowed, commit],
+    [catalog, saveProperty],
+  );
+
+  const togglePropertyStatus = useCallback<AdminContextValue["togglePropertyStatus"]>(
+    (id) => patchProperty(id, (p) => ({ status: p.status === "published" ? "draft" : "published" })),
+    [patchProperty],
+  );
+
+  const togglePropertyFlag = useCallback<AdminContextValue["togglePropertyFlag"]>(
+    (id, flag) => patchProperty(id, (p) => ({ [flag]: !p[flag] })),
+    [patchProperty],
   );
 
   const deleteProperty = useCallback<AdminContextValue["deleteProperty"]>(
-    (id) => {
-      const state = dbRef.current;
-      if (!state || !allowed("properties:write")) {
-        return fail("No tenés permiso para eliminar propiedades.");
-      }
-      commit({
-        ...state,
-        properties: state.properties.filter((p) => p.id !== id),
-      });
-      return ok;
-    },
-    [allowed, commit],
+    (id) => sendProperty({ method: "DELETE" }, `/api/admin/properties?id=${encodeURIComponent(id)}`),
+    [sendProperty],
   );
 
   const saveUser = useCallback<AdminContextValue["saveUser"]>(
@@ -398,6 +390,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       reassignLead,
       saveProperty,
       togglePropertyStatus,
+      togglePropertyFlag,
       deleteProperty,
       saveUser,
       setUserActive,
@@ -418,6 +411,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       reassignLead,
       saveProperty,
       togglePropertyStatus,
+      togglePropertyFlag,
       deleteProperty,
       saveUser,
       setUserActive,

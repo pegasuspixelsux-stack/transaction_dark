@@ -22,4 +22,8 @@ export interface Property {
   description?: string;
   features?: string[];
   amenities?: string[];
+  /** Shown in "Propiedades destacadas" (max 5 across the catalog). */
+  featured?: boolean;
+  /** Shown in the homepage hero slideshow (max 5 across the catalog). */
+  hero?: boolean;
 }

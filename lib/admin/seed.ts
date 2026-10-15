@@ -1,5 +1,4 @@
-import { properties as publicProperties } from "@/lib/properties";
-import type { AdminProperty, DbState, Lead } from "@/types/admin";
+import type { DbState, Lead } from "@/types/admin";
 
 const daysAgo = (n: number, hour = 10) => {
   const d = new Date();
@@ -8,24 +7,6 @@ const daysAgo = (n: number, hour = 10) => {
   return d.toISOString();
 };
 
-
-const seedProperties: AdminProperty[] = publicProperties.map((p, i) => ({
-  id: p.id,
-  title: p.title,
-  listingType: p.price < 800000 && i % 2 === 0 ? "rent" : "sale",
-  price: p.price,
-  currency: "USD",
-  location: `${p.zone}, Maldonado`,
-  bedrooms: p.bedrooms,
-  bathrooms: p.bathrooms ?? Math.max(1, p.bedrooms - 1),
-  areaM2: p.area ?? 120 + p.bedrooms * 60,
-  features: p.features ?? [],
-  imageUrl: p.imageUrl,
-  description: p.description ?? "",
-  status: i % 5 === 4 ? "draft" : "published",
-  assignedAgentId: null,
-  updatedAt: daysAgo(i),
-}));
 
 const seedLeads: Lead[] = [
   { id: "l-01", name: "Camila Torres", phone: "+598 99 123 456", email: "camila@example.com", propertyId: "ji-01", propertyTitle: "Casa de las Dunas", assignedAgentId: null, stage: "new", outcome: null, source: "Formulario de contacto", createdAt: daysAgo(0, 9) },
@@ -41,7 +22,6 @@ const seedLeads: Lead[] = [
 
 export function createSeed(): DbState {
   return {
-    properties: structuredClone(seedProperties),
     leads: structuredClone(seedLeads),
   };
 }

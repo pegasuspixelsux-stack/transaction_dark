@@ -1,3 +1,5 @@
+import type { PropertyType, PropertyZone } from "@/types/property";
+
 /** `superadmin` is hardcoded server-side (env credentials) and never stored in the users table. */
 export type Role = "superadmin" | "admin" | "manager" | "agent";
 export type StoredRole = Exclude<Role, "superadmin">;
@@ -32,6 +34,16 @@ export interface AdminProperty {
   status: PublishStatus;
   assignedAgentId: string | null;
   updatedAt: string; // ISO
+  /** Public-site fields. Optional so older records keep working. */
+  zone?: PropertyZone;
+  propertyType?: PropertyType;
+  images?: string[];
+  yearBuilt?: number;
+  amenities?: string[];
+  /** "Propiedades destacadas" on the homepage (max 5). */
+  featured?: boolean;
+  /** Homepage hero slideshow (max 5). */
+  hero?: boolean;
 }
 
 export const LEAD_STAGES = [
@@ -60,7 +72,6 @@ export interface Lead {
 }
 
 export interface DbState {
-  properties: AdminProperty[];
   leads: Lead[];
 }
 

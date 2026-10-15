@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Eye, EyeOff, LayoutGrid, List, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { Eye, EyeOff, GalleryHorizontal, LayoutGrid, List, Pencil, Plus, Search, Star, Trash2 } from "lucide-react";
 import { useAdmin } from "@/lib/admin/admin-context";
 import { formatMoney } from "@/lib/admin/utils";
 import type { AdminProperty, PublishStatus } from "@/types/admin";
@@ -23,11 +23,14 @@ import {
 
 type View = "table" | "grid";
 
+const MAX_FEATURED = 5;
+const MAX_HERO = 5;
+
 const listingLabel = (t: AdminProperty["listingType"]) =>
   t === "sale" ? "En venta" : "En alquiler";
 
 export function PropertiesManager() {
-  const { status, properties, users, can, saveProperty, togglePropertyStatus, deleteProperty } =
+  const { status, properties, users, can, saveProperty, togglePropertyStatus, togglePropertyFlag, deleteProperty } =
     useAdmin();
   const canWrite = can("properties:write");
 
@@ -53,7 +56,11 @@ export function PropertiesManager() {
 
   if (status === "loading") return <Spinner />;
 
-  function report(result: { ok: true } | { ok: false; error: string }) {
+  const featuredCount = properties.filter((p) => p.featured).length;
+  const heroCount = properties.filter((p) => p.hero).length;
+
+  async function report(pending: Promise<{ ok: true } | { ok: false; error: string }>) {
+    const result = await pending;
     setNotice(result.ok ? null : result.error);
     return result.ok;
   }
@@ -61,6 +68,22 @@ export function PropertiesManager() {
   const rowActions = (p: AdminProperty) =>
     canWrite ? (
       <div className="flex">
+        <IconButton
+          label={p.featured ? `Quitar ${p.title} de destacadas` : `Marcar ${p.title} como destacada`}
+          aria-pressed={!!p.featured}
+          onClick={() => report(togglePropertyFlag(p.id, "featured"))}
+          className={cn(p.featured && "text-admin-accent")}
+        >
+          <Star className="size-4" fill={p.featured ? "currentColor" : "none"} aria-hidden />
+        </IconButton>
+        <IconButton
+          label={p.hero ? `Quitar ${p.title} del hero` : `Mostrar ${p.title} en el hero`}
+          aria-pressed={!!p.hero}
+          onClick={() => report(togglePropertyFlag(p.id, "hero"))}
+          className={cn(p.hero && "text-admin-accent")}
+        >
+          <GalleryHorizontal className="size-4" aria-hidden />
+        </IconButton>
         <IconButton label={p.status === "published" ? `Despublicar ${p.title}` : `Publicar ${p.title}`} onClick={() => report(togglePropertyStatus(p.id))}>
           {p.status === "published" ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
         </IconButton>
@@ -70,6 +93,14 @@ export function PropertiesManager() {
         <IconButton label={`Eliminar ${p.title}`} onClick={() => setDeleting(p)} className="hover:text-admin-bad">
           <Trash2 className="size-4" aria-hidden />
         </IconButton>
+      </div>
+    ) : null;
+
+  const flagBadges = (p: AdminProperty) =>
+    p.featured || p.hero ? (
+      <div className="mt-1 flex flex-wrap gap-1">
+        {p.featured ? <Badge tone="accent">Destacada</Badge> : null}
+        {p.hero ? <Badge tone="accent">Hero</Badge> : null}
       </div>
     ) : null;
 
@@ -98,6 +129,10 @@ export function PropertiesManager() {
           Estás viendo las propiedades asignadas a vos. Solo gerentes y administradores pueden editar publicaciones.
         </p>
       ) : null}
+
+      <p className="mb-6 text-sm text-admin-muted">
+        Destacadas en la página principal: {featuredCount}/{MAX_FEATURED} · En el hero: {heroCount}/{MAX_HERO}
+      </p>
 
       <section aria-label="Filtros" className="mb-6 grid gap-4 sm:grid-cols-[1fr_12rem_auto]">
         <Field label="Buscar">
@@ -164,6 +199,7 @@ export function PropertiesManager() {
                   <td className="px-5 py-3">
                     <p className="text-admin-ink">{p.title}</p>
                     <p className="text-admin-muted">{p.location}</p>
+                    {flagBadges(p)}
                   </td>
                   <td className="px-5 py-3 text-admin-muted">{listingLabel(p.listingType)}</td>
                   <td className="px-5 py-3">{formatMoney(p.price, p.currency)}</td>
@@ -195,6 +231,7 @@ export function PropertiesManager() {
                     {statusBadge(p.status)}
                   </div>
                   <p className="mt-1 text-sm text-admin-muted">{p.location}</p>
+                  {flagBadges(p)}
                   <p className="mt-3 text-admin-ink">
                     {formatMoney(p.price, p.currency)}
                     <span className="text-sm text-admin-muted"> · {listingLabel(p.listingType)}</span>
@@ -221,8 +258,10 @@ export function PropertiesManager() {
             property={editing === "new" ? null : editing}
             agents={agents}
             onCancel={() => setEditing(null)}
-            onSubmit={(input) => {
-              if (report(saveProperty(input))) setEditing(null);
+            featuredFull={featuredCount >= MAX_FEATURED}
+            heroFull={heroCount >= MAX_HERO}
+            onSubmit={async (input) => {
+              if (await report(saveProperty(input))) setEditing(null);
             }}
           />
         ) : null}
