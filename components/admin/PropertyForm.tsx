@@ -23,7 +23,8 @@ interface FormState {
   bathrooms: string;
   areaM2: string;
   features: string[];
-  imageUrl: string;
+  /** Gallery in display order; the first photo is the cover. */
+  photos: string[];
   description: string;
   status: PublishStatus;
   assignedAgentId: string;
@@ -51,7 +52,7 @@ const empty: FormState = {
   bathrooms: "0",
   areaM2: "",
   features: [],
-  imageUrl: "",
+  photos: [],
   description: "",
   status: "draft",
   assignedAgentId: "",
@@ -72,7 +73,7 @@ function fromProperty(p: AdminProperty): FormState {
     bathrooms: String(p.bathrooms),
     areaM2: String(p.areaM2),
     features: p.features,
-    imageUrl: p.imageUrl,
+    photos: [...new Set([p.imageUrl, ...(p.images ?? [])].filter(Boolean))],
     description: p.description,
     status: p.status,
     assignedAgentId: p.assignedAgentId ?? "",
@@ -96,11 +97,10 @@ function validate(f: FormState): Errors {
       errors[key] = "Usá un número entero, 0 o más.";
     }
   }
-  if (f.imageUrl && !/^https?:\/\//i.test(f.imageUrl)) {
-    errors.imageUrl = "Usá una URL completa que empiece con http(s)://";
-  }
   return errors;
 }
+
+const MAX_PHOTOS = 10;
 
 export function PropertyForm({
   property,
@@ -123,41 +123,67 @@ export function PropertyForm({
   const [featureDraft, setFeatureDraft] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [urlDraft, setUrlDraft] = useState("");
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  async function onPickImage(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    setUploadError(null);
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return setUploadError("Usá una imagen JPG, PNG o WebP.");
-    if (file.size > 10 * 1024 * 1024) return setUploadError("La imagen supera los 10 MB.");
-    setUploading(true);
-    try {
-      const authRes = await fetch("/api/admin/imagekit-auth", { cache: "no-store" });
-      const auth = await authRes.json().catch(() => ({}));
-      if (!authRes.ok) throw new Error(auth.error ?? "No pudimos autorizar la subida.");
-      const body = new FormData();
-      body.set("file", file);
-      body.set("fileName", file.name);
-      body.set("folder", "/properties");
-      body.set("useUniqueFileName", "true");
-      body.set("publicKey", auth.publicKey);
-      body.set("token", auth.token);
-      body.set("expire", String(auth.expire));
-      body.set("signature", auth.signature);
-      const res = await fetch("https://upload.imagekit.io/api/v1/files/upload", { method: "POST", body });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.url) throw new Error(data.message ?? "No pudimos subir la imagen.");
-      set("imageUrl", data.url);
-    } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "No pudimos subir la imagen.");
-    } finally {
-      setUploading(false);
-    }
+  async function uploadOne(file: File): Promise<string> {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error(`${file.name}: usá una imagen JPG, PNG o WebP.`);
+    if (file.size > 10 * 1024 * 1024) throw new Error(`${file.name}: supera los 10 MB.`);
+    const authRes = await fetch("/api/admin/imagekit-auth", { cache: "no-store" });
+    const auth = await authRes.json().catch(() => ({}));
+    if (!authRes.ok) throw new Error(auth.error ?? "No pudimos autorizar la subida.");
+    const body = new FormData();
+    body.set("file", file);
+    body.set("fileName", file.name);
+    body.set("folder", "/properties");
+    body.set("useUniqueFileName", "true");
+    body.set("publicKey", auth.publicKey);
+    body.set("token", auth.token);
+    body.set("expire", String(auth.expire));
+    body.set("signature", auth.signature);
+    const res = await fetch("https://upload.imagekit.io/api/v1/files/upload", { method: "POST", body });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.url) throw new Error(data.message ?? `${file.name}: no pudimos subir la imagen.`);
+    return data.url as string;
   }
+
+  async function onPickImages(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (files.length === 0) return;
+    setUploadError(null);
+    const room = MAX_PHOTOS - form.photos.length;
+    if (room <= 0) return setUploadError(`Máximo ${MAX_PHOTOS} fotos por propiedad.`);
+    setUploading(true);
+    const added: string[] = [];
+    const problems: string[] = [];
+    for (const file of files.slice(0, room)) {
+      try {
+        added.push(await uploadOne(file));
+      } catch (err) {
+        problems.push(err instanceof Error ? err.message : "No pudimos subir la imagen.");
+      }
+    }
+    if (files.length > room) problems.push(`Solo se admiten ${MAX_PHOTOS} fotos; se ignoraron ${files.length - room}.`);
+    if (added.length) setForm((f) => ({ ...f, photos: [...f.photos, ...added].slice(0, MAX_PHOTOS) }));
+    if (problems.length) setUploadError(problems.join(" "));
+    setUploading(false);
+  }
+
+  function addPhotoUrl() {
+    const url = urlDraft.trim();
+    if (!url) return;
+    if (!/^https?:\/\//i.test(url)) return setUploadError("Usá una URL completa que empiece con http(s)://");
+    if (form.photos.length >= MAX_PHOTOS) return setUploadError(`Máximo ${MAX_PHOTOS} fotos por propiedad.`);
+    setUploadError(null);
+    if (!form.photos.includes(url)) set("photos", [...form.photos, url]);
+    setUrlDraft("");
+  }
+
+  const makeCover = (i: number) => set("photos", [form.photos[i], ...form.photos.filter((_, j) => j !== i)]);
+  const removePhoto = (i: number) => set("photos", form.photos.filter((_, j) => j !== i));
 
   function addFeature() {
     const value = featureDraft.trim();
@@ -188,7 +214,8 @@ export function PropertyForm({
       bathrooms: Number(form.bathrooms),
       areaM2: Number(form.areaM2),
       features: form.features,
-      imageUrl: form.imageUrl.trim(),
+      imageUrl: form.photos[0] ?? "",
+      images: form.photos,
       description: form.description.trim(),
       status: form.status,
       assignedAgentId: form.assignedAgentId || null,
@@ -316,21 +343,48 @@ export function PropertyForm({
       </Field>
 
       <div>
-        <p className="mb-2 text-xs uppercase tracking-luxury text-admin-ink">Imagen</p>
+        <p className="mb-2 text-xs uppercase tracking-luxury text-admin-ink">Fotos ({form.photos.length}/{MAX_PHOTOS})</p>
         <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-admin-line px-4 py-6 text-center text-admin-muted focus-within:ring-2 focus-within:ring-admin-ink">
           <Upload className="size-5" aria-hidden />
-          <span className="text-sm">{uploading ? "Subiendo…" : "Subir una imagen (JPG, PNG o WebP, hasta 10 MB)"}</span>
-          <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={uploading} onChange={onPickImage} />
+          <span className="text-sm">{uploading ? "Subiendo…" : "Subir fotos (JPG, PNG o WebP, hasta 10 MB cada una)"}</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" disabled={uploading} onChange={onPickImages} />
         </label>
-        {uploadError ? <p role="alert" className="mt-2 text-sm text-red-600">{uploadError}</p> : null}
-        <Field label="URL de la imagen" error={errors.imageUrl} className="mt-4">
-          {({ id, describedBy, invalid }) => (
-            <input id={id} type="url" aria-invalid={invalid} aria-describedby={describedBy} value={form.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} className={inputClass} placeholder="https://…" />
-          )}
-        </Field>
-        {form.imageUrl && !errors.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin-supplied host
-          <img src={form.imageUrl} alt="Vista previa de la propiedad" className="mt-4 h-40 w-full rounded-xl border border-admin-line object-cover" />
+        {uploadError ? <p role="alert" className="mt-2 text-sm text-admin-bad">{uploadError}</p> : null}
+        <div className="mt-4 flex gap-2">
+          <input
+            type="url"
+            value={urlDraft}
+            onChange={(e) => setUrlDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addPhotoUrl();
+              }
+            }}
+            aria-label="Agregar foto por URL"
+            className={inputClass}
+            placeholder="O pegá la URL de una foto…"
+          />
+          <button type="button" onClick={addPhotoUrl} className="min-h-11 shrink-0 rounded-xl border border-admin-line px-4 text-sm">Agregar</button>
+        </div>
+        {form.photos.length > 0 ? (
+          <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {form.photos.map((url, i) => (
+              <li key={url} className="relative overflow-hidden rounded-xl border border-admin-line">
+                {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary admin-supplied host */}
+                <img src={url} alt={`Foto ${i + 1} de la propiedad`} className="h-28 w-full object-cover" />
+                {i === 0 ? (
+                  <span className="absolute left-2 top-2 rounded-full bg-admin-accent px-2 py-0.5 text-[10px] uppercase tracking-luxury text-admin-accent-ink">Portada</span>
+                ) : null}
+                <div className="flex justify-between gap-1 p-1.5 text-xs">
+                  {i === 0 ? <span /> : (
+                    <button type="button" onClick={() => makeCover(i)} className="inline-flex min-h-11 items-center rounded-lg px-2 underline">Hacer portada</button>
+                  )}
+                  <button type="button" onClick={() => removePhoto(i)} className="inline-flex min-h-11 items-center rounded-lg px-2 text-admin-bad underline" aria-label={`Quitar foto ${i + 1}`}>Quitar</button>
+                </div>
+              </li>
+            ))}
+          </ul>
         ) : null}
       </div>
 
