@@ -86,7 +86,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           {/* Description Section */}
           <div className="mb-24 max-w-2xl">
             <p className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">
-              Descripción
+              Descripción · Ref. <span className="uppercase">{property.id}</span>
             </p>
             <h1 className="mt-3 font-display text-3xl font-normal tracking-tight text-ink dark:text-white sm:text-4xl">
               {property.title}

@@ -20,9 +20,10 @@ export function PropertyCard({ property }: { property: Property }) {
         className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/60 via-black/30 to-transparent"
       />
       <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end gap-2 p-4 text-white">
-        <p className="text-xs uppercase tracking-luxury [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">
-          {zone}
-        </p>
+        <div className="flex items-baseline justify-between gap-2 text-xs uppercase tracking-luxury [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">
+          <p>{zone}</p>
+          <p className="shrink-0 opacity-90">Ref. {id}</p>
+        </div>
         <h3 className="font-display text-lg font-normal tracking-tight [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">
           {title}
         </h3>
