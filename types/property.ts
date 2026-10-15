@@ -11,6 +11,8 @@ export interface Property {
   id: string;
   title: string;
   zone: PropertyZone;
+  /** Free-text address line, e.g. "Punta del Este, Maldonado". */
+  location?: string;
   price: number; // USD, whole dollars
   bedrooms: number;
   bathrooms?: number;

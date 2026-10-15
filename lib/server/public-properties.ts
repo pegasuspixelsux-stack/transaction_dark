@@ -15,6 +15,7 @@ function toPublic(p: AdminProperty): Property {
     id: p.id,
     title: p.title,
     zone: p.zone ?? "José Ignacio",
+    location: p.location || undefined,
     price: p.price,
     bedrooms: p.bedrooms,
     bathrooms: p.bathrooms,

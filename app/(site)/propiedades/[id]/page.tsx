@@ -18,7 +18,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     notFound();
   }
 
-  const images = property.images || [property.imageUrl];
+  const images = (property.images?.length ? property.images : [property.imageUrl]).filter(Boolean);
   const bathrooms = property.bathrooms ?? 3;
   const area = property.area ?? 450;
   const yearBuilt = property.yearBuilt ?? 2015;
@@ -57,7 +57,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     <>
       <main className="min-h-full">
         {/* Hero Slideshow */}
-        <PropertySlideshow images={images} title={property.title} />
+        {images.length > 0 ? (
+          <PropertySlideshow images={images} title={property.title} />
+        ) : (
+          <div className="flex h-64 items-center justify-center bg-mist/20 text-xs uppercase tracking-luxury text-ink-muted sm:h-96">
+            Fotos próximamente
+          </div>
+        )}
 
         {/* Property Info Section */}
         <section className="container-page py-24 sm:py-32">
