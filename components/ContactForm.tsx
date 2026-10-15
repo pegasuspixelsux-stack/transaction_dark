@@ -14,7 +14,7 @@ const buttonClass =
 
 type Status = "idle" | "loading" | "sent" | "error";
 
-export function ContactForm({ propertyTitle, whatsapp = DEFAULT_WHATSAPP }: { propertyTitle?: string; whatsapp?: string }) {
+export function ContactForm({ propertyTitle, propertyId, whatsapp = DEFAULT_WHATSAPP }: { propertyTitle?: string; propertyId?: string; whatsapp?: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
   const [form, setForm] = useState({
@@ -46,6 +46,7 @@ export function ContactForm({ propertyTitle, whatsapp = DEFAULT_WHATSAPP }: { pr
           message: form.message,
           source: "contact-form",
           propertyTitle,
+          propertyId,
           website: form.website,
         }),
       });

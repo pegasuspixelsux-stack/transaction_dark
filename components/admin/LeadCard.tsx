@@ -57,7 +57,14 @@ export function LeadCard({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="truncate text-sm text-admin-ink">{lead.name}</h3>
+          <h3 className="truncate text-sm text-admin-ink">
+            {lead.name}
+            {lead.qualified ? (
+              <span className="ml-2 border border-admin-ok px-1.5 py-0.5 text-[10px] uppercase tracking-luxury text-admin-ok">
+                Calificado
+              </span>
+            ) : null}
+          </h3>
           <p className="truncate text-sm text-admin-muted">{lead.phone}</p>
         </div>
         {canMove ? (

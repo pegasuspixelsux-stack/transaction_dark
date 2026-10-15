@@ -165,12 +165,23 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 WhatsApp
               </a>
             </div>
+
+            <div className="mt-16 max-w-xl">
+              <h3 className="font-display text-xl font-normal tracking-tight text-ink dark:text-white">
+                Consultá por esta propiedad
+              </h3>
+              <p className="mb-8 mt-3 text-sm text-ink-muted dark:text-white/75">
+                Dejanos tus datos y un asesor privado te contacta. También podés responder unas
+                preguntas rápidas con el asistente AGENTE.
+              </p>
+              <ContactForm propertyTitle={property.title} propertyId={property.id} whatsapp={whatsapp} />
+            </div>
           </div>
         </section>
       </main>
 
       <SiteFooter />
-      <AGenteConcierge whatsapp={whatsapp} />
+      <AGenteConcierge whatsapp={whatsapp} property={{ id: property.id, title: property.title }} />
     </>
   );
 }

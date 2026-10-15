@@ -45,6 +45,8 @@ export async function POST(request: Request) {
     ["Zona", str(body.zone, 60)],
     ["Plazo", str(body.timeline, 60)],
     ["Presupuesto", str(body.budget, 60)],
+    ["Forma de pago", str(body.payment, 60)],
+    ["Permuta", str(body.tradeIn, 60)],
     ["Dormitorios", str(body.beds, 40)],
     ["Baños", str(body.baths, 40)],
     ["Preferencia", str(body.preference, 80)],
@@ -64,6 +66,8 @@ export async function POST(request: Request) {
       propertyTitle: str(body.propertyTitle, 120),
       source,
       intent: str(body.intent, 60),
+      // Finished the budget + timeframe questions: worth a call first.
+      qualified: source === "a-gente-concierge" && Boolean(str(body.timeline) && str(body.budget)),
       message: [typed, source === "a-gente-concierge" ? answers : ""].filter(Boolean).join("\n"),
     });
     return NextResponse.json({ ok: true });

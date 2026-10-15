@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { X, MessageCircle } from "lucide-react";
 
@@ -11,6 +11,8 @@ type AnswerKey =
   | "zone"
   | "timeline"
   | "budget"
+  | "payment"
+  | "tradeIn"
   | "beds"
   | "baths"
   | "preference";
@@ -76,6 +78,30 @@ const OPTION_STEPS: { key: AnswerKey; kicker: string; q: string; options: string
   },
 ];
 
+/** Questions for a visitor already looking at one property: the property answers type, zone and size. */
+const PROPERTY_STEPS: typeof OPTION_STEPS = [
+  OPTION_STEPS[0],
+  OPTION_STEPS[3],
+  {
+    key: "budget",
+    kicker: "Inversión",
+    q: "¿Cuál es tu presupuesto estimado?",
+    options: ["Hasta USD 500K", "USD 500K — 1M", "USD 1M — 3M", "Más de USD 3M"],
+  },
+  {
+    key: "payment",
+    kicker: "Forma de pago",
+    q: "¿Cómo pensás realizar el pago?",
+    options: ["Fondos propios", "Crédito hipotecario", "Combinación", "Aún no lo definí"],
+  },
+  {
+    key: "tradeIn",
+    kicker: "Permuta",
+    q: "¿Tenés una propiedad para entregar como parte de pago?",
+    options: ["Sí", "No", "Lo evaluaría"],
+  },
+];
+
 const BEST_TIMES = ["Mañana", "Mediodía", "Tarde", "Noche"];
 const SEEN_KEY = "agente-concierge-seen";
 const DEFAULT_WHATSAPP = "59842771234";
@@ -86,7 +112,15 @@ const labelClass = "text-[0.7rem] uppercase tracking-[0.18em] text-white/50";
 const backClass =
   "text-[0.7rem] uppercase tracking-[0.18em] text-white/45 transition-colors hover:text-white/80";
 
-export function AGenteConcierge({ whatsapp = DEFAULT_WHATSAPP }: { whatsapp?: string }) {
+export function AGenteConcierge({
+  whatsapp = DEFAULT_WHATSAPP,
+  property,
+}: {
+  whatsapp?: string;
+  /** Set on a property page: asks the pre-qualification questions and ties the lead to that property. */
+  property?: { id: string; title: string };
+}) {
+  const steps = useMemo(() => (property ? PROPERTY_STEPS : OPTION_STEPS), [property]);
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("options");
@@ -117,8 +151,8 @@ export function AGenteConcierge({ whatsapp = DEFAULT_WHATSAPP }: { whatsapp?: st
     }
   }
 
-  const current = OPTION_STEPS[stepIdx];
-  const total = OPTION_STEPS.length;
+  const current = steps[stepIdx];
+  const total = steps.length;
 
   function pick(value: string) {
     setAnswers((a) => ({ ...a, [current.key]: value }));
@@ -143,7 +177,11 @@ export function AGenteConcierge({ whatsapp = DEFAULT_WHATSAPP }: { whatsapp?: st
       const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...answers, ...form }),
+        body: JSON.stringify({
+          ...answers,
+          ...form,
+          ...(property ? { propertyId: property.id, propertyTitle: property.title } : {}),
+        }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
@@ -157,7 +195,15 @@ export function AGenteConcierge({ whatsapp = DEFAULT_WHATSAPP }: { whatsapp?: st
     }
   }
 
-  const waMessage = [
+  const waMessage = property
+    ? [
+        `Hola, soy ${form.name || "—"}.`,
+        `Me interesa la propiedad «${property.title}» (Ref. ${property.id}).`,
+        `Horizonte de compra: ${answers.timeline ?? "—"}. Presupuesto: ${answers.budget ?? "—"}.`,
+        `Forma de pago: ${answers.payment ?? "—"}. Permuta: ${answers.tradeIn ?? "—"}.`,
+        `Mi teléfono es ${form.phone || "—"}; prefiero que me contacten en el horario de ${form.bestTime}.`,
+      ].join(" ")
+    : [
     `Hola, soy ${form.name || "—"}.`,
     `Busco ${answers.asset ?? "una propiedad"} para ${answers.intent ?? "—"} en ${answers.zone ?? "—"}.`,
     `Horizonte de compra: ${answers.timeline ?? "—"}. Rango de inversión: ${answers.budget ?? "—"}.`,
@@ -220,7 +266,7 @@ export function AGenteConcierge({ whatsapp = DEFAULT_WHATSAPP }: { whatsapp?: st
               {phase === "options" && (
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-1">
-                    {OPTION_STEPS.map((_, i) => (
+                    {steps.map((_, i) => (
                       <span
                         key={i}
                         className={`h-1 flex-1 ${i <= stepIdx ? "bg-sky-400" : "bg-white/15"}`}

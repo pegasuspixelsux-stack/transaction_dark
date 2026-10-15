@@ -49,6 +49,7 @@ function normalise(id: string, d: Raw): Lead {
     createdAt: iso(d.createdAt),
     ...(s(d.intent) ? { intent: s(d.intent) } : {}),
     ...(s(d.message) ? { message: s(d.message) } : {}),
+    ...(d.qualified === true ? { qualified: true } : {}),
   };
 }
 
@@ -87,6 +88,7 @@ export interface NewLead {
   source: string;
   intent: string;
   message: string;
+  qualified?: boolean;
 }
 
 export async function createLead(input: NewLead): Promise<Lead> {

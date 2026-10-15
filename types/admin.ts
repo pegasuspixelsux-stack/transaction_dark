@@ -88,6 +88,8 @@ export interface Lead {
   /** What the visitor said they want (from the form). */
   intent?: string;
   message?: string;
+  /** Finished the concierge questions (intent, timeframe, budget): a pre-qualified lead. */
+  qualified?: boolean;
 }
 
 
