@@ -17,6 +17,7 @@ import type {
   Lead,
   LeadOutcome,
   LeadStage,
+  PropertyImportSummary,
   SessionUser,
   StoredRole,
 } from "@/types/admin";
@@ -67,6 +68,11 @@ interface AdminContextValue {
   /** Turn the homepage "Destacada" / "Hero" choice on or off (max 5 each). */
   togglePropertyFlag: (id: string, flag: "featured" | "hero") => Promise<Result>;
   deleteProperty: (id: string) => Promise<Result>;
+  /** Upload an .xlsx; `commit: false` only validates and previews. */
+  importProperties: (
+    file: File,
+    commit: boolean,
+  ) => Promise<({ ok: true } & PropertyImportSummary) | { ok: false; error: string }>;
 
   saveUser: (input: UserInput) => Promise<Result>;
   setUserActive: (id: string, active: boolean) => Promise<Result>;
@@ -322,6 +328,33 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     [sendProperty],
   );
 
+  const importProperties = useCallback<AdminContextValue["importProperties"]>(
+    async (file, commit) => {
+      if (!allowed("properties:write")) return { ok: false, error: "No tenés permiso para importar propiedades." };
+      const body = new FormData();
+      body.set("file", file);
+      if (commit) body.set("commit", "1");
+      try {
+        const res = await fetch("/api/admin/properties/import", { method: "POST", body });
+        const data = await readJson<
+          PropertyImportSummary & { properties?: AdminProperty[]; error?: string }
+        >(res);
+        if (!res.ok) return { ok: false, error: data.error ?? "No pudimos importar el archivo." };
+        if (data.saved && data.properties) setCatalog(data.properties);
+        return {
+          ok: true,
+          created: data.created,
+          updated: data.updated,
+          errors: data.errors,
+          saved: data.saved,
+        };
+      } catch {
+        return { ok: false, error: "No pudimos conectar con el servidor." };
+      }
+    },
+    [allowed],
+  );
+
   const saveUser = useCallback<AdminContextValue["saveUser"]>(
     async (input) => {
       if (!allowed("users:manage")) {
@@ -392,6 +425,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       togglePropertyStatus,
       togglePropertyFlag,
       deleteProperty,
+      importProperties,
       saveUser,
       setUserActive,
       resetDemoData,
@@ -413,6 +447,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       togglePropertyStatus,
       togglePropertyFlag,
       deleteProperty,
+      importProperties,
       saveUser,
       setUserActive,
       resetDemoData,

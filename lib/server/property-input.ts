@@ -3,11 +3,11 @@ import type { AdminProperty, Currency, ListingType, PublishStatus } from "@/type
 import type { PropertyType, PropertyZone } from "@/types/property";
 import { MAX_FEATURED, MAX_HERO } from "@/lib/server/property-store";
 
-const ZONES: PropertyZone[] = ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"];
-const TYPES: PropertyType[] = ["house", "apartment", "penthouse", "land"];
-const LISTINGS: ListingType[] = ["sale", "rent"];
-const CURRENCIES: Currency[] = ["USD", "UYU", "EUR"];
-const STATUSES: PublishStatus[] = ["draft", "published"];
+export const ZONES: PropertyZone[] = ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"];
+export const TYPES: PropertyType[] = ["house", "apartment", "penthouse", "land"];
+export const LISTINGS: ListingType[] = ["sale", "rent"];
+export const CURRENCIES: Currency[] = ["USD", "UYU", "EUR"];
+export const STATUSES: PublishStatus[] = ["draft", "published"];
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -19,7 +19,11 @@ export type SaveResult =
 const bad = (error: string, status = 422): SaveResult => ({ ok: false, error, status });
 
 /** Insert or update `input` in `list`, enforcing field rules and the featured / hero caps. */
-export function saveIntoCatalog(list: AdminProperty[], input: unknown): SaveResult {
+export function saveIntoCatalog(
+  list: AdminProperty[],
+  input: unknown,
+  opts: { allowNewId?: boolean } = {},
+): SaveResult {
   if (!isObj(input)) return bad("Solicitud inválida.", 400);
 
   const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
@@ -27,7 +31,10 @@ export function saveIntoCatalog(list: AdminProperty[], input: unknown): SaveResu
 
   const id = typeof input.id === "string" && input.id ? input.id : null;
   const existing = id ? list.find((p) => p.id === id) : undefined;
-  if (id && !existing) return bad("No se encontró la propiedad.", 404);
+  if (id && !existing) {
+    if (!opts.allowNewId) return bad("No se encontró la propiedad.", 404);
+    if (!/^[a-zA-Z0-9_-]{1,40}$/.test(id)) return bad("El id solo admite letras, números, guiones (hasta 40).");
+  }
 
   const title = str(input.title, 120);
   const location = str(input.location, 160);
@@ -59,9 +66,25 @@ export function saveIntoCatalog(list: AdminProperty[], input: unknown): SaveResu
     return bad(`Ya hay ${MAX_HERO} propiedades en el hero. Quitá una antes de agregar otra.`, 409);
   }
 
+  const list_ = (v: unknown, max: number, limit: number) =>
+    (Array.isArray(v) ? v : []).map((x) => str(x, max)).filter(Boolean).slice(0, limit);
+
+  const extra: Partial<AdminProperty> = {};
+  if ("yearBuilt" in input) {
+    const y = num(input.yearBuilt);
+    extra.yearBuilt = Number.isInteger(y) && y >= 1500 && y <= 2200 ? y : undefined;
+  }
+  if ("amenities" in input) extra.amenities = list_(input.amenities, 120, 40);
+  if ("images" in input) {
+    const imgs = list_(input.images, 500, 20);
+    if (imgs.some((u) => !/^https?:\/\//i.test(u))) return bad("Las imágenes deben ser URLs http(s).");
+    extra.images = imgs;
+  }
+
   const property: AdminProperty = {
     ...existing,
-    id: existing?.id ?? `p-${crypto.randomUUID().slice(0, 8)}`,
+    ...extra,
+    id: existing?.id ?? id ?? `p-${crypto.randomUUID().slice(0, 8)}`,
     title,
     listingType: pick(input.listingType, LISTINGS, "sale"),
     price,
@@ -77,7 +100,12 @@ export function saveIntoCatalog(list: AdminProperty[], input: unknown): SaveResu
     imageUrl,
     description: str(input.description, 4000),
     status,
-    assignedAgentId: typeof input.assignedAgentId === "string" && input.assignedAgentId ? input.assignedAgentId : null,
+    assignedAgentId:
+      "assignedAgentId" in input
+        ? typeof input.assignedAgentId === "string" && input.assignedAgentId
+          ? input.assignedAgentId
+          : null
+        : (existing?.assignedAgentId ?? null),
     updatedAt: new Date().toISOString(),
     zone: pick(input.zone, ZONES, existing?.zone ?? "José Ignacio"),
     propertyType: pick(input.propertyType, TYPES, existing?.propertyType ?? "house"),

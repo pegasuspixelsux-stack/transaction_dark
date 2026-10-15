@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Eye, EyeOff, GalleryHorizontal, LayoutGrid, List, Pencil, Plus, Search, Star, Trash2 } from "lucide-react";
+import { Eye, EyeOff, FileSpreadsheet, GalleryHorizontal, LayoutGrid, List, Pencil, Plus, Search, Star, Trash2 } from "lucide-react";
 import { useAdmin } from "@/lib/admin/admin-context";
 import { formatMoney } from "@/lib/admin/utils";
 import type { AdminProperty, PublishStatus } from "@/types/admin";
 import { cn } from "@/lib/utils";
 import { PropertyForm } from "./PropertyForm";
+import { PropertyImport } from "./PropertyImport";
 import {
   Badge,
   Button,
@@ -40,6 +41,7 @@ export function PropertiesManager() {
   const [editing, setEditing] = useState<AdminProperty | "new" | null>(null);
   const [deleting, setDeleting] = useState<AdminProperty | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
   const agents = useMemo(() => users.filter((u) => u.role === "agent" && u.active), [users]);
   const agentName = (id: string | null) =>
@@ -117,9 +119,14 @@ export function PropertiesManager() {
         title="Propiedades"
         actions={
           canWrite ? (
-            <Button variant="primary" onClick={() => setEditing("new")}>
-              <Plus className="size-4" aria-hidden /> Crear propiedad
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={() => setImporting(true)}>
+                <FileSpreadsheet className="size-4" aria-hidden /> Importar Excel
+              </Button>
+              <Button variant="primary" onClick={() => setEditing("new")}>
+                <Plus className="size-4" aria-hidden /> Crear propiedad
+              </Button>
+            </div>
           ) : null
         }
       />
@@ -266,6 +273,8 @@ export function PropertiesManager() {
           />
         ) : null}
       </Modal>
+
+      <PropertyImport open={importing} onClose={() => setImporting(false)} />
 
       <ConfirmDialog
         open={deleting !== null}

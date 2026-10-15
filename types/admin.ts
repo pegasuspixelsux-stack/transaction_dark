@@ -14,6 +14,22 @@ export interface SessionUser {
   lastLogin: string | null; // ISO
 }
 
+/** One problem found while importing a spreadsheet. */
+export interface ImportRowError {
+  /** Spreadsheet row number (the header is row 1). */
+  row: number;
+  title: string;
+  error: string;
+}
+
+/** Result of previewing or committing an Excel import. */
+export interface PropertyImportSummary {
+  created: number;
+  updated: number;
+  errors: ImportRowError[];
+  saved: boolean;
+}
+
 export type ListingType = "sale" | "rent";
 export type Currency = "USD" | "UYU" | "EUR";
 export type PublishStatus = "draft" | "published";
