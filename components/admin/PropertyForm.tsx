@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { Plus, Upload, X } from "lucide-react";
 import type {
   AdminProperty,
@@ -121,9 +121,43 @@ export function PropertyForm({
   const [form, setForm] = useState<FormState>(property ? fromProperty(property) : empty);
   const [errors, setErrors] = useState<Errors>({});
   const [featureDraft, setFeatureDraft] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
+
+  async function onPickImage(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploadError(null);
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return setUploadError("Usá una imagen JPG, PNG o WebP.");
+    if (file.size > 10 * 1024 * 1024) return setUploadError("La imagen supera los 10 MB.");
+    setUploading(true);
+    try {
+      const authRes = await fetch("/api/admin/imagekit-auth", { cache: "no-store" });
+      const auth = await authRes.json().catch(() => ({}));
+      if (!authRes.ok) throw new Error(auth.error ?? "No pudimos autorizar la subida.");
+      const body = new FormData();
+      body.set("file", file);
+      body.set("fileName", file.name);
+      body.set("folder", "/properties");
+      body.set("useUniqueFileName", "true");
+      body.set("publicKey", auth.publicKey);
+      body.set("token", auth.token);
+      body.set("expire", String(auth.expire));
+      body.set("signature", auth.signature);
+      const res = await fetch("https://upload.imagekit.io/api/v1/files/upload", { method: "POST", body });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url) throw new Error(data.message ?? "No pudimos subir la imagen.");
+      set("imageUrl", data.url);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "No pudimos subir la imagen.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   function addFeature() {
     const value = featureDraft.trim();
@@ -283,13 +317,12 @@ export function PropertyForm({
 
       <div>
         <p className="mb-2 text-xs uppercase tracking-luxury text-admin-ink">Imagen</p>
-        <div
-          aria-disabled
-          className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-admin-line px-4 py-6 text-center text-admin-muted"
-        >
+        <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-admin-line px-4 py-6 text-center text-admin-muted focus-within:ring-2 focus-within:ring-admin-ink">
           <Upload className="size-5" aria-hidden />
-          <p className="text-sm">La carga de archivos todavía no está conectada. Pegá abajo la URL de una imagen.</p>
-        </div>
+          <span className="text-sm">{uploading ? "Subiendo…" : "Subir una imagen (JPG, PNG o WebP, hasta 10 MB)"}</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={uploading} onChange={onPickImage} />
+        </label>
+        {uploadError ? <p role="alert" className="mt-2 text-sm text-red-600">{uploadError}</p> : null}
         <Field label="URL de la imagen" error={errors.imageUrl} className="mt-4">
           {({ id, describedBy, invalid }) => (
             <input id={id} type="url" aria-invalid={invalid} aria-describedby={describedBy} value={form.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} className={inputClass} placeholder="https://…" />
