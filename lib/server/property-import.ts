@@ -26,6 +26,51 @@ const KNOWN_COLUMNS = [
   "bedrooms", "bathrooms", "areaM2", "yearBuilt", "features", "amenities", "imageUrl",
   "images", "description", "status", "featured", "hero",
 ] as const;
+/** Spanish headers (what the template uses) and the original English ones both work. */
+const HEADER_ALIASES: Record<(typeof KNOWN_COLUMNS)[number], string[]> = {
+  id: ["id", "codigo"],
+  title: ["titulo", "title", "nombre"],
+  listingType: ["operacion", "listingtype"],
+  price: ["precio", "price"],
+  currency: ["moneda", "currency"],
+  location: ["ubicacion", "location"],
+  zone: ["zona", "zone"],
+  propertyType: ["tipo", "tipodepropiedad", "propertytype"],
+  bedrooms: ["dormitorios", "bedrooms"],
+  bathrooms: ["banos", "bathrooms"],
+  areaM2: ["superficiem", "superficiem2", "superficie", "aream2"],
+  yearBuilt: ["anodeconstruccion", "aniodeconstruccion", "ano", "anio", "yearbuilt"],
+  features: ["caracteristicas", "features"],
+  amenities: ["amenidades", "comodidades", "amenities"],
+  imageUrl: ["imagenprincipal", "imagen", "imageurl"],
+  images: ["imagenes", "images"],
+  description: ["descripcion", "description"],
+  status: ["estado", "status"],
+  featured: ["destacada", "destacado", "featured"],
+  hero: ["carruselprincipal", "carrusel", "hero"],
+};
+
+const COLUMN_LABELS: Record<(typeof REQUIRED_COLUMNS)[number], string> = {
+  title: "Título", listingType: "Operación", price: "Precio", currency: "Moneda",
+  location: "Ubicación", zone: "Zona", propertyType: "Tipo", bedrooms: "Dormitorios",
+  bathrooms: "Baños", areaM2: "Superficie m²", status: "Estado",
+};
+
+/** Spanish cell values -> the canonical values the catalog stores. */
+const VALUE_ALIASES: Record<string, string> = {
+  venta: "sale", alquiler: "rent",
+  casa: "house", apartamento: "apartment", departamento: "apartment", terreno: "land",
+  publicada: "published", publicado: "published", borrador: "draft",
+};
+const VALUE_LABELS: Record<string, string> = {
+  sale: "venta", rent: "alquiler", house: "casa", apartment: "apartamento", land: "terreno",
+  penthouse: "penthouse", published: "publicada", draft: "borrador",
+};
+
+const fold = (v: string) => v.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const normalizeHeader = (v: string) => fold(v).replace(/[^a-z0-9]/g, "");
+const canonical = (v: string) => VALUE_ALIASES[fold(v.trim())] ?? v.toLowerCase();
+
 const REQUIRED_COLUMNS = [
   "title", "listingType", "price", "currency", "location", "zone", "propertyType",
   "bedrooms", "bathrooms", "areaM2", "status",
@@ -64,11 +109,13 @@ export async function readInventoryRows(file: Blob): Promise<{ row: number; valu
   if (!data || data.length === 0) throw new ImportFileError("El archivo está vacío.");
 
   const headers = data[0].map((h) => text(h));
-  const byLower = new Map<string, string>(KNOWN_COLUMNS.map((c) => [c.toLowerCase(), c]));
-  const columns = headers.map((h) => byLower.get(h.toLowerCase()));
+  const byHeader = new Map<string, string>(
+    KNOWN_COLUMNS.flatMap((c) => HEADER_ALIASES[c].map((alias) => [alias, c] as const)),
+  );
+  const columns = headers.map((h) => byHeader.get(normalizeHeader(h)));
   const missing = REQUIRED_COLUMNS.filter((c) => !columns.includes(c));
   if (missing.length > 0) {
-    throw new ImportFileError(`Faltan columnas obligatorias: ${missing.join(", ")}.`);
+    throw new ImportFileError(`Faltan columnas obligatorias: ${missing.map((c) => COLUMN_LABELS[c]).join(", ")}.`);
   }
 
   const rows: { row: number; values: Record<string, Cell> }[] = [];
@@ -102,12 +149,12 @@ export function applyInventoryRows(
     const input = {
       ...(id ? { id } : {}),
       title: text(v.title),
-      listingType: text(v.listingType).toLowerCase(),
+      listingType: canonical(text(v.listingType)),
       price: number(v.price),
       currency: text(v.currency).toUpperCase(),
       location: text(v.location),
       zone: text(v.zone),
-      propertyType: text(v.propertyType).toLowerCase(),
+      propertyType: canonical(text(v.propertyType)),
       bedrooms: number(v.bedrooms),
       bathrooms: number(v.bathrooms),
       areaM2: number(v.areaM2),
@@ -117,25 +164,25 @@ export function applyInventoryRows(
       imageUrl: text(v.imageUrl),
       ...("images" in v ? { images: splitList(v.images) } : {}),
       description: text(v.description),
-      status: text(v.status).toLowerCase(),
+      status: canonical(text(v.status)),
       featured: bool(v.featured),
       hero: bool(v.hero),
     };
 
     // Reject unknown dropdown values instead of silently replacing them with a default.
     const invalid: [string, string, readonly string[]][] = [
-      ["listingType", input.listingType, LISTINGS],
-      ["currency", input.currency, CURRENCIES],
-      ["zone", input.zone, ZONES],
-      ["propertyType", input.propertyType, TYPES],
-      ["status", input.status, STATUSES],
+      ["Operación", input.listingType, LISTINGS],
+      ["Moneda", input.currency, CURRENCIES],
+      ["Zona", input.zone, ZONES],
+      ["Tipo", input.propertyType, TYPES],
+      ["Estado", input.status, STATUSES],
     ];
     const badField = invalid.find(([, value, allowed]) => !allowed.includes(value));
     if (badField) {
       errors.push({
         row,
         title: input.title,
-        error: `Valor inválido en «${badField[0]}»: "${badField[1]}". Usá: ${badField[2].join(" | ")}.`,
+        error: `Valor inválido en «${badField[0]}»: "${VALUE_LABELS[badField[1]] ?? badField[1]}". Usá: ${badField[2].map((o) => VALUE_LABELS[o] ?? o).join(" | ")}.`,
       });
       continue;
     }
