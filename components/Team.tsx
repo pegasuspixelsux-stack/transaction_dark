@@ -1,4 +1,4 @@
-import { Lock, Users, Zap, Award, Scale } from "lucide-react";
+import { Lock, Users, Scale } from "lucide-react";
 
 const SERVICES: { title: string; description: string; icon: React.ReactNode }[] = [
   {
@@ -10,16 +10,6 @@ const SERVICES: { title: string; description: string; icon: React.ReactNode }[] 
     title: "Equipo dedicado",
     description: "Profesionales locales con profundo conocimiento de Punta del Este y experiencia en operaciones de lujo.",
     icon: <Users size={24} />,
-  },
-  {
-    title: "Proceso eficiente",
-    description: "De la primera visita a la escritura, acompañamos cada paso con rapidez y profesionalismo.",
-    icon: <Zap size={24} />,
-  },
-  {
-    title: "Excelencia reconocida",
-    description: "Años de experiencia y referencias que hablan por nosotros en el mercado de propiedades premium.",
-    icon: <Award size={24} />,
   },
 ];
 
