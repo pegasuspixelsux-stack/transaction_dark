@@ -101,6 +101,23 @@ function validate(f: FormState): Errors {
 }
 
 const MAX_PHOTOS = 10;
+const MAX_EDGE_PX = 2000;
+const WEBP_QUALITY = 0.82;
+
+/** Downscale (never upscale) to MAX_EDGE_PX on the long side and re-encode as WebP. */
+async function toWebp(file: File): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_EDGE_PX / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", WEBP_QUALITY));
+  if (!blob || blob.type !== "image/webp") throw new Error(`${file.name}: no pudimos convertir la imagen a WebP.`);
+  return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" });
+}
+
 
 export function PropertyForm({
   property,
@@ -131,12 +148,13 @@ export function PropertyForm({
   async function uploadOne(file: File): Promise<string> {
     if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error(`${file.name}: usá una imagen JPG, PNG o WebP.`);
     if (file.size > 10 * 1024 * 1024) throw new Error(`${file.name}: supera los 10 MB.`);
+    const webp = await toWebp(file);
     const authRes = await fetch("/api/admin/imagekit-auth", { cache: "no-store" });
     const auth = await authRes.json().catch(() => ({}));
     if (!authRes.ok) throw new Error(auth.error ?? "No pudimos autorizar la subida.");
     const body = new FormData();
-    body.set("file", file);
-    body.set("fileName", file.name);
+    body.set("file", webp);
+    body.set("fileName", webp.name);
     body.set("folder", "/properties");
     body.set("useUniqueFileName", "true");
     body.set("publicKey", auth.publicKey);
@@ -346,7 +364,7 @@ export function PropertyForm({
         <p className="mb-2 text-xs uppercase tracking-luxury text-admin-ink">Fotos ({form.photos.length}/{MAX_PHOTOS})</p>
         <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-admin-line px-4 py-6 text-center text-admin-muted focus-within:ring-2 focus-within:ring-admin-ink">
           <Upload className="size-5" aria-hidden />
-          <span className="text-sm">{uploading ? "Subiendo…" : "Subir fotos (JPG, PNG o WebP, hasta 10 MB cada una)"}</span>
+          <span className="text-sm">{uploading ? "Subiendo…" : "Subir fotos (JPG, PNG o WebP, se convierten a WebP, hasta 10 MB cada una)"}</span>
           <input type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" disabled={uploading} onChange={onPickImages} />
         </label>
         {uploadError ? <p role="alert" className="mt-2 text-sm text-admin-bad">{uploadError}</p> : null}
