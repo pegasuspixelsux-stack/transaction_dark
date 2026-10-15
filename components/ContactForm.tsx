@@ -22,6 +22,7 @@ export function ContactForm({ propertyTitle, whatsapp = DEFAULT_WHATSAPP }: { pr
     email: "",
     phone: "",
     interest: INTERESTS[0] as string,
+    website: "", // honeypot: real visitors never see or fill this
     message: propertyTitle ? `Consulta sobre propiedad: ${propertyTitle}` : "",
   });
 
@@ -45,6 +46,7 @@ export function ContactForm({ propertyTitle, whatsapp = DEFAULT_WHATSAPP }: { pr
           message: form.message,
           source: "contact-form",
           propertyTitle,
+          website: form.website,
         }),
       });
       if (!res.ok) {
@@ -82,7 +84,17 @@ export function ContactForm({ propertyTitle, whatsapp = DEFAULT_WHATSAPP }: { pr
   const loading = status === "loading";
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5">
+    <form onSubmit={onSubmit} className="relative flex flex-col gap-5">
+      <input
+        type="text"
+        name="website"
+        value={form.website}
+        onChange={set("website")}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute -left-[9999px] h-0 w-0 opacity-0"
+      />
       <label className="flex flex-col gap-2">
         <span className={labelClass}>Nombre y apellido</span>
         <input type="text" name="nombre" autoComplete="name" required disabled={loading} value={form.name} onChange={set("name")} className={fieldClass} />

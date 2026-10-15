@@ -92,7 +92,7 @@ export function AGenteConcierge({ whatsapp = DEFAULT_WHATSAPP }: { whatsapp?: st
   const [phase, setPhase] = useState<Phase>("options");
   const [stepIdx, setStepIdx] = useState(0);
   const [answers, setAnswers] = useState<Partial<Record<AnswerKey, string>>>({});
-  const [form, setForm] = useState({ name: "", phone: "", bestTime: BEST_TIMES[0] });
+  const [form, setForm] = useState({ name: "", phone: "", bestTime: BEST_TIMES[0], website: "" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -254,7 +254,17 @@ export function AGenteConcierge({ whatsapp = DEFAULT_WHATSAPP }: { whatsapp?: st
               )}
 
               {phase === "form" && (
-                <form onSubmit={submit} className="flex flex-col gap-4">
+                <form onSubmit={submit} className="relative flex flex-col gap-4">
+                  <input
+                    type="text"
+                    name="website"
+                    value={form.website}
+                    onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="absolute -left-[9999px] h-0 w-0 opacity-0"
+                  />
                   <p className="font-display text-lg leading-snug tracking-tight">
                     Un asesor privado te contacta
                   </p>

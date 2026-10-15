@@ -12,6 +12,7 @@ import {
   toSessionUser,
   verifySuperAdmin,
 } from "@/lib/server/admin-session";
+import { allowRequest } from "@/lib/server/rate-limit";
 
 const noStore = { "Cache-Control": "no-store" };
 const BAD_CREDENTIALS = "Correo o contraseña incorrectos.";
@@ -35,7 +36,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Origen no permitido." }, { status: 403 });
   }
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  if (isThrottled(ip)) {
+  // Shared across serverless instances; the in-memory lockout below only counts failures.
+  if (isThrottled(ip) || !(await allowRequest(`login:${ip}`, 30, 15 * 60 * 1000))) {
     return NextResponse.json(
       { error: "Demasiados intentos. Probá de nuevo en unos minutos." },
       { status: 429, headers: noStore },

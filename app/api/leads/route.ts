@@ -1,17 +1,34 @@
 import { NextResponse } from "next/server";
 import { createLead } from "@/lib/server/lead-store";
+import { allowRequest, clientIp } from "@/lib/server/rate-limit";
 
 const str = (v: unknown, max = 200) => String(v ?? "").trim().slice(0, max);
 
 const SOURCES = { "contact-form": "contact-form", "a-gente-concierge": "a-gente-concierge" } as const;
 
+const MAX_BODY_BYTES = 10_000;
+
 export async function POST(request: Request) {
+  if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "Solicitud demasiado grande." }, { status: 413 });
+  }
+  // 5 submissions per IP every 10 minutes is plenty for a real visitor.
+  if (!(await allowRequest(`lead:${clientIp(request)}`, 5, 10 * 60 * 1000))) {
+    return NextResponse.json(
+      { error: "Demasiadas consultas seguidas. Probá de nuevo en unos minutos." },
+      { status: 429 },
+    );
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Solicitud inválida." }, { status: 400 });
   }
+
+  // Hidden "website" field: humans never see it, bots fill it. Pretend success.
+  if (str(body.website)) return NextResponse.json({ ok: true });
 
   const name = str(body.name);
   const phone = str(body.phone, 60);

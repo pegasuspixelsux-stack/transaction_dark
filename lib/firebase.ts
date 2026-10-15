@@ -1,6 +1,5 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -15,14 +14,6 @@ const firebaseConfig = {
 export const firebaseEnabled = Boolean(
   firebaseConfig.apiKey && firebaseConfig.projectId,
 );
-
-function getDb(): Firestore | null {
-  if (!firebaseEnabled) return null;
-  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  return getFirestore(app);
-}
-
-export const db = getDb();
 
 /** Browser-side Firebase Auth (email/password). `null` if Firebase isn't configured. */
 export function getFirebaseAuth(): Auth | null {
