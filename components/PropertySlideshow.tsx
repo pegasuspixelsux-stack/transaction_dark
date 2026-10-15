@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { WatermarkIcon } from "@/components/WatermarkIcon";
@@ -8,9 +8,11 @@ import { WatermarkIcon } from "@/components/WatermarkIcon";
 interface PropertySlideshowProps {
   images: string[];
   title: string;
+  /** Overlay content (tag, title, specs) rendered bottom-left inside the boxed container. */
+  children?: ReactNode;
 }
 
-export function PropertySlideshow({ images, title }: PropertySlideshowProps) {
+export function PropertySlideshow({ images, title, children }: PropertySlideshowProps) {
   const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export function PropertySlideshow({ images, title }: PropertySlideshowProps) {
   };
 
   return (
-    <section className="relative h-[75vh] sm:min-h-dvh w-full overflow-hidden bg-zinc-950">
+    <section className="relative aspect-video w-full overflow-hidden bg-neutral-950">
       {/* Images */}
       {images.map((image, index) => (
         <div
@@ -51,11 +53,7 @@ export function PropertySlideshow({ images, title }: PropertySlideshowProps) {
       {/* Gradient Overlays */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(120%_95%_at_0%_100%,rgba(0,0,0,0.62),rgba(0,0,0,0.18)_38%,transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent"
       />
 
       {/* Watermark */}
@@ -79,23 +77,30 @@ export function PropertySlideshow({ images, title }: PropertySlideshowProps) {
         <ChevronRight size={24} />
       </button>
 
-      {/* Dots Navigation */}
-      <div className="absolute bottom-6 right-6 z-20 flex gap-2">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setActiveSlide(index)}
-            className={`h-2 rounded-full transition-all ${
-              activeSlide === index ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white/75"
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
-
-      {/* Slide Counter */}
-      <div className="absolute bottom-6 left-6 z-20 text-sm text-white/75">
-        {activeSlide + 1} / {images.length}
+      {/* Bottom-left overlay, aligned with the 1200px page grid */}
+      <div className="absolute inset-x-0 bottom-4 z-10 md:bottom-8">
+        <div className="mx-auto flex w-full max-w-[1200px] items-end justify-between gap-6 px-6 md:px-8">
+          <div className="min-w-0">{children}</div>
+          {images.length > 1 ? (
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <div className="flex gap-2">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveSlide(index)}
+                    className={`h-2 rounded-full transition-all ${
+                      activeSlide === index ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white/75"
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+              <p className="text-sm text-white/75">
+                {activeSlide + 1} / {images.length}
+              </p>
+            </div>
+          ) : null}
+        </div>
       </div>
     </section>
   );

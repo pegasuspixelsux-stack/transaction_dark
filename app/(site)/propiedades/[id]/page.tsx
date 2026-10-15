@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import { Mail, MessageCircle, Bed, Bath, Ruler, Calendar } from "lucide-react";
-import { propertyTypeLabel } from "@/lib/properties";
+import { Mail, MessageCircle, Bed, Bath, Ruler, Calendar, MapPin } from "lucide-react";
 import { getPublicProperties } from "@/lib/server/public-properties";
 import { PropertySlideshow } from "@/components/PropertySlideshow";
 import { ContactForm } from "@/components/ContactForm";
@@ -46,59 +45,77 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     "Almacenamiento",
   ];
 
-  const stats = [
-    { label: "Dormitorios", value: property.bedrooms, icon: Bed },
-    { label: "Baños", value: bathrooms, icon: Bath },
-    { label: "Área", value: `${area}m²`, icon: Ruler },
-    { label: "Año de construcción", value: yearBuilt, icon: Calendar },
-  ];
+  const place = property.location && property.location !== property.zone ? `${property.location} | ${property.zone}` : property.zone;
+  const specs = [
+    property.bedrooms > 0 ? { icon: Bed, text: `${property.bedrooms} ${property.bedrooms === 1 ? "dorm" : "dorms"}` } : null,
+    bathrooms > 0 ? { icon: Bath, text: `${bathrooms} ${bathrooms === 1 ? "baño" : "baños"}` } : null,
+    area > 0 ? { icon: Ruler, text: `${area.toLocaleString("es-UY")} m²` } : null,
+    { icon: Calendar, text: String(yearBuilt) },
+  ].filter((x): x is NonNullable<typeof x> => x !== null);
+
+  const heroOverlay = (
+    <div className="text-white">
+      <p className="text-xs uppercase tracking-luxury text-white/80 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">
+        {place} · Ref. {property.id}
+      </p>
+      <h1 className="mt-2 font-display text-2xl font-normal tracking-tight drop-shadow-md sm:text-3xl md:text-5xl">
+        {property.title}
+      </h1>
+      <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] md:mt-4">
+        {specs.map(({ icon: Icon, text }) => (
+          <li key={text} className="flex items-center gap-2">
+            <Icon className="size-4" aria-hidden />
+            {text}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 
   return (
     <>
       <main className="min-h-full">
         {/* Hero Slideshow */}
         {images.length > 0 ? (
-          <PropertySlideshow images={images} title={property.title} />
+          <PropertySlideshow images={images} title={property.title}>
+            {heroOverlay}
+          </PropertySlideshow>
         ) : (
-          <div className="flex h-64 items-center justify-center bg-mist/20 text-xs uppercase tracking-luxury text-ink-muted sm:h-96">
+          <section className="relative flex aspect-video w-full items-center justify-center overflow-hidden bg-neutral-950 text-xs uppercase tracking-luxury text-white/60">
             Fotos próximamente
-          </div>
+            <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
+            <div className="absolute inset-x-0 bottom-4 z-10 md:bottom-8">
+              <div className="mx-auto w-full max-w-[1200px] px-6 normal-case tracking-normal md:px-8">{heroOverlay}</div>
+            </div>
+          </section>
         )}
 
         {/* Property Info Section */}
-        <section className="container-page py-24 sm:py-32">
-          {/* Important Stats */}
-          <div className="mb-24">
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-              {stats.map((stat) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={stat.label} className="flex flex-col gap-3">
-                    <Icon className="size-6 text-blue-400" />
-                    <div>
-                      <p className="text-sm text-ink-muted dark:text-white/75">
-                        {stat.label}
-                      </p>
-                      <p className="mt-1 text-xl font-display font-normal dark:text-white">
-                        {stat.value}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
+        <section className="mx-auto w-full max-w-[1200px] px-6 py-24 sm:py-32 md:px-8">
           {/* Description Section */}
           <div className="mb-24 max-w-2xl">
             <p className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">
               Descripción · Ref. <span className="uppercase">{property.id}</span>
             </p>
-            <h1 className="mt-3 font-display text-3xl font-normal tracking-tight text-ink dark:text-white sm:text-4xl">
-              {property.title}
-            </h1>
+            <h2 className="mt-3 font-display text-3xl font-normal tracking-tight text-ink dark:text-white sm:text-4xl">
+              Sobre esta propiedad
+            </h2>
             <p className="mt-6 text-base leading-relaxed text-ink-muted dark:text-white/75">
               {description}
+            </p>
+          </div>
+
+          {/* Location */}
+          <div className="mb-24 max-w-2xl">
+            <h2 className="font-display text-2xl font-normal tracking-tight text-ink dark:text-white sm:text-3xl">
+              Ubicación
+            </h2>
+            <p className="mt-4 flex items-start gap-3 text-base text-ink-muted dark:text-white/75">
+              <MapPin className="mt-1 size-5 shrink-0 text-blue-400" aria-hidden />
+              <span>
+                {property.location ?? property.zone}
+                {property.location && property.location !== property.zone ? ` · ${property.zone}` : ""}
+              </span>
             </p>
           </div>
 
