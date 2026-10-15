@@ -215,7 +215,7 @@ export function ConfigManager() {
       };
       if (res.ok && data.config) {
         setDraft(data.config);
-        setNotice({ tone: "ok", text: "Configuración guardada. Los cambios persisten tras reiniciar." });
+        setNotice({ tone: "ok", text: "Configuración guardada correctamente. Los nuevos cambios ya están activos." });
       } else {
         if (data.errors) setErrors(data.errors);
         if (res.status === 401) setLoad({ state: "auth" });

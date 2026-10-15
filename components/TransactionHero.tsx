@@ -9,7 +9,7 @@ import { properties } from "@/lib/properties";
 
 const HERO_PROPERTIES = properties.slice(0, 5);
 
-export function OceanusHero() {
+export function TransactionHero() {
   const [activeSlide, setActiveSlide] = useState(0);
 
   return (

@@ -1,4 +1,4 @@
-# Oceanus — Hero & Design-System Foundation (Cycle 1)
+# Transaction — Hero & Design-System Foundation (Cycle 1)
 
 > **Superseded in part (2026-08-31):** mid-cycle the hero gained a real photo
 > background and the type moved to Playfair Display + Montserrat (not Geist). The
@@ -8,11 +8,11 @@
 
 **Date:** 2026-08-31
 **Status:** Approved (design), pending spec review
-**Branch:** `feat/oceanus-hero-design-system`
+**Branch:** `feat/transaction-hero-design-system`
 
 ## Context
 
-`oceanus` is a fresh Next.js 16.3.3 / React 19 / Tailwind CSS v4 App Router
+`transaction` is a fresh Next.js 16.3.3 / React 19 / Tailwind CSS v4 App Router
 project, currently carrying only the `create-next-app` boilerplate. The goal
 for this cycle is to establish the visual foundation for a luxury real-estate
 platform (Punta del Este zones) and ship the first high-impact screen: a
@@ -31,7 +31,7 @@ This is **cycle 1 of a larger effort**. Explicitly deferred to later cycles:
    supporting Tailwind v4 utilities.
 3. Add the `cn()` class-merge helper.
 4. Define the `Property` domain types (no runtime code that consumes them yet).
-5. Build `OceanusHero.tsx` and render it as the home page.
+5. Build `TransactionHero.tsx` and render it as the home page.
 6. Write a concrete, reusable design-guidelines document and point `AGENTS.md`
    at it.
 
@@ -158,7 +158,7 @@ export interface Property {
 
 No fixtures, no consumers this cycle — the hero does not read property data.
 
-### `components/OceanusHero.tsx` (new, `"use client"`)
+### `components/TransactionHero.tsx` (new, `"use client"`)
 
 Client component: uses `motion/react` and `useReducedMotion`.
 
@@ -172,7 +172,7 @@ Structure:
   (`bg-black/40`) sits over the media for text contrast.
 - **Sticky nav** — `sticky top-0 z-50 flex items-center justify-between px-6 py-5
   backdrop-blur-md bg-surface/40 border-b border-hairline`. Left: wordmark
-  `OCEANUS` in `uppercase tracking-wordmark text-sm font-light`. Right: 3–4 nav
+  `TRANSACTION` in `uppercase tracking-wordmark text-sm font-light`. Right: 3–4 nav
   links (`Propiedades`, `Zonas`, `Nosotros`, `Contacto`) `uppercase
   tracking-luxury text-xs text-ink-muted hover:text-ink transition-colors`.
   A `lucide-react` menu icon shown `md:hidden` (non-functional placeholder this
@@ -201,15 +201,15 @@ Animation:
 ### `app/page.tsx` (rewrite)
 
 ```tsx
-import { OceanusHero } from "@/components/OceanusHero";
+import { TransactionHero } from "@/components/TransactionHero";
 
 export default function Home() {
-  return <OceanusHero />;
+  return <TransactionHero />;
 }
 ```
 
 Remove all boilerplate imports/markup. `metadata` in `layout.tsx` gets a
-minor touch-up (`title: "Oceanus"`, description one-liner) — small, in scope.
+minor touch-up (`title: "Transaction"`, description one-liner) — small, in scope.
 
 ### `docs/design-guidelines.md` (new)
 

@@ -1,4 +1,4 @@
-# Oceanus Hero & Design-System Foundation — Implementation Plan
+# Transaction Hero & Design-System Foundation — Implementation Plan
 
 > **Superseded in part (2026-08-31):** mid-cycle the hero gained a real photo
 > background and the type moved to Playfair Display + Montserrat (not Geist). The
@@ -8,13 +8,13 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Establish the luxury-dark visual foundation and ship the cinematic `OceanusHero` as the home page.
+**Goal:** Establish the luxury-dark visual foundation and ship the cinematic `TransactionHero` as the home page.
 
 **Architecture:** Tailwind v4 CSS-first theming in `app/globals.css` (`@theme inline` + `@utility`), a `cn()` class-merge helper, `Property` domain types (declarations only), one self-contained `"use client"` hero component driven by `motion/react`, and a concrete design-guidelines doc referenced from `AGENTS.md`. No data layer this cycle.
 
 **Tech Stack:** Next.js 16.3.3 (App Router), React 19, TypeScript, Tailwind CSS v4, `motion` 13.1.1, `lucide-react`, `clsx`, `tailwind-merge`.
 
-**Spec:** `docs/superpowers/specs/2026-08-31-oceanus-hero-design-system-design.md` — read it alongside this plan.
+**Spec:** `docs/superpowers/specs/2026-08-31-transaction-hero-design-system-design.md` — read it alongside this plan.
 
 ## Global Constraints
 
@@ -35,7 +35,7 @@
   Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
   Claude-Session: https://claude.ai/code/session_01FeaGCm6YBYNQKG3L2hud55
   ```
-- Work stays on branch `feat/oceanus-hero-design-system`.
+- Work stays on branch `feat/transaction-hero-design-system`.
 
 ---
 
@@ -153,7 +153,7 @@ Replace the `metadata` export only. Leave the font setup and the `RootLayout` co
 
 ```tsx
 export const metadata: Metadata = {
-  title: "Oceanus",
+  title: "Transaction",
   description: "Propiedades de autor frente al mar en Punta del Este.",
 };
 ```
@@ -168,7 +168,7 @@ it again):
 export default function Home() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface">
-      <p className="text-xs uppercase tracking-luxury text-ink-muted">Oceanus</p>
+      <p className="text-xs uppercase tracking-luxury text-ink-muted">Transaction</p>
     </main>
   );
 }
@@ -185,7 +185,7 @@ Expected: both clean. No "unknown utility" or "unknown at-rule" errors from the 
 - [ ] **Step 5: Visual check**
 
 Run: `npm run dev`, open `http://localhost:3000`.
-Expected: near-black `#0A0A0A` background, a single small light-grey uppercase "OCEANUS" centered; scrollbar is thin and dark. Stop the dev server.
+Expected: near-black `#0A0A0A` background, a single small light-grey uppercase "TRANSACTION" centered; scrollbar is thin and dark. Stop the dev server.
 
 - [ ] **Step 6: Commit**
 
@@ -285,17 +285,17 @@ git commit -m "feat: add cn() helper and Property domain types"
 
 ---
 
-### Task 4: `OceanusHero` component, rendered as the home page
+### Task 4: `TransactionHero` component, rendered as the home page
 
 **Files:**
-- Create: `components/OceanusHero.tsx`
+- Create: `components/TransactionHero.tsx`
 - Modify (rewrite): `app/page.tsx`
 
 **Interfaces:**
 - Consumes: `motion` / `useReducedMotion` / `Variants` from `motion/react`; `Menu` from `lucide-react`.
-- Produces: `export function OceanusHero()` from `@/components/OceanusHero`.
+- Produces: `export function TransactionHero()` from `@/components/TransactionHero`.
 
-- [ ] **Step 1: Create `components/OceanusHero.tsx`**
+- [ ] **Step 1: Create `components/TransactionHero.tsx`**
 
 ```tsx
 "use client";
@@ -321,7 +321,7 @@ const item: Variants = {
   },
 };
 
-export function OceanusHero() {
+export function TransactionHero() {
   const reduce = useReducedMotion();
   const parentMotion = reduce
     ? {}
@@ -344,7 +344,7 @@ export function OceanusHero() {
 
       <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-hairline bg-surface/40 px-6 py-5 backdrop-blur-md">
         <span className="text-sm font-light uppercase tracking-wordmark">
-          Oceanus
+          Transaction
         </span>
         <ul className="hidden items-center gap-10 md:flex">
           {NAV_LINKS.map((link) => (
@@ -408,10 +408,10 @@ export function OceanusHero() {
 - [ ] **Step 2: Rewrite `app/page.tsx`**
 
 ```tsx
-import { OceanusHero } from "@/components/OceanusHero";
+import { TransactionHero } from "@/components/TransactionHero";
 
 export default function Home() {
-  return <OceanusHero />;
+  return <TransactionHero />;
 }
 ```
 
@@ -425,7 +425,7 @@ Expected: both clean. `app/page` builds as a static route. No `"use client"` bou
 Run: `npm run dev`, open `http://localhost:3000`.
 Expected:
 - Full-screen dark radial-gradient background.
-- Sticky top nav with blur, hairline bottom border, `OCEANUS` wordmark (wide tracking), 4 nav links on desktop, a menu icon below `md`.
+- Sticky top nav with blur, hairline bottom border, `TRANSACTION` wordmark (wide tracking), 4 nav links on desktop, a menu icon below `md`.
 - Headline / eyebrow / subhead / CTA fade + rise in, staggered, on load.
 - CTA inverts (ink fill, dark text) on hover.
 
@@ -437,8 +437,8 @@ Expected: hero content is present immediately with no fade/rise animation. Stop 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add components/OceanusHero.tsx app/page.tsx
-git commit -m "feat: add OceanusHero and render it as the home page"
+git add components/TransactionHero.tsx app/page.tsx
+git commit -m "feat: add TransactionHero and render it as the home page"
 ```
 
 ---
@@ -456,7 +456,7 @@ git commit -m "feat: add OceanusHero and render it as the home page"
 - [ ] **Step 1: Create `docs/design-guidelines.md`**
 
 ```md
-# Oceanus Design Guidelines
+# Transaction Design Guidelines
 
 Follow these for all UI, styling, and animation work. Concrete rules over taste debates.
 
@@ -564,7 +564,7 @@ git commit -m "docs: add design guidelines and reference them from AGENTS.md"
 - `layout.tsx` metadata touch-up → Task 2. ✓
 - `cn()` helper → Task 3. ✓
 - `Property` / `PropertyZone` / `PropertyType` → Task 3. ✓
-- `OceanusHero.tsx` (background swap point, sticky blur nav, wordmark, nav links, mobile menu icon, staggered spring entry, reduced-motion gate, opacity/transform only) → Task 4. ✓
+- `TransactionHero.tsx` (background swap point, sticky blur nav, wordmark, nav links, mobile menu icon, staggered spring entry, reduced-motion gate, opacity/transform only) → Task 4. ✓
 - `app/page.tsx` renders the hero → Task 4. ✓
 - `docs/design-guidelines.md` all five sections → Task 5. ✓
 - `AGENTS.md` pointer → Task 5. ✓
@@ -575,7 +575,7 @@ git commit -m "docs: add design guidelines and reference them from AGENTS.md"
 
 **3. Type consistency:**
 - `cn(...inputs: ClassValue[]): string` — defined Task 3, matches Global Constraints wording.
-- `OceanusHero` — named export, referenced identically in Task 4 Step 1/Step 2 and the interfaces block.
+- `TransactionHero` — named export, referenced identically in Task 4 Step 1/Step 2 and the interfaces block.
 - `container` / `item` `Variants`, `parentMotion` / `childVariants` locals — defined and consumed within Task 4 Step 1 only; consistent.
 - `PropertyZone` members exactly match the spec's five zones including accents (`José Ignacio`, `Península`).
 
@@ -583,4 +583,4 @@ No issues found.
 
 ## Execution Handoff
 
-Plan complete and saved to `docs/superpowers/plans/2026-08-31-oceanus-hero-design-system.md`.
+Plan complete and saved to `docs/superpowers/plans/2026-08-31-transaction-hero-design-system.md`.

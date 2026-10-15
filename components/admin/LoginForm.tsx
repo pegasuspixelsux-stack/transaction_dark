@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { LogIn, Mail } from "lucide-react";
+import { Eye, EyeOff, LogIn, Mail } from "lucide-react";
 import { useAdmin } from "@/lib/admin/admin-context";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { siteConfig } from "@/config/siteConfig";
@@ -26,6 +26,7 @@ export function LoginForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (status === "ready" && user) router.replace("/admin");
@@ -146,20 +147,42 @@ export function LoginForm() {
                 <div>
                   <Field label="Contraseña" error={passwordError}>
                     {({ id, describedBy, invalid }) => (
-                      <input
-                        id={id}
-                        type="password"
-                        autoComplete="current-password"
-                        value={password}
-                        aria-invalid={invalid}
-                        aria-describedby={describedBy}
-                        onChange={(e) => setPassword(e.target.value)}
-                        onBlur={() =>
-                          setTouched((t) => ({ ...t, password: true }))
-                        }
-                        className={inputClass}
-                        placeholder="••••••••"
-                      />
+                      <div className="relative">
+                        <input
+                          id={id}
+                          type={showPassword ? "text" : "password"}
+                          autoComplete="current-password"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          spellCheck={false}
+                          value={password}
+                          aria-invalid={invalid}
+                          aria-describedby={describedBy}
+                          onChange={(e) => setPassword(e.target.value)}
+                          onBlur={() =>
+                            setTouched((t) => ({ ...t, password: true }))
+                          }
+                          className={`${inputClass} pr-12`}
+                          placeholder="••••••••"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          aria-label={
+                            showPassword
+                              ? "Ocultar contraseña"
+                              : "Mostrar contraseña"
+                          }
+                          aria-pressed={showPassword}
+                          className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center rounded-r-lg text-admin-muted transition-colors duration-200 hover:text-admin-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="size-4" aria-hidden />
+                          ) : (
+                            <Eye className="size-4" aria-hidden />
+                          )}
+                        </button>
+                      </div>
                     )}
                   </Field>
                   <div className="mt-2 text-right">

@@ -1,4 +1,4 @@
-# Oceanus Landing Sections (Cycle 2) — Implementation Plan
+# Transaction Landing Sections (Cycle 2) — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development. Steps use `- [ ]` checkboxes.
 
@@ -28,7 +28,7 @@
   Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
   Claude-Session: https://claude.ai/code/session_01FeaGCm6YBYNQKG3L2hud55
   ```
-- Branch: `feat/oceanus-hero-design-system` (continues from the hero cycle).
+- Branch: `feat/transaction-hero-design-system` (continues from the hero cycle).
 
 ---
 
@@ -37,7 +37,7 @@
 **Files:**
 - Create: `components/Trident.tsx`
 - Modify: `components/SiteHeader.tsx` (use `<Trident />`)
-- Modify: `components/OceanusHero.tsx` (2 one-attribute carry-overs from the Task 7 re-review)
+- Modify: `components/TransactionHero.tsx` (2 one-attribute carry-overs from the Task 7 re-review)
 - Modify: `app/globals.css` (trim one animation delay)
 - Create: `lib/properties.ts`
 
@@ -75,7 +75,7 @@ export function Trident({ className }: { className?: string }) {
 ```
 Add `import { Trident } from "@/components/Trident";` with the other imports. Nothing else changes.
 
-- [ ] **Step 3: `components/OceanusHero.tsx` — fix the lazy-load regression**
+- [ ] **Step 3: `components/TransactionHero.tsx` — fix the lazy-load regression**
 
 The `<Image>` currently has `fetchPriority="high"` but defaults to `loading="lazy"`, so the LCP hero photo only loads on scroll. Add `loading="eager"`:
 ```tsx
@@ -90,9 +90,9 @@ The `<Image>` currently has `fetchPriority="high"` but defaults to `loading="laz
       />
 ```
 
-- [ ] **Step 4: `components/OceanusHero.tsx` + `app/globals.css` — trim entrance timing**
+- [ ] **Step 4: `components/TransactionHero.tsx` + `app/globals.css` — trim entrance timing**
 
-In `OceanusHero.tsx` the CTA's `[animation-delay:180ms]` → `[animation-delay:150ms]` (brings the entrance under the ~600ms guideline: last element 150ms + 450ms = 600ms). No other delay changes. `globals.css` needs no change — the delay lives in the utility class.
+In `TransactionHero.tsx` the CTA's `[animation-delay:180ms]` → `[animation-delay:150ms]` (brings the entrance under the ~600ms guideline: last element 150ms + 450ms = 600ms). No other delay changes. `globals.css` needs no change — the delay lives in the utility class.
 
 - [ ] **Step 5: Create `lib/properties.ts`**
 
@@ -134,7 +134,7 @@ export function formatPrice(usd: number): string {
 
 - [ ] **Step 7: Commit**
 ```
-git add components/Trident.tsx components/SiteHeader.tsx components/OceanusHero.tsx app/globals.css lib/properties.ts
+git add components/Trident.tsx components/SiteHeader.tsx components/TransactionHero.tsx app/globals.css lib/properties.ts
 git commit -m "feat: extract Trident, fix hero lazy-load, add property fixtures"
 ```
 
@@ -213,13 +213,13 @@ export function FeaturedProperties() {
 
 - [ ] **Step 3: `app/page.tsx`**
 ```tsx
-import { OceanusHero } from "@/components/OceanusHero";
+import { TransactionHero } from "@/components/TransactionHero";
 import { FeaturedProperties } from "@/components/FeaturedProperties";
 
 export default function Home() {
   return (
     <>
-      <OceanusHero />
+      <TransactionHero />
       <FeaturedProperties />
     </>
   );
@@ -315,7 +315,7 @@ export function BrandStatement() {
   return (
     <section className="mx-auto max-w-4xl px-6 py-28 text-center sm:py-40">
       <p className="font-display text-2xl font-normal leading-snug tracking-tight sm:text-3xl lg:text-4xl">
-        Oceanus representa un número reducido de residencias frente al mar en Punta
+        Transaction representa un número reducido de residencias frente al mar en Punta
         del Este. Cada una elegida por su ubicación, su arquitectura y su luz.
       </p>
     </section>
@@ -355,7 +355,7 @@ export function Contact() {
           Agende una visita privada o reciba nuestra cartera completa.
         </p>
         <a
-          href="mailto:hola@oceanus.uy"
+          href="mailto:hola@transaction.uy"
           className="mt-8 inline-flex min-h-11 items-center border border-ink/30 px-8 text-xs uppercase tracking-luxury transition-colors hover:bg-ink hover:text-surface focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink"
         >
           Escribinos
@@ -395,7 +395,7 @@ import { Trident } from "@/components/Trident";
 const FOOTER_COLUMNS: { heading: string; items: string[] }[] = [
   { heading: "Propiedades", items: ["Casas", "Apartamentos", "Penthouses", "Terrenos"] },
   { heading: "Zonas", items: ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"] },
-  { heading: "Oceanus", items: ["Nosotros", "Contacto", "Prensa"] },
+  { heading: "Transaction", items: ["Nosotros", "Contacto", "Prensa"] },
 ];
 
 export function SiteFooter() {
@@ -406,7 +406,7 @@ export function SiteFooter() {
           <div className="flex items-center gap-2.5">
             <Trident className="size-4 text-sky-400" />
             <span className="text-sm font-light uppercase tracking-wordmark text-ink">
-              Oceanus
+              Transaction
             </span>
           </div>
           <div className="grid grid-cols-2 gap-10 sm:grid-cols-3">
@@ -432,7 +432,7 @@ export function SiteFooter() {
           </div>
         </div>
         <p className="mt-16 text-xs text-ink-muted">
-          © 2026 Oceanus. Punta del Este, Uruguay.
+          © 2026 Transaction. Punta del Este, Uruguay.
         </p>
       </div>
     </footer>

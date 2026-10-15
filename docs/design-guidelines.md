@@ -1,4 +1,4 @@
-# Oceanus Design Guidelines
+# Transaction Design Guidelines
 
 Follow these for all UI, styling, and animation work. Concrete rules over taste debates.
 

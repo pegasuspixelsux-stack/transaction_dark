@@ -9,6 +9,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { cert, getApp, getApps, initializeApp, type App, type ServiceAccount } from "firebase-admin/app";
 import { getAuth, type Auth } from "firebase-admin/auth";
+import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
 function loadServiceAccount(): ServiceAccount | null {
   const inline = process.env.FIREBASE_SERVICE_ACCOUNT?.trim();
@@ -43,6 +44,12 @@ function getAdminApp(): App | null {
 export function adminAuth(): Auth | null {
   const app = getAdminApp();
   return app ? getAuth(app) : null;
+}
+
+/** `null` when no credentials are configured. */
+export function adminDb(): Firestore | null {
+  const app = getAdminApp();
+  return app ? getFirestore(app) : null;
 }
 
 export const firebaseAdminConfigured = () => adminAuth() !== null;

@@ -39,7 +39,7 @@ const NAV: NavItem[] = [
   { href: "/admin/settings", label: "Configuración del sitio", Icon: Settings, requires: "config:manage" },
 ];
 
-const COLLAPSE_KEY = "oceanus-admin-sidebar-collapsed";
+const COLLAPSE_KEY = "transaction-admin-sidebar-collapsed";
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const router = useRouter();
