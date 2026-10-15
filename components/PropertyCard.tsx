@@ -21,7 +21,7 @@ export function PropertyCard({ property }: { property: Property }) {
     <Link
       href={`/propiedades/${id}`}
       aria-label={`${title}, ${formatPrice(price)}. Ver ficha completa`}
-      className="group relative block h-[520px] overflow-hidden rounded-2xl border border-hairline bg-neutral-950 text-white transition-opacity hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:opacity-90"
+      className="group relative block h-[520px] overflow-hidden border border-hairline bg-neutral-950 text-white transition-opacity hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:opacity-90"
     >
       {imageUrl ? (
         <Image
