@@ -108,12 +108,6 @@ export function AGenteConcierge({ whatsapp = DEFAULT_WHATSAPP }: { whatsapp?: st
     return () => window.clearTimeout(t);
   }, []);
 
-  useEffect(() => {
-    const show = () => setOpen(true);
-    window.addEventListener("open-concierge", show);
-    return () => window.removeEventListener("open-concierge", show);
-  }, []);
-
   function dismiss() {
     setOpen(false);
     try {
