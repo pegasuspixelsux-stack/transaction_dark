@@ -1,4 +1,4 @@
-import { Lock, Users, Zap, Award } from "lucide-react";
+import { Lock, Users, Zap, Award, Scale } from "lucide-react";
 
 const SERVICES: { title: string; description: string; icon: React.ReactNode }[] = [
   {
@@ -22,6 +22,8 @@ const SERVICES: { title: string; description: string; icon: React.ReactNode }[] 
     icon: <Award size={24} />,
   },
 ];
+
+const LEGAL_ADVISORS = ["Escribano", "Contador", "Abogado", "Agrimensor"];
 
 export function Team() {
   return (
@@ -69,6 +71,24 @@ export function Team() {
               </div>
             </div>
           ))}
+          <div className="col-span-2 flex flex-col gap-4 border border-hairline p-6 dark:border-white/10">
+            <div className="text-blue-400 dark:text-blue-400">
+              <Scale size={24} />
+            </div>
+            <div>
+              <h3 className="font-display text-lg font-normal tracking-tight">
+                Asesoramiento legal
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-muted dark:text-white/75">
+                Contamos con asesoramiento legal de:
+              </p>
+              <ul className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 text-sm text-ink dark:text-white/90">
+                {LEGAL_ADVISORS.map((role) => (
+                  <li key={role}>{role}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>
