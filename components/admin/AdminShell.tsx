@@ -36,8 +36,14 @@ const NAV: NavItem[] = [
   { href: "/admin/properties", label: "Propiedades", Icon: Building2 },
   { href: "/admin/leads", label: "Pipeline de consultas", Icon: SquareKanban },
   { href: "/admin/users", label: "Gestión de usuarios", Icon: Users, requires: "users:manage" },
-  { href: "/admin/settings", label: "Configuración del sitio", Icon: Settings, requires: "config:manage" },
 ];
+
+const SETTINGS_ITEM: NavItem = {
+  href: "/admin/settings",
+  label: "Configuración del sitio",
+  Icon: Settings,
+  requires: "config:manage",
+};
 
 const COLLAPSE_KEY = "transaction-admin-sidebar-collapsed";
 
@@ -76,6 +82,30 @@ export function AdminShell({ children }: { children: ReactNode }) {
   }
 
   const items = NAV.filter((item) => !item.requires || can(item.requires));
+  const showSettings = !SETTINGS_ITEM.requires || can(SETTINGS_ITEM.requires);
+
+  const renderLink = ({ href, label, Icon }: NavItem) => {
+    const active = href === "/admin" ? pathname === href : pathname.startsWith(href);
+    return (
+      <Link
+        key={href}
+        href={href}
+        title={label}
+        aria-current={active ? "page" : undefined}
+        onClick={() => setDrawerOpen(false)}
+        className={cn(
+          "flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent",
+          collapsed && "lg:justify-center",
+          active
+            ? "bg-white/15 text-white"
+            : "text-white/80 hover:bg-white/10 hover:text-white active:bg-white/15",
+        )}
+      >
+        <Icon className={cn("size-5 shrink-0", active && "text-white")} aria-hidden />
+        <span className={cn(collapsed && "lg:sr-only")}>{label}</span>
+      </Link>
+    );
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -115,35 +145,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </div>
 
         <nav aria-label="Administración" className="flex-1 space-y-1 p-3">
-          {items.map(({ href, label, Icon }) => {
-            const active =
-              href === "/admin" ? pathname === href : pathname.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                title={label}
-                aria-current={active ? "page" : undefined}
-                onClick={() => setDrawerOpen(false)}
-                className={cn(
-                  "flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent",
-                  collapsed && "lg:justify-center",
-                  active
-                    ? "bg-white/15 text-white"
-                    : "text-white/80 hover:bg-white/10 hover:text-white active:bg-white/15",
-                )}
-              >
-                <Icon
-                  className={cn("size-5 shrink-0", active && "text-white")}
-                  aria-hidden
-                />
-                <span className={cn(collapsed && "lg:sr-only")}>{label}</span>
-              </Link>
-            );
-          })}
+          {items.map(renderLink)}
         </nav>
 
-        <div className="hidden border-t border-admin-line p-3 lg:block">
+        <div className="space-y-1 border-t border-admin-line p-3">
+          {showSettings ? renderLink(SETTINGS_ITEM) : null}
           <button
             type="button"
             onClick={toggleCollapsed}
@@ -151,7 +157,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
             aria-controls="admin-sidebar"
             title={collapsed ? "Expandir barra lateral" : "Contraer barra lateral"}
             className={cn(
-              "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-white/80 transition-colors duration-200 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:bg-white/15",
+              "hidden min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-white/80 transition-colors duration-200 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:bg-white/15",
+              "lg:flex",
               collapsed && "justify-center",
             )}
           >
