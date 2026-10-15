@@ -85,9 +85,9 @@ export interface Lead {
   outcome: LeadOutcome | null;
   source: string;
   createdAt: string; // ISO
+  /** What the visitor said they want (from the form). */
+  intent?: string;
+  message?: string;
 }
 
-export interface DbState {
-  leads: Lead[];
-}
 

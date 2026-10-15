@@ -44,6 +44,7 @@ export function ContactForm({ propertyTitle, whatsapp = DEFAULT_WHATSAPP }: { pr
           intent: form.interest,
           message: form.message,
           source: "contact-form",
+          propertyTitle,
         }),
       });
       if (!res.ok) {

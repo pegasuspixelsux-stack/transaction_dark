@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db, firebaseEnabled } from "@/lib/firebase";
+import { createLead } from "@/lib/server/lead-store";
 
 const str = (v: unknown, max = 200) => String(v ?? "").trim().slice(0, max);
+
+const SOURCES = { "contact-form": "contact-form", "a-gente-concierge": "a-gente-concierge" } as const;
 
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
@@ -12,43 +13,42 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Solicitud inválida." }, { status: 400 });
   }
 
-  const lead = {
-    name: str(body.name),
-    phone: str(body.phone, 60),
-    bestTime: str(body.bestTime, 40),
-    intent: str(body.intent, 60),
-    asset: str(body.asset, 60),
-    zone: str(body.zone, 60),
-    timeline: str(body.timeline, 60),
-    budget: str(body.budget, 60),
-    beds: str(body.beds, 40),
-    baths: str(body.baths, 40),
-    preference: str(body.preference, 80),
-    email: str(body.email, 120),
-    message: str(body.message, 1000),
-  };
-  const source = body.source === "contact-form" ? "contact-form" : "a-gente-concierge";
-
-  if (!lead.name || !lead.phone) {
-    return NextResponse.json(
-      { error: "Nombre y teléfono son obligatorios." },
-      { status: 400 },
-    );
+  const name = str(body.name);
+  const phone = str(body.phone, 60);
+  if (!name || !phone) {
+    return NextResponse.json({ error: "Nombre y teléfono son obligatorios." }, { status: 400 });
   }
 
+  const source = body.source === "contact-form" ? SOURCES["contact-form"] : SOURCES["a-gente-concierge"];
+
+  // The concierge asks several questions; fold the answers into a readable note.
+  const answers = [
+    ["Operación", str(body.intent, 60)],
+    ["Tipo", str(body.asset, 60)],
+    ["Zona", str(body.zone, 60)],
+    ["Plazo", str(body.timeline, 60)],
+    ["Presupuesto", str(body.budget, 60)],
+    ["Dormitorios", str(body.beds, 40)],
+    ["Baños", str(body.baths, 40)],
+    ["Preferencia", str(body.preference, 80)],
+    ["Mejor horario", str(body.bestTime, 40)],
+  ]
+    .filter(([, value]) => value)
+    .map(([label, value]) => `${label}: ${value}`)
+    .join(" · ");
+  const typed = str(body.message, 1000);
+
   try {
-    if (firebaseEnabled && db) {
-      await addDoc(collection(db, "leads"), {
-        ...lead,
-        createdAt: serverTimestamp(),
-        source,
-        status: "nuevo",
-      });
-    } else {
-      // No Firebase project configured yet — record it in the function logs so
-      // nothing is lost. Set NEXT_PUBLIC_FIREBASE_* env vars to persist to Firestore.
-      console.log("[lead] firebase disabled, logging only:", lead);
-    }
+    await createLead({
+      name,
+      phone,
+      email: str(body.email, 120),
+      propertyId: str(body.propertyId, 60) || null,
+      propertyTitle: str(body.propertyTitle, 120),
+      source,
+      intent: str(body.intent, 60),
+      message: [typed, source === "a-gente-concierge" ? answers : ""].filter(Boolean).join("\n"),
+    });
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[lead] failed to save:", error);

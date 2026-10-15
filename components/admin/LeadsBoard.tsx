@@ -55,7 +55,8 @@ export function LeadsBoard() {
     });
   }, [leads, query, agentFilter, from, to]);
 
-  function run(result: { ok: true } | { ok: false; error: string }) {
+  async function run(pending: Promise<{ ok: true } | { ok: false; error: string }>) {
+    const result = await pending;
     setNotice(result.ok ? null : result.error);
   }
 

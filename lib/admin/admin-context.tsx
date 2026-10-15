@@ -6,14 +6,12 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import type {
   AdminProperty,
-  DbState,
   Lead,
   LeadOutcome,
   LeadStage,
@@ -22,7 +20,6 @@ import type {
   StoredRole,
 } from "@/types/admin";
 import { getFirebaseAuth } from "@/lib/firebase";
-import { loadDb, resetDb, saveDb } from "./db";
 import { can, type Permission } from "./rbac";
 
 export type Result = { ok: true } | { ok: false; error: string };
@@ -59,9 +56,9 @@ interface AdminContextValue {
   login: (email: string, password: string) => Promise<Result>;
   logout: () => void;
 
-  moveLead: (id: string, stage: LeadStage, outcome?: LeadOutcome) => Result;
-  setLeadOutcome: (id: string, outcome: LeadOutcome) => Result;
-  reassignLead: (id: string, agentId: string | null) => Result;
+  moveLead: (id: string, stage: LeadStage, outcome?: LeadOutcome) => Promise<Result>;
+  setLeadOutcome: (id: string, outcome: LeadOutcome) => Promise<Result>;
+  reassignLead: (id: string, agentId: string | null) => Promise<Result>;
 
   saveProperty: (input: PropertyInput) => Promise<Result>;
   togglePropertyStatus: (id: string) => Promise<Result>;
@@ -77,7 +74,6 @@ interface AdminContextValue {
   saveUser: (input: UserInput) => Promise<Result>;
   setUserActive: (id: string, active: boolean) => Promise<Result>;
 
-  resetDemoData: () => void;
 }
 
 const AdminContext = createContext<AdminContextValue | null>(null);
@@ -87,23 +83,14 @@ async function readJson<T>(res: Response): Promise<T> {
 }
 
 export function AdminProvider({ children }: { children: ReactNode }) {
-  const [db, setDb] = useState<DbState | null>(null);
   // The signed server cookie is the only source of truth for who is signed in.
   const [authUser, setAuthUser] = useState<SessionUser | null>(null);
   const [staff, setStaff] = useState<SessionUser[]>([]);
   const [serverChecked, setServerChecked] = useState(false);
   const [catalog, setCatalog] = useState<AdminProperty[]>([]);
-  const dbRef = useRef<DbState | null>(null);
+  const [leadList, setLeadList] = useState<Lead[]>([]);
 
-  // localStorage only exists in the browser, so the first client render must
-  // match the server's "loading" output; hydrate state here, after mount.
   useEffect(() => {
-    const loaded = loadDb();
-    dbRef.current = loaded;
-    /* eslint-disable react-hooks/set-state-in-effect */
-    setDb(loaded);
-    /* eslint-enable react-hooks/set-state-in-effect */
-
     let cancelled = false;
     fetch("/api/admin/session", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
@@ -119,13 +106,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const commit = useCallback((next: DbState) => {
-    dbRef.current = next;
-    setDb(next);
-    saveDb(next);
-  }, []);
-
-  const currentUser = db ? authUser : null;
+  const currentUser = authUser;
   const role = currentUser?.role;
   const allowed = useCallback((p: Permission) => can(role, p), [role]);
 
@@ -169,15 +150,24 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     };
   }, [userId]);
 
-  const leads = useMemo(() => {
-    if (!db || !currentUser) return [];
-    return can(currentUser.role, "leads:view-all")
-      ? db.leads
-      : db.leads.filter((l) => l.assignedAgentId === currentUser.id);
-  }, [db, currentUser]);
+  // The server already scopes leads to what this role may see.
+  const leads = useMemo(() => (currentUser ? leadList : []), [currentUser, leadList]);
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    fetch("/api/admin/leads", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { leads?: Lead[] } | null) => {
+        if (!cancelled && data?.leads) setLeadList(data.leads);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const login = useCallback<AdminContextValue["login"]>(async (email, password) => {
-    if (!dbRef.current) return fail("Todavía se está cargando — probá de nuevo en un momento.");
     const post = (body: unknown) =>
       fetch("/api/admin/session", {
         method: "POST",
@@ -230,50 +220,60 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     setAuthUser(null);
     setStaff([]);
+    setCatalog([]);
+    setLeadList([]);
     void fetch("/api/admin/session", { method: "DELETE" }).catch(() => {});
   }, []);
 
+  /** Optimistic update: the board moves at once and rolls back if the server refuses. */
   const patchLead = useCallback(
-    (id: string, patch: (lead: Lead) => Lead): Result => {
-      const state = dbRef.current;
-      const actor = currentUser;
-      if (!state || !actor) return fail("Tu sesión se cerró.");
-      const lead = state.leads.find((l) => l.id === id);
-      if (!lead) return fail("No se encontró la consulta.");
-      const mayEdit =
-        can(actor.role, "leads:view-all") || lead.assignedAgentId === actor.id;
-      if (!mayEdit || !can(actor.role, "leads:move")) {
-        return fail("Solo podés editar las consultas asignadas a vos.");
+    async (id: string, body: Record<string, unknown>, local: (lead: Lead) => Lead): Promise<Result> => {
+      const previous = leadList.find((l) => l.id === id);
+      if (!currentUser) return fail("Tu sesión se cerró.");
+      if (!previous) return fail("No se encontró la consulta.");
+      setLeadList((list) => list.map((l) => (l.id === id ? local(l) : l)));
+      const rollback = () => setLeadList((list) => list.map((l) => (l.id === id ? previous : l)));
+      try {
+        const res = await fetch(`/api/admin/leads/${encodeURIComponent(id)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await readJson<{ lead?: Lead; error?: string }>(res);
+        if (!res.ok || !data.lead) {
+          rollback();
+          return fail(data.error ?? "No pudimos guardar el cambio.");
+        }
+        const saved = data.lead;
+        setLeadList((list) => list.map((l) => (l.id === id ? saved : l)));
+        return ok;
+      } catch {
+        rollback();
+        return fail("No pudimos conectar con el servidor.");
       }
-      commit({
-        ...state,
-        leads: state.leads.map((l) => (l.id === id ? patch(l) : l)),
-      });
-      return ok;
     },
-    [commit, currentUser],
+    [currentUser, leadList],
   );
 
   const moveLead = useCallback<AdminContextValue["moveLead"]>(
     (id, stage, outcome) =>
-      patchLead(id, (l) => ({
+      patchLead(id, { stage, ...(outcome ? { outcome } : {}) }, (l) => ({
         ...l,
         stage,
-        outcome:
-          stage === "closed" ? (outcome ?? l.outcome ?? "won") : null,
+        outcome: stage === "closed" ? (outcome ?? l.outcome ?? "won") : null,
       })),
     [patchLead],
   );
 
   const setLeadOutcome = useCallback<AdminContextValue["setLeadOutcome"]>(
-    (id, outcome) => patchLead(id, (l) => ({ ...l, outcome })),
+    (id, outcome) => patchLead(id, { outcome }, (l) => ({ ...l, outcome })),
     [patchLead],
   );
 
   const reassignLead = useCallback<AdminContextValue["reassignLead"]>(
     (id, agentId) => {
-      if (!allowed("leads:reassign")) return fail("Solo los gerentes pueden reasignar.");
-      return patchLead(id, (l) => ({ ...l, assignedAgentId: agentId }));
+      if (!allowed("leads:reassign")) return Promise.resolve(fail("Solo los gerentes pueden reasignar."));
+      return patchLead(id, { assignedAgentId: agentId }, (l) => ({ ...l, assignedAgentId: agentId }));
     },
     [allowed, patchLead],
   );
@@ -406,11 +406,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     [allowed, refreshStaff],
   );
 
-  const resetDemoData = useCallback(() => commit(resetDb()), [commit]);
-
   const value = useMemo<AdminContextValue>(
     () => ({
-      status: db && serverChecked ? "ready" : "loading",
+      status: serverChecked ? "ready" : "loading",
       user: currentUser,
       users,
       properties,
@@ -428,10 +426,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       importProperties,
       saveUser,
       setUserActive,
-      resetDemoData,
     }),
     [
-      db,
       serverChecked,
       currentUser,
       users,
@@ -450,7 +446,6 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       importProperties,
       saveUser,
       setUserActive,
-      resetDemoData,
     ],
   );
 

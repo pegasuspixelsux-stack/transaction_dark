@@ -39,7 +39,9 @@ export function LeadCard({
   onDragStart,
   onDragEnd,
 }: LeadCardProps) {
-  const greeting = `Hola ${lead.name.split(" ")[0]}, te escribimos de Transaction por ${lead.propertyTitle}.`;
+  const greeting = `Hola ${lead.name.split(" ")[0]}, te escribimos de Transaction${
+    lead.propertyTitle ? ` por ${lead.propertyTitle}` : " por tu consulta"
+  }.`;
 
   return (
     <article
@@ -68,6 +70,12 @@ export function LeadCard({
           <dt className="sr-only">Interesado en</dt>
           <dd className="text-admin-ink">{lead.propertyTitle || "Consulta general"}</dd>
         </div>
+        {lead.message ? (
+          <div className="text-admin-muted">
+            <dt className="sr-only">Mensaje</dt>
+            <dd className="line-clamp-3 whitespace-pre-line">{lead.message}</dd>
+          </div>
+        ) : null}
         <div className="text-admin-muted">
           <dt className="sr-only">Origen y fecha</dt>
           <dd>
