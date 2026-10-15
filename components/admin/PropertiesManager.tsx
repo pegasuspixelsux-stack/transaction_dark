@@ -44,15 +44,13 @@ export function PropertiesManager() {
   const [importing, setImporting] = useState(false);
 
   const agents = useMemo(() => users.filter((u) => u.role === "agent" && u.active), [users]);
-  const agentName = (id: string | null) =>
-    id ? (users.find((u) => u.id === id)?.fullName ?? "Desconocido") : "Sin asignar";
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return properties.filter(
       (p) =>
         (statusFilter === "all" || p.status === statusFilter) &&
-        (!q || p.title.toLowerCase().includes(q) || p.location.toLowerCase().includes(q)),
+        (!q || p.title.toLowerCase().includes(q) || p.location.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)),
     );
   }, [properties, query, statusFilter]);
 
@@ -146,7 +144,7 @@ export function PropertiesManager() {
           {({ id }) => (
             <div className="relative">
               <Search aria-hidden className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-admin-muted" />
-              <input id={id} type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Título o ubicación" className={cn(inputClass, "pl-11")} />
+              <input id={id} type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Título, ubicación o ID" className={cn(inputClass, "pl-11")} />
             </div>
           )}
         </Field>
@@ -188,14 +186,14 @@ export function PropertiesManager() {
         <EmptyState title="Ninguna propiedad coincide" body="Probá con otra búsqueda o filtro de estado." />
       ) : view === "table" ? (
         <GlassCard className="overflow-x-auto">
-          <table className="w-full min-w-[48rem] text-left text-sm">
+          <table className="w-full min-w-[44rem] text-left text-sm">
             <thead>
               <tr className="border-b border-admin-line text-xs uppercase tracking-luxury text-admin-ink">
+                <th scope="col" className="px-5 py-4 font-normal">ID</th>
                 <th scope="col" className="px-5 py-4 font-normal">Propiedad</th>
                 <th scope="col" className="px-5 py-4 font-normal">Tipo</th>
                 <th scope="col" className="px-5 py-4 font-normal">Precio</th>
                 <th scope="col" className="px-5 py-4 font-normal">Detalles</th>
-                <th scope="col" className="px-5 py-4 font-normal">Agente</th>
                 <th scope="col" className="px-5 py-4 font-normal">Estado</th>
                 <th scope="col" className="px-5 py-4"><span className="sr-only">Acciones</span></th>
               </tr>
@@ -203,6 +201,7 @@ export function PropertiesManager() {
             <tbody className="divide-y divide-admin-line">
               {filtered.map((p) => (
                 <tr key={p.id} className="transition-colors duration-200 hover:bg-slate-50">
+                  <td className="px-5 py-3 font-mono text-xs text-admin-muted">{p.id}</td>
                   <td className="px-5 py-3">
                     <p className="text-admin-ink">{p.title}</p>
                     <p className="text-admin-muted">{p.location}</p>
@@ -213,7 +212,6 @@ export function PropertiesManager() {
                   <td className="px-5 py-3 text-admin-muted">
                     {p.bedrooms} dorm. · {p.bathrooms} baños · {p.areaM2} m²
                   </td>
-                  <td className="px-5 py-3 text-admin-muted">{agentName(p.assignedAgentId)}</td>
                   <td className="px-5 py-3">{statusBadge(p.status)}</td>
                   <td className="px-2 py-1">{rowActions(p)}</td>
                 </tr>
@@ -238,6 +236,7 @@ export function PropertiesManager() {
                     {statusBadge(p.status)}
                   </div>
                   <p className="mt-1 text-sm text-admin-muted">{p.location}</p>
+                  <p className="mt-1 font-mono text-xs text-admin-muted">ID: {p.id}</p>
                   {flagBadges(p)}
                   <p className="mt-3 text-admin-ink">
                     {formatMoney(p.price, p.currency)}
