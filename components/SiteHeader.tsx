@@ -27,7 +27,7 @@ export async function SiteHeader() {
           aria-label="Transaction — inicio"
           className={`flex items-center gap-2.5 ${focusRing}`}
         >
-          <div className="flex size-4 items-center justify-center rounded-full border border-sky-600 text-[8px] font-bold text-sky-600">
+          <div className="flex size-4 items-center justify-center rounded-full border border-blue-800 dark:border-sky-600 text-[8px] font-bold text-blue-800 dark:text-sky-600">
             T
           </div>
           <span className="text-sm font-light uppercase tracking-wordmark text-ink dark:text-white">

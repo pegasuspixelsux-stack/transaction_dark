@@ -1,7 +1,8 @@
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { SOCIAL } from "@/components/social-icons";
 import { getSiteConfig, telHref } from "@/lib/server/public-config";
 
-const staticColumns: { heading: string; href?: string; items: string[] }[] = [
+const staticColumns: { heading: string; href?: string; items: string[]; hrefs?: string[] }[] = [
   { heading: "Propiedades", href: "/propiedades", items: ["Casas", "Apartamentos", "Penthouses", "Terrenos"] },
   { heading: "Zonas", href: "/#zonas", items: ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"] },
   { heading: "Transaction", href: "/#nosotros", items: ["Nosotros", "Contacto", "Prensa"] },
@@ -15,7 +16,14 @@ export async function SiteFooter() {
     {
       heading: "Contacto",
       href: "/#contacto",
-      items: [`${street} · ${city}`, config.hours.weekday, config.contact.phones[0]],
+      // Same details, in the same order, as the Contacto section.
+      items: [
+        config.contact.emails[0],
+        config.contact.phones[0],
+        `${street} · ${city}`,
+        ...[config.hours.weekday, config.hours.saturday, config.hours.sunday, config.hours.holidays].filter(Boolean),
+      ],
+      hrefs: [`mailto:${config.contact.emails[0]}`, telHref(config.contact.phones[0])],
     },
   ];
   return (
@@ -24,7 +32,7 @@ export async function SiteFooter() {
         <div className="flex flex-col gap-12 lg:flex-row lg:justify-between">
           <div className="max-w-xs">
             <div className="flex items-center gap-3">
-              <div className="flex size-8 items-center justify-center rounded-full border-[1.5px] border-sky-600 text-xs font-bold text-sky-600">
+              <div className="flex size-8 items-center justify-center rounded-full border-[1.5px] border-blue-800 dark:border-sky-600 text-xs font-bold text-blue-800 dark:text-sky-600">
                 T
               </div>
               <span className="text-xl uppercase tracking-wordmark text-ink dark:text-white">
@@ -66,10 +74,10 @@ export async function SiteFooter() {
                   </p>
                 )}
                 <ul className="mt-4 space-y-2">
-                  {column.items.map((item) => (
+                  {column.items.map((item, i) => (
                     <li key={item}>
                       <a
-                        href="#"
+                        href={column.hrefs?.[i] ?? "#"}
                         className="text-sm text-ink-muted transition-colors hover:text-ink dark:text-white/75 dark:hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink dark:focus-visible:outline-white"
                       >
                         {item}
@@ -86,7 +94,8 @@ export async function SiteFooter() {
             <p className="text-xs text-ink-muted dark:text-white/75">
               © 2026 {config.agency.name}. {city}, {config.address.country}.
             </p>
-            <div className="flex gap-6">
+            <div className="flex flex-wrap items-center gap-6">
+              <ThemeToggle />
               <a
                 href="/login"
                 className="text-xs text-ink-muted transition-colors hover:text-ink dark:text-white/75 dark:hover:text-white"

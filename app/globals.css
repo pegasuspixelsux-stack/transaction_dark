@@ -1,13 +1,16 @@
 @import "tailwindcss";
 
+/* `dark:` utilities follow the html.dark class (set by the footer theme switch), not the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* `@theme inline` so `--font-sans` / `--font-display` resolve the Montserrat and
    Playfair Display variables that next/font sets on <html>. */
 @theme inline {
-  --color-surface: #f7fafb;
-  --color-surface-raised: #eaf1f5;
-  --color-ink: #10262e;
-  --color-ink-muted: #3a555e;
-  --color-hairline: #d5e1e7;
+  --color-surface: #eaf4fb; /* coastal light blue */
+  --color-surface-raised: #d9ebf6;
+  --color-ink: #061a26;
+  --color-ink-muted: #1f3a49;
+  --color-hairline: #b6d3e5;
   --color-mist: #a9cae0;
   --font-sans: var(--font-montserrat);
   --font-display: var(--font-playfair);

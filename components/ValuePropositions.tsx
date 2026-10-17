@@ -24,7 +24,7 @@ export function ValuePropositions() {
       <div className="grid gap-8 grid-cols-3 sm:gap-12">
         {propositions.map(({ icon: Icon, title, description }) => (
           <div key={title} className="flex flex-col gap-5 sm:gap-5">
-            <Icon className="size-8 text-blue-400 dark:text-blue-400" strokeWidth={1.5} />
+            <Icon className="size-8 text-blue-800 dark:text-blue-400" strokeWidth={1.5} />
             <div>
               <h3 className="text-sm sm:text-lg font-medium text-ink dark:text-white">{title}</h3>
               <p className="mt-2 hidden text-xs sm:block sm:text-base leading-relaxed text-ink-muted dark:text-white/75">

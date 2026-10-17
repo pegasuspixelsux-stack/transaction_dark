@@ -75,23 +75,23 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             {heroOverlay}
           </PropertySlideshow>
         ) : (
-          <section className="relative flex aspect-video w-full items-center justify-center overflow-hidden bg-neutral-950 text-xs uppercase tracking-luxury text-white/60">
+          <section className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-neutral-950 text-xs uppercase tracking-luxury text-white/60 sm:aspect-auto sm:min-h-dvh">
             Fotos próximamente
-            <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
+            <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/30 to-transparent" />
             <div className="absolute inset-x-0 bottom-4 z-10 md:bottom-8">
-              <div className="mx-auto w-full max-w-[1200px] px-6 normal-case tracking-normal md:px-8">{heroOverlay}</div>
+              <div className="mx-auto w-full max-w-[calc(1000px+4rem)] px-6 normal-case tracking-normal md:px-8">{heroOverlay}</div>
             </div>
           </section>
         )}
 
         {/* Property Info Section */}
-        <section className="mx-auto w-full max-w-[1200px] px-6 py-24 sm:py-32 md:px-8">
+        <section className="mx-auto w-full max-w-[calc(1000px+4rem)] px-6 py-24 sm:py-32 md:px-8">
           {/* Description Section */}
-          <div className="mb-24 max-w-2xl">
-            <ul className="mb-8 grid max-w-sm grid-cols-2 gap-x-6 gap-y-3 text-sm text-ink dark:text-white/90">
+          <div className="mb-24">
+            <ul className="mb-8 grid max-w-md grid-cols-2 gap-x-6 gap-y-3 text-sm text-ink dark:text-white/90">
               {specs.map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-center gap-2">
-                  <Icon className="size-4 text-blue-400" aria-hidden />
+                  <Icon className="size-4 text-blue-800 dark:text-blue-400" aria-hidden />
                   {text}
                 </li>
               ))}
@@ -105,12 +105,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           </div>
 
           {/* Location */}
-          <div className="mb-24 max-w-2xl">
+          <div className="mb-24">
             <h2 className="font-display text-2xl font-normal tracking-tight text-ink dark:text-white sm:text-3xl">
               Ubicación
             </h2>
             <p className="mt-4 flex items-start gap-3 text-base text-ink-muted dark:text-white/75">
-              <MapPin className="mt-1 size-5 shrink-0 text-blue-400" aria-hidden />
+              <MapPin className="mt-1 size-5 shrink-0 text-blue-800 dark:text-blue-400" aria-hidden />
               <span>{property.zone}, Maldonado</span>
             </p>
             <iframe
@@ -137,7 +137,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                     key={feature}
                     className="flex items-start gap-3 text-base text-ink-muted dark:text-white/75"
                   >
-                    <span className="mt-1.5 size-2 rounded-full bg-blue-400 flex-shrink-0" />
+                    <span className="mt-1.5 size-2 rounded-full bg-blue-800 dark:bg-blue-400 flex-shrink-0" />
                     {feature}
                   </li>
                 ))}
@@ -153,7 +153,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                     key={amenity}
                     className="flex items-start gap-3 text-base text-ink-muted dark:text-white/75"
                   >
-                    <span className="mt-1.5 size-2 rounded-full bg-blue-400 flex-shrink-0" />
+                    <span className="mt-1.5 size-2 rounded-full bg-blue-800 dark:bg-blue-400 flex-shrink-0" />
                     {amenity}
                   </li>
                 ))}
@@ -166,7 +166,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             <h2 className="font-display text-2xl font-normal tracking-tight text-ink dark:text-white sm:text-3xl">
               Costos e información de contacto
             </h2>
-            <dl className="mt-8 max-w-xl divide-y divide-hairline border-y border-hairline text-base dark:divide-white/10 dark:border-white/10">
+            <dl className="mt-8 divide-y divide-hairline border-y border-hairline text-base dark:divide-white/10 dark:border-white/10">
               <div className="flex items-baseline justify-between gap-4 py-4">
                 <dt className="text-ink-muted dark:text-white/75">Precio</dt>
                 <dd className="font-display text-2xl text-ink dark:text-white">US$ {property.price.toLocaleString("es-UY")}</dd>
@@ -193,7 +193,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             <div className="mt-8 flex gap-4">
               <a
                 href={`mailto:${config.contact.emails[0]}?subject=${encodeURIComponent(`Consulta sobre ${property.title}`)}`}
-                className="inline-flex items-center gap-2 border border-blue-400 px-6 py-3 text-sm uppercase tracking-luxury text-blue-400 transition-colors hover:bg-blue-400 hover:text-white dark:border-blue-400"
+                className="inline-flex items-center gap-2 border border-blue-800 dark:border-blue-400 px-6 py-3 text-sm uppercase tracking-luxury text-blue-800 dark:text-blue-400 transition-colors hover:bg-blue-800 hover:text-white dark:hover:bg-blue-400 "
               >
                 <Mail size={18} />
                 Email
@@ -202,14 +202,14 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 href={`https://wa.me/${whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 border border-blue-400 px-6 py-3 text-sm uppercase tracking-luxury text-blue-400 transition-colors hover:bg-blue-400 hover:text-white dark:border-blue-400"
+                className="inline-flex items-center gap-2 border border-blue-800 dark:border-blue-400 px-6 py-3 text-sm uppercase tracking-luxury text-blue-800 dark:text-blue-400 transition-colors hover:bg-blue-800 hover:text-white dark:hover:bg-blue-400 "
               >
                 <MessageCircle size={18} />
                 WhatsApp
               </a>
             </div>
 
-            <div className="mt-16 max-w-xl">
+            <div className="mt-16">
               <h3 className="font-display text-xl font-normal tracking-tight text-ink dark:text-white">
                 Consultá por esta propiedad
               </h3>

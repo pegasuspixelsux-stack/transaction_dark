@@ -72,7 +72,7 @@ export function TransactionHero({ properties: HERO_PROPERTIES }: { properties: P
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-10 text-white">
         <div className="container-page pb-8 pt-4">
           {current ? (
-            <div key={current.id}>
+            <div key={current.id} className="md:max-w-[70%]">
               <p className="text-sm uppercase tracking-luxury text-white/75">{tag}</p>
               <h3 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">
                 <Link

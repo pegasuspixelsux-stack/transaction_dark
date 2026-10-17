@@ -51,7 +51,7 @@ export function PropertySlideshow({ images, title, children }: PropertySlideshow
 
   return (
     <>
-    <section className="relative aspect-square w-full md:aspect-video overflow-hidden bg-neutral-950">
+    <section className="relative aspect-square w-full sm:aspect-auto sm:min-h-dvh overflow-hidden bg-neutral-950">
       {/* Images */}
       {images.map((image, index) => (
         <div
@@ -73,7 +73,7 @@ export function PropertySlideshow({ images, title, children }: PropertySlideshow
       {/* Gradient Overlays */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/30 to-transparent"
       />
 
       {/* Watermark */}
@@ -105,10 +105,10 @@ export function PropertySlideshow({ images, title, children }: PropertySlideshow
         <ChevronRight size={24} />
       </button>
 
-      {/* Bottom-left overlay, aligned with the 1200px page grid */}
+      {/* Bottom-left overlay, aligned with the 1000px page grid */}
       <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 md:pointer-events-auto md:bottom-8">
-        <div className="mx-auto flex w-full max-w-[1200px] items-end justify-between gap-6 px-6 md:px-8">
-          <div className="min-w-0">{children}</div>
+        <div className="mx-auto flex w-full max-w-[calc(1000px+4rem)] items-end justify-between gap-6 px-6 md:px-8">
+          <div className="min-w-0 md:w-[70%]">{children}</div>
           {images.length > 1 ? (
             <div className="pointer-events-auto flex shrink-0 flex-col items-end gap-2">
               <div className="flex gap-2">
