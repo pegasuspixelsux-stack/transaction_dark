@@ -25,6 +25,11 @@ export interface SiteConfig {
   flags: Record<string, boolean>;
 }
 
+/** Flag key for the concierge chat widget; on unless explicitly switched off. */
+export const AGENT_FLAG = "agentEnabled";
+
+export const isAgentEnabled = (config: SiteConfig) => config.flags[AGENT_FLAG] !== false;
+
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
   agency: {
     name: "Transaction",

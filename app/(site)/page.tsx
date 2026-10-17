@@ -7,6 +7,7 @@ import { Team } from "@/components/Team";
 import { Contact } from "@/components/Contact";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
+import { isAgentEnabled } from "@/lib/site-config";
 import { getSiteConfig, waNumber } from "@/lib/server/public-config";
 import { getPublicProperties, pickHero } from "@/lib/server/public-properties";
 
@@ -23,7 +24,9 @@ export default async function Home() {
       <Team />
       <Contact />
       <SiteFooter />
-      <AGenteConcierge whatsapp={waNumber(config.whatsapp.primary.number)} />
+      {isAgentEnabled(config) ? (
+        <AGenteConcierge whatsapp={waNumber(config.whatsapp.primary.number)} />
+      ) : null}
     </>
   );
 }

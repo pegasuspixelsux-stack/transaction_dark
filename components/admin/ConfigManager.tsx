@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 import { useAdmin } from "@/lib/admin/admin-context";
-import type { ConfigErrors, SiteConfig } from "@/lib/site-config";
+import { AGENT_FLAG, isAgentEnabled, type ConfigErrors, type SiteConfig } from "@/lib/site-config";
 import {
   Button,
   EmptyState,
@@ -230,7 +230,7 @@ export function ConfigManager() {
 
   const phones = [draft.contact.phones[0] ?? "", draft.contact.phones[1] ?? ""];
   const emails = [draft.contact.emails[0] ?? "", draft.contact.emails[1] ?? ""];
-  const flagEntries = Object.entries(draft.flags);
+  const flagEntries = Object.entries(draft.flags).filter(([key]) => key !== AGENT_FLAG);
 
   function addFlag() {
     const key = flagDraft.trim();
@@ -382,6 +382,15 @@ export function ConfigManager() {
           </Field>
 
           <p className="mb-2 mt-6 text-xs uppercase tracking-luxury text-admin-ink">Indicadores de funcionalidades</p>
+          <label className="flex min-h-11 cursor-pointer items-center gap-3 border-b border-admin-line text-sm">
+            <input
+              type="checkbox"
+              checked={isAgentEnabled(draft)}
+              onChange={(e) => set("flags", { ...draft.flags, [AGENT_FLAG]: e.target.checked })}
+              className="size-5 accent-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent"
+            />
+            <span>Agente de chat (asistente en el sitio)</span>
+          </label>
           {errors.flags ? <p role="alert" className="mb-2 text-sm text-admin-bad">{errors.flags}</p> : null}
           {flagEntries.length === 0 ? (
             <p className="text-sm text-admin-muted">Todavía no hay indicadores.</p>

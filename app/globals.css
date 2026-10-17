@@ -203,3 +203,27 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #b7c9d3;
 }
+
+/* Hero watermark stays white at the wrapper's opacity — keep the dark-mode
+   blanket colour/border rules above from tinting it. Must stay last. */
+html.dark [data-watermark],
+html.dark [data-watermark] * {
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+@keyframes navSlide {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* `dark:` utilities follow the OS setting, not the html.dark toggle, so the
+   mobile drawer needs an explicit rule to match the dark page background. */
+html.dark [data-mobile-nav] {
+  background-color: #0a1a2e !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}

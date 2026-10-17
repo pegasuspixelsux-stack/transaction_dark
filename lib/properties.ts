@@ -66,6 +66,15 @@ export function propertyTypeLabel(type: PropertyType): string {
   return TYPE_LABELS[type];
 }
 
+/** Approximate centre of each zone — deliberately not a property address. */
+export const ZONE_CENTERS: Record<PropertyZone, { lat: number; lng: number }> = {
+  "José Ignacio": { lat: -34.8433, lng: -54.635 },
+  Manantiales: { lat: -34.9081, lng: -54.8294 },
+  "La Barra": { lat: -34.914, lng: -54.872 },
+  Península: { lat: -34.968, lng: -54.944 },
+  Mansa: { lat: -34.94, lng: -54.925 },
+};
+
 export function countByZone(list: Property[], zone: PropertyZone): number {
   return list.filter((p) => p.zone === zone).length;
 }

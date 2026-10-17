@@ -6,6 +6,7 @@ import { PropertyFilters } from "@/components/PropertyFilters";
 import { MobilePropertyFilters } from "@/components/MobilePropertyFilters";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
+import { isAgentEnabled } from "@/lib/site-config";
 import { getSiteConfig, waNumber } from "@/lib/server/public-config";
 
 export const metadata: Metadata = {
@@ -130,7 +131,9 @@ export default async function PropiedadesPage({
         </div>
       </div>
       <SiteFooter />
-      <AGenteConcierge whatsapp={waNumber(config.whatsapp.primary.number)} />
+      {isAgentEnabled(config) ? (
+        <AGenteConcierge whatsapp={waNumber(config.whatsapp.primary.number)} />
+      ) : null}
     </main>
   );
 }

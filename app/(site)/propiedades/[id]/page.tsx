@@ -5,6 +5,8 @@ import { PropertySlideshow } from "@/components/PropertySlideshow";
 import { ContactForm } from "@/components/ContactForm";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
+import { ZONE_CENTERS } from "@/lib/properties";
+import { isAgentEnabled } from "@/lib/site-config";
 import { getSiteConfig, waNumber } from "@/lib/server/public-config";
 
 export default async function PropertyPage({ params }: { params: Promise<{ id: string }> }) {
@@ -109,10 +111,17 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             </h2>
             <p className="mt-4 flex items-start gap-3 text-base text-ink-muted dark:text-white/75">
               <MapPin className="mt-1 size-5 shrink-0 text-blue-400" aria-hidden />
-              <span>
-                {property.location ?? property.zone}
-                {property.location && property.location !== property.zone ? ` · ${property.zone}` : ""}
-              </span>
+              <span>{property.zone}, Maldonado</span>
+            </p>
+            <iframe
+              title={`Mapa de la zona ${property.zone}`}
+              src={`https://maps.google.com/maps?q=${ZONE_CENTERS[property.zone].lat},${ZONE_CENTERS[property.zone].lng}&z=13&output=embed`}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="mt-6 aspect-[4/3] w-full border border-hairline sm:aspect-video dark:border-white/10"
+            />
+            <p className="mt-2 text-xs text-ink-muted dark:text-white/60">
+              Ubicación aproximada de la zona.
             </p>
           </div>
 
@@ -215,7 +224,9 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
       </main>
 
       <SiteFooter />
-      <AGenteConcierge whatsapp={whatsapp} property={{ id: property.id, title: property.title }} />
+      {isAgentEnabled(config) ? (
+        <AGenteConcierge whatsapp={whatsapp} property={{ id: property.id, title: property.title }} />
+      ) : null}
     </>
   );
 }

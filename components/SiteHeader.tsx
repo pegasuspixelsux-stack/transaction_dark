@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Menu, MapPin, Clock, Phone } from "lucide-react";
-import { Trident } from "@/components/Trident";
+import { MapPin, Clock, Phone } from "lucide-react";
+import { SOCIAL } from "@/components/social-icons";
+import { MobileNav } from "@/components/MobileNav";
 import { getSiteConfig, telHref } from "@/lib/server/public-config";
 
 const NAV_LINKS: { label: string; href: string }[] = [
@@ -71,13 +72,16 @@ export async function SiteHeader() {
           >
             <Phone size={18} strokeWidth={1.5} />
           </a>
-          <button
-            type="button"
-            aria-label="Abrir menú"
-            className={`-m-3 p-3 text-ink/85 transition-colors hover:text-ink dark:text-white/85 dark:hover:text-white ${focusRing}`}
-          >
-            <Menu size={20} strokeWidth={1.5} />
-          </button>
+          <div className="nav:hidden">
+            <MobileNav
+              links={NAV_LINKS}
+              social={SOCIAL.filter(({ key }) => config.social[key]).map(({ label, key, path }) => ({
+                label,
+                path,
+                href: config.social[key],
+              }))}
+            />
+          </div>
         </div>
       </nav>
     </header>
