@@ -39,7 +39,7 @@ export function PropertyCard({ property }: { property: Property }) {
       )}
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent"
+        className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/50 to-transparent"
       />
 
       <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-6 text-xs uppercase tracking-luxury text-white/80">
