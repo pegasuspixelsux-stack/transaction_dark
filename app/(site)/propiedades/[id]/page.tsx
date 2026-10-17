@@ -91,7 +91,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             <ul className="mb-8 grid max-w-md grid-cols-2 gap-x-6 gap-y-3 text-sm text-ink dark:text-white/90">
               {specs.map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-center gap-2">
-                  <Icon className="size-4 text-blue-800 dark:text-blue-400" aria-hidden />
+                  <Icon className="size-4 text-blue-800 dark:text-blue-100" aria-hidden />
                   {text}
                 </li>
               ))}
@@ -110,7 +110,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               Ubicación
             </h2>
             <p className="mt-4 flex items-start gap-3 text-base text-ink-muted dark:text-white/75">
-              <MapPin className="mt-1 size-5 shrink-0 text-blue-800 dark:text-blue-400" aria-hidden />
+              <MapPin className="mt-1 size-5 shrink-0 text-blue-800 dark:text-blue-100" aria-hidden />
               <span>{property.zone}, Maldonado</span>
             </p>
             <iframe
@@ -137,7 +137,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                     key={feature}
                     className="flex items-start gap-3 text-base text-ink-muted dark:text-white/75"
                   >
-                    <span className="mt-1.5 size-2 rounded-full bg-blue-800 dark:bg-blue-400 flex-shrink-0" />
+                    <span className="mt-1.5 size-2 rounded-full bg-blue-800 dark:bg-blue-100 flex-shrink-0" />
                     {feature}
                   </li>
                 ))}
@@ -153,7 +153,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                     key={amenity}
                     className="flex items-start gap-3 text-base text-ink-muted dark:text-white/75"
                   >
-                    <span className="mt-1.5 size-2 rounded-full bg-blue-800 dark:bg-blue-400 flex-shrink-0" />
+                    <span className="mt-1.5 size-2 rounded-full bg-blue-800 dark:bg-blue-100 flex-shrink-0" />
                     {amenity}
                   </li>
                 ))}
@@ -193,7 +193,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             <div className="mt-8 flex gap-4">
               <a
                 href={`mailto:${config.contact.emails[0]}?subject=${encodeURIComponent(`Consulta sobre ${property.title}`)}`}
-                className="inline-flex items-center gap-2 border border-blue-800 dark:border-blue-400 px-6 py-3 text-sm uppercase tracking-luxury text-blue-800 dark:text-blue-400 transition-colors hover:bg-blue-800 hover:text-white dark:hover:bg-blue-400 "
+                className="inline-flex items-center gap-2 border border-blue-800 dark:border-blue-100 px-6 py-3 text-sm uppercase tracking-luxury text-blue-800 dark:text-blue-100 transition-colors hover:bg-blue-800 hover:text-white dark:hover:bg-blue-100/15 "
               >
                 <Mail size={18} />
                 Email
@@ -202,7 +202,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 href={`https://wa.me/${whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 border border-blue-800 dark:border-blue-400 px-6 py-3 text-sm uppercase tracking-luxury text-blue-800 dark:text-blue-400 transition-colors hover:bg-blue-800 hover:text-white dark:hover:bg-blue-400 "
+                className="inline-flex items-center gap-2 border border-blue-800 dark:border-blue-100 px-6 py-3 text-sm uppercase tracking-luxury text-blue-800 dark:text-blue-100 transition-colors hover:bg-blue-800 hover:text-white dark:hover:bg-blue-100/15 "
               >
                 <MessageCircle size={18} />
                 WhatsApp

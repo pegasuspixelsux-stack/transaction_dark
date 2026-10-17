@@ -83,7 +83,7 @@ html.dark textarea,
 html.dark select {
   background-color: #0f172a !important;
   color: #fafafa !important;
-  border-color: #64b5f6 !important;
+  border-color: #dbeafe !important;
 }
 
 html.dark input::placeholder,
@@ -140,25 +140,25 @@ html.dark img {
 html.dark dt,
 html.dark [class*="uppercase"],
 html.dark .tracking-luxury {
-  color: #64b5f6 !important;
+  color: #dbeafe !important;
 }
 
 html.dark button {
-  color: #64b5f6 !important;
-  border-color: #64b5f6 !important;
+  color: #dbeafe !important;
+  border-color: #dbeafe !important;
 }
 
 html.dark svg {
-  stroke: #64b5f6 !important;
-  fill: #64b5f6 !important;
-  color: #64b5f6 !important;
+  stroke: #dbeafe !important;
+  fill: #dbeafe !important;
+  color: #dbeafe !important;
 }
 
 html.dark [class*="lucide"],
 html.dark svg[viewBox] {
-  stroke: #64b5f6 !important;
+  stroke: #dbeafe !important;
   fill: none !important;
-  color: #64b5f6 !important;
+  color: #dbeafe !important;
 }
 
 html {

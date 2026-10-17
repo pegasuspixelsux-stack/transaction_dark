@@ -48,7 +48,7 @@ export function Team() {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
           {SERVICES.map((service) => (
             <div key={service.title} className="flex flex-col gap-4 border border-hairline p-6 dark:border-white/10">
-              <div className="text-blue-800 dark:text-blue-400">
+              <div className="text-blue-800 dark:text-blue-100">
                 {service.icon}
               </div>
               <div>
@@ -62,7 +62,7 @@ export function Team() {
             </div>
           ))}
           <div className="flex flex-col sm:col-span-2 gap-4 border border-hairline p-6 dark:border-white/10">
-            <div className="text-blue-800 dark:text-blue-400">
+            <div className="text-blue-800 dark:text-blue-100">
               <Scale size={24} />
             </div>
             <div>
