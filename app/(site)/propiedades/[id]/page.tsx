@@ -61,14 +61,6 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
       <h1 className="mt-2 font-display text-2xl font-normal tracking-tight drop-shadow-md sm:text-3xl md:text-5xl">
         {property.title}
       </h1>
-      <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] md:mt-4">
-        {specs.map(({ icon: Icon, text }) => (
-          <li key={text} className="flex items-center gap-2">
-            <Icon className="size-4" aria-hidden />
-            {text}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 
@@ -94,12 +86,17 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
         <section className="mx-auto w-full max-w-[1200px] px-6 py-24 sm:py-32 md:px-8">
           {/* Description Section */}
           <div className="mb-24 max-w-2xl">
+            <ul className="mb-8 grid max-w-sm grid-cols-2 gap-x-6 gap-y-3 text-sm text-ink dark:text-white/90">
+              {specs.map(({ icon: Icon, text }) => (
+                <li key={text} className="flex items-center gap-2">
+                  <Icon className="size-4 text-blue-400" aria-hidden />
+                  {text}
+                </li>
+              ))}
+            </ul>
             <p className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">
               Descripción · Ref. <span className="uppercase">{property.id}</span>
             </p>
-            <h2 className="mt-3 font-display text-3xl font-normal tracking-tight text-ink dark:text-white sm:text-4xl">
-              Sobre esta propiedad
-            </h2>
             <p className="mt-6 text-base leading-relaxed text-ink-muted dark:text-white/75">
               {description}
             </p>

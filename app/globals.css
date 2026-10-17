@@ -11,6 +11,9 @@
   --color-mist: #a9cae0;
   --font-sans: var(--font-montserrat);
   --font-display: var(--font-playfair);
+  /* Extra breakpoints: `nav` shows inline header links, `wide` gives the footer its 4-column grid. */
+  --breakpoint-nav: 60rem;
+  --breakpoint-wide: 80rem;
 }
 
 @utility tracking-luxury {

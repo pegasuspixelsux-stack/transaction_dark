@@ -27,7 +27,7 @@ export function ValuePropositions() {
             <Icon className="size-8 text-blue-400 dark:text-blue-400" strokeWidth={1.5} />
             <div>
               <h3 className="text-sm sm:text-lg font-medium text-ink dark:text-white">{title}</h3>
-              <p className="mt-2 text-xs sm:text-base leading-relaxed text-ink-muted dark:text-white/75">
+              <p className="mt-2 hidden text-xs sm:block sm:text-base leading-relaxed text-ink-muted dark:text-white/75">
                 {description}
               </p>
             </div>

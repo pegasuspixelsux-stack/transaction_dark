@@ -39,7 +39,7 @@ export async function SiteFooter() {
   return (
     <footer className="border-t border-hairline dark:border-white/10 dark:bg-zinc-950">
       <div className="container-page py-16 dark:text-white">
-        <div className="flex flex-col gap-12 sm:flex-row sm:justify-between">
+        <div className="flex flex-col gap-12 lg:flex-row lg:justify-between">
           <div className="max-w-xs">
             <div className="flex items-center gap-3">
               <div className="flex size-8 items-center justify-center rounded-full border-[1.5px] border-sky-600 text-xs font-bold text-sky-600">
@@ -68,7 +68,7 @@ export async function SiteFooter() {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-10 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-10 md:grid-cols-4 lg:grid-cols-2 wide:grid-cols-4">
             {FOOTER_COLUMNS.map((column) => (
               <div key={column.heading}>
                 {column.href ? (

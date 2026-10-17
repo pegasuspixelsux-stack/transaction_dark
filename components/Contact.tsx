@@ -41,6 +41,16 @@ export async function Contact() {
                 <dt className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">Oficina</dt>
                 <dd className="mt-1 text-sm text-ink-muted dark:text-white/75">{street} · {city}</dd>
               </div>
+              <div id="horarios" className="scroll-mt-28">
+                <dt className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">Horarios</dt>
+                <dd className="mt-1 space-y-0.5 text-sm text-ink-muted dark:text-white/75">
+                  {[config.hours.weekday, config.hours.saturday, config.hours.sunday, config.hours.holidays]
+                    .filter(Boolean)
+                    .map((line) => (
+                      <p key={line}>{line}</p>
+                    ))}
+                </dd>
+              </div>
             </dl>
           </div>
 

@@ -54,19 +54,22 @@ export function TransactionHero({ properties: HERO_PROPERTIES }: { properties: P
         className="absolute inset-0 bg-[radial-gradient(120%_95%_at_0%_100%,rgba(0,0,0,0.62),rgba(0,0,0,0.18)_38%,transparent_70%)]"
       />
 
-      {/* Centered watermark and button. */}
-      <div className="pointer-events-none absolute inset-0 z-10 flex select-none flex-col items-center justify-center gap-8 sm:gap-12">
-        <WatermarkIcon />
+      {/* Whole slide links to the active property's page. */}
+      {current ? (
         <Link
-          href="/propiedades"
-          className="pointer-events-auto border border-white/50 px-8 py-3 text-xs uppercase tracking-luxury text-white transition-all hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white backdrop-blur-sm"
-        >
-          Buscar propiedades
-        </Link>
+          href={`/propiedades/${current.id}`}
+          aria-label={`Ver ${current.title}`}
+          className="absolute inset-0 z-[5] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-white"
+        />
+      ) : null}
+
+      {/* Centered watermark. */}
+      <div className="pointer-events-none absolute inset-0 z-10 flex select-none flex-col items-center justify-center">
+        <WatermarkIcon />
       </div>
 
       {/* Property info lower left corner. */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 text-white">
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-10 text-white">
         <div className="container-page pb-8 pt-4">
           {current ? (
             <div key={current.id}>
@@ -74,7 +77,7 @@ export function TransactionHero({ properties: HERO_PROPERTIES }: { properties: P
               <h3 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">
                 <Link
                   href={`/propiedades/${current.id}`}
-                  className="focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white"
+                  className="pointer-events-auto focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white"
                 >
                   {current.title}
                 </Link>
