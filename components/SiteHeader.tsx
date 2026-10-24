@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Clock, Phone } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
 import { SOCIAL } from "@/components/social-icons";
 import { MobileNav } from "@/components/MobileNav";
 import { getSiteConfig, telHref } from "@/lib/server/public-config";
@@ -7,6 +7,7 @@ import { getSiteConfig, telHref } from "@/lib/server/public-config";
 const NAV_LINKS: { label: string; href: string }[] = [
   { label: "Inicio", href: "/" },
   { label: "Propiedades", href: "/propiedades" },
+  { label: "Inversiones", href: "/inversiones" },
   { label: "Zonas", href: "/#zonas" },
   { label: "Nosotros", href: "/#nosotros" },
   { label: "Contacto", href: "/#contacto" },
@@ -58,13 +59,6 @@ export async function SiteHeader() {
           >
             <MapPin size={18} strokeWidth={1.5} />
           </a>
-          <Link
-            href="/#horarios"
-            aria-label="Horarios"
-            className={`-m-3 p-3 text-ink/85 transition-colors hover:text-ink dark:text-white/85 dark:hover:text-white ${focusRing}`}
-          >
-            <Clock size={18} strokeWidth={1.5} />
-          </Link>
           <a
             href={telHref(config.contact.phones[0])}
             aria-label="Llamar"

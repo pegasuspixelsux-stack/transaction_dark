@@ -28,11 +28,12 @@ const fail = (error: string): Result => ({ ok: false, error });
 
 const BAD_CREDENTIALS = "Correo o contraseña incorrectos.";
 
-export type PropertyInput = Omit<AdminProperty, "id" | "updatedAt" | "commonExpenses" | "annualTaxes"> & {
+export type PropertyInput = Omit<AdminProperty, "id" | "updatedAt" | "commonExpenses" | "annualTaxes" | "frontage"> & {
   id?: string;
   /** `null` clears the value. */
   commonExpenses?: number | null;
   annualTaxes?: number | null;
+  frontage?: number | null;
 };
 
 export interface UserInput {

@@ -4,7 +4,7 @@ import type { PropertyType, PropertyZone } from "@/types/property";
 import { MAX_FEATURED, MAX_HERO } from "@/lib/server/property-store";
 
 export const ZONES: PropertyZone[] = ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"];
-export const TYPES: PropertyType[] = ["house", "apartment", "penthouse", "land"];
+export const TYPES: PropertyType[] = ["house", "apartment", "land", "farm", "field"];
 export const LISTINGS: ListingType[] = ["sale", "rent"];
 export const CURRENCIES: Currency[] = ["USD", "UYU", "EUR"];
 export const STATUSES: PublishStatus[] = ["draft", "published"];
@@ -73,6 +73,11 @@ export function saveIntoCatalog(
   if ("yearBuilt" in input) {
     const y = num(input.yearBuilt);
     extra.yearBuilt = Number.isInteger(y) && y >= 1500 && y <= 2200 ? y : undefined;
+  }
+  if ("padron" in input) extra.padron = str(input.padron, 40) || undefined;
+  if ("frontage" in input) {
+    const f = num(input.frontage);
+    extra.frontage = Number.isFinite(f) && f > 0 ? f : undefined;
   }
   for (const key of ["commonExpenses", "annualTaxes"] as const) {
     if (key in input) {

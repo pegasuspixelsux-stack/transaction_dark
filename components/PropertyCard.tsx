@@ -6,7 +6,14 @@ import { formatPrice } from "@/lib/properties";
 
 const textShadow = "[text-shadow:0_1px_6px_rgba(0,0,0,0.5)]";
 
-export function PropertyCard({ property }: { property: Property }) {
+export function PropertyCard({
+  property,
+  featured = false,
+}: {
+  property: Property;
+  /** Homepage featured layout: "Ref. · location" sits above the title and the dorms / baños / m² row is omitted. */
+  featured?: boolean;
+}) {
   const { id, title, zone, location, price, bedrooms, bathrooms, area, imageUrl } = property;
 
   const metrics = [
@@ -42,15 +49,24 @@ export function PropertyCard({ property }: { property: Property }) {
         className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/50 to-transparent"
       />
 
-      <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-6 text-xs uppercase tracking-luxury text-white/80">
-        <p className={textShadow}>{tag}</p>
-        <p className={`shrink-0 ${textShadow}`}>Ref. {id}</p>
-      </div>
+      {!featured ? (
+        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-6 text-xs uppercase tracking-luxury text-white/80">
+          <p className={textShadow}>{tag}</p>
+          <p className={`shrink-0 ${textShadow}`}>Ref. {id}</p>
+        </div>
+      ) : null}
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-4 p-6">
-        <h3 className={`font-display text-2xl font-normal tracking-tight ${textShadow}`}>{title}</h3>
+        <div>
+          {featured ? (
+            <p className={`mb-2 text-xs uppercase tracking-luxury text-white/80 ${textShadow}`}>
+              Ref. {id} · {tag}
+            </p>
+          ) : null}
+          <h3 className={`font-display text-2xl font-normal tracking-tight ${textShadow}`}>{title}</h3>
+        </div>
 
-        {metrics.length > 0 ? (
+        {!featured && metrics.length > 0 ? (
           <ul className={`flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/90 ${textShadow}`}>
             {metrics.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-2">

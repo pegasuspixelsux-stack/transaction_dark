@@ -1,15 +1,17 @@
-import { Lock, Users, Scale } from "lucide-react";
+import { Lock, Camera, Scale } from "lucide-react";
 
 const SERVICES: { title: string; description: string; icon: React.ReactNode }[] = [
   {
-    title: "Discreción garantizada",
-    description: "Mantenemos la confidencialidad de nuestros clientes y transacciones con estrictos protocolos de privacidad.",
+    title: "Discreción y confidencialidad",
+    description:
+      "Resguardamos la información de nuestros clientes y gestionamos cada operación con la debida confidencialidad.",
     icon: <Lock size={24} />,
   },
   {
-    title: "Equipo dedicado",
-    description: "Profesionales locales con profundo conocimiento de Punta del Este y experiencia en operaciones de lujo.",
-    icon: <Users size={24} />,
+    title: "Tasación y fotografía profesional",
+    description:
+      "Ofrecemos tasaciones de terrenos y fotografía profesional sin costo adicional para nuestros clientes, como parte de nuestro servicio inmobiliario.",
+    icon: <Camera size={24} />,
   },
 ];
 
@@ -26,21 +28,20 @@ export function Team() {
           </h2>
           <div className="mt-6 max-w-md space-y-4 text-base leading-relaxed text-ink-muted">
             <p>
-              Transaction nació de una idea simple: comprar o vender una casa en la
-              costa debería sentirse como una conversación entre conocidos, no
-              como una transacción. Somos un equipo reducido de asesores con
-              raíces en Punta del Este.
+              Detrás de cada operación inmobiliaria hay decisiones, expectativas y
+              proyectos personales. Entender ese contexto es parte fundamental de
+              nuestro trabajo.
             </p>
             <p>
-              Conocemos cada calle, cada playa y cada casa que representamos.
-              Muchas de nuestras propiedades nunca llegan a publicarse: circulan
-              entre un grupo acotado de compradores que confían en nuestro
-              criterio y en nuestra discreción.
+              En Transaction buscamos aportar una perspectiva integral del negocio
+              inmobiliario, combinando conocimiento del mercado local, análisis y
+              atención a los detalles que pueden marcar una diferencia en cada
+              operación.
             </p>
             <p>
-              Trabajamos con un número limitado de clientes por temporada para
-              acompañar cada operación de principio a fin — desde la primera
-              visita hasta la escritura, y también en todo lo que viene después.
+              Nuestra forma de trabajar se basa en la información, la planificación
+              y el cuidado de cada etapa, con el objetivo de que nuestros clientes
+              cuenten con elementos claros para tomar sus decisiones.
             </p>
           </div>
         </div>
@@ -67,10 +68,10 @@ export function Team() {
             </div>
             <div>
               <h3 className="font-display text-lg font-normal tracking-tight">
-                Asesoramiento legal
+                Asesoramiento profesional
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-ink-muted dark:text-white/75">
-                Contamos con asesoramiento legal de:
+                Contamos con asesoramiento de profesionales especializados para acompañar las distintas etapas de cada operación.
               </p>
               <ul className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 text-sm text-ink dark:text-white/90">
                 {LEGAL_ADVISORS.map((role) => (

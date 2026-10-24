@@ -11,7 +11,7 @@ const ZONES: PropertyZone[] = [
   "Península",
   "Mansa",
 ];
-const TYPES: PropertyType[] = ["house", "apartment", "penthouse", "land"];
+const TYPES: PropertyType[] = ["house", "apartment", "land", "farm", "field"];
 const PRICE_OPTIONS = [
   { label: "Sin límite", value: "" },
   { label: "Hasta US$ 1M", value: "1000000" },

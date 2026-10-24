@@ -55,6 +55,10 @@ export interface AdminProperty {
   propertyType?: PropertyType;
   images?: string[];
   yearBuilt?: number;
+  /** Cadastral parcel number (padrón). */
+  padron?: string;
+  /** Street frontage in metres (medida del frente). */
+  frontage?: number;
   /** Monthly common expenses, in the property currency. */
   commonExpenses?: number;
   /** Yearly property taxes (e.g. contribución inmobiliaria), in the property currency. */

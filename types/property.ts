@@ -5,7 +5,7 @@ export type PropertyZone =
   | "Península"
   | "Mansa";
 
-export type PropertyType = "house" | "apartment" | "penthouse" | "land";
+export type PropertyType = "house" | "apartment" | "land" | "farm" | "field";
 
 export interface Property {
   id: string;
@@ -18,6 +18,10 @@ export interface Property {
   bathrooms?: number;
   area?: number; // m²
   yearBuilt?: number;
+  /** Cadastral parcel number (padrón). */
+  padron?: string;
+  /** Street frontage in metres (medida del frente). */
+  frontage?: number;
   /** Monthly common expenses (gastos comunes). */
   commonExpenses?: number;
   /** Yearly property taxes. */

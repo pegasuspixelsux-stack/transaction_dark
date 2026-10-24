@@ -16,13 +16,13 @@ const ZONES: {
 }[] = [
   {
     name: "José Ignacio",
-    blurb: "El pueblo de pescadores devenido en el enclave más codiciado de la costa.",
+    blurb: "El pueblo de pescadores convertido en uno de los destinos más reconocidos de la costa uruguaya.",
     image: zimg("1507525428034-b723cf961d3e"),
     className: "sm:col-span-4 sm:row-span-2",
   },
   {
     name: "Manantiales",
-    blurb: "Playas amplias, médanos y las mejores mesas del este.",
+    blurb: "La tranquilidad de un entorno costero en una zona de creciente desarrollo.",
     image: zimg("1519046904884-53103b34b206"),
     className: "sm:col-span-2 sm:row-span-2",
   },
@@ -51,9 +51,9 @@ export async function Zones() {
   return (
     <section id="zonas" className="scroll-mt-24 border-y border-hairline bg-surface-raised">
       <div className="container-page py-24 sm:py-32">
-        <p className="text-xs uppercase tracking-luxury text-ink-muted">Dónde</p>
+        <p className="text-xs uppercase tracking-luxury text-ink-muted">Nuestra costa</p>
         <h2 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">
-          Las zonas más codiciadas
+          Dónde trabajamos
         </h2>
         <p className="mt-4 max-w-md text-base leading-relaxed text-ink-muted">
           Cinco enclaves donde se concentra la demanda. También asesoramos en el

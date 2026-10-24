@@ -21,9 +21,12 @@ function toPublic(p: AdminProperty): Property {
     bathrooms: p.bathrooms,
     area: p.areaM2,
     yearBuilt: p.yearBuilt,
+    padron: p.padron,
+    frontage: p.frontage,
     commonExpenses: p.commonExpenses,
     annualTaxes: p.annualTaxes,
-    type: p.propertyType ?? "house",
+    // Records saved before the category change may still say "penthouse".
+    type: (p.propertyType as string) === "penthouse" ? "apartment" : (p.propertyType ?? "house"),
     imageUrl: p.imageUrl,
     images: p.images?.length ? p.images : undefined,
     description: p.description || undefined,

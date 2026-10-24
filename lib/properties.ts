@@ -47,8 +47,8 @@ export const properties: Property[] = [
   { id: "ji-04", title: "Terreno Camino de los Ceibos", zone: "José Ignacio", price: 1250000, bedrooms: 0, type: "land", imageUrl: img("1449844908441-8829872d2607") },
   { id: "mn-01", title: "Refugio Manantiales", zone: "Manantiales", price: 2650000, bedrooms: 4, type: "house", imageUrl: img("1512917774080-9991f1c4c750") },
   { id: "mn-02", title: "Casa Médano", zone: "Manantiales", price: 3100000, bedrooms: 4, type: "house", imageUrl: img("1600047509807-ba8f99d2cdde") },
-  { id: "mn-03", title: "Penthouse Bikini", zone: "Manantiales", price: 1780000, bedrooms: 3, type: "penthouse", imageUrl: img("1600566753190-17f0baa2a6c3") },
-  { id: "lb-01", title: "Penthouse del Arroyo", zone: "La Barra", price: 1890000, bedrooms: 3, type: "penthouse", imageUrl: img("1600607687644-c7171b42498f") },
+  { id: "mn-03", title: "Apartamento Bikini", zone: "Manantiales", price: 1780000, bedrooms: 3, type: "apartment", imageUrl: img("1600566753190-17f0baa2a6c3") },
+  { id: "lb-01", title: "Apartamento del Arroyo", zone: "La Barra", price: 1890000, bedrooms: 3, type: "apartment", imageUrl: img("1600607687644-c7171b42498f") },
   { id: "lb-02", title: "Casa Galería", zone: "La Barra", price: 2450000, bedrooms: 4, type: "house", imageUrl: img("1600585152220-90363fe7e115") },
   { id: "pe-01", title: "Terreno Faro", zone: "Península", price: 950000, bedrooms: 0, type: "land", imageUrl: img("1583608205776-bfd35f0d9f83") },
   { id: "pe-02", title: "Apartamento Torre Mar", zone: "Península", price: 690000, bedrooms: 2, type: "apartment", imageUrl: img("1502005097973-6a7082348e28") },
@@ -58,8 +58,9 @@ export const properties: Property[] = [
 const TYPE_LABELS: Record<PropertyType, string> = {
   house: "Casa",
   apartment: "Apartamento",
-  penthouse: "Penthouse",
   land: "Terreno",
+  farm: "Chacra",
+  field: "Campo",
 };
 
 export function propertyTypeLabel(type: PropertyType): string {

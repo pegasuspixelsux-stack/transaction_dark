@@ -23,7 +23,7 @@ export interface ImportReport {
 
 const KNOWN_COLUMNS = [
   "id", "title", "listingType", "price", "currency", "location", "zone", "propertyType",
-  "bedrooms", "bathrooms", "areaM2", "yearBuilt", "commonExpenses", "annualTaxes", "features", "amenities", "imageUrl",
+  "bedrooms", "bathrooms", "areaM2", "yearBuilt", "padron", "frontage", "commonExpenses", "annualTaxes", "features", "amenities", "imageUrl",
   "images", "description", "status", "featured", "hero",
 ] as const;
 /** Spanish headers (what the template uses) and the original English ones both work. */
@@ -40,6 +40,8 @@ const HEADER_ALIASES: Record<(typeof KNOWN_COLUMNS)[number], string[]> = {
   bathrooms: ["banos", "bathrooms"],
   areaM2: ["superficiem", "superficiem2", "superficie", "aream2"],
   yearBuilt: ["anodeconstruccion", "aniodeconstruccion", "ano", "anio", "yearbuilt"],
+  padron: ["padron", "numerodepadron"],
+  frontage: ["frente", "medidadelfrente", "frentem", "frontage"],
   commonExpenses: ["gastoscomunes", "gastoscomunesmensual", "commonexpenses"],
   annualTaxes: ["impuestos", "impuestosanuales", "annualtaxes"],
   features: ["caracteristicas", "features"],
@@ -61,12 +63,12 @@ const COLUMN_LABELS: Record<(typeof REQUIRED_COLUMNS)[number], string> = {
 /** Spanish cell values -> the canonical values the catalog stores. */
 const VALUE_ALIASES: Record<string, string> = {
   venta: "sale", alquiler: "rent",
-  casa: "house", apartamento: "apartment", departamento: "apartment", terreno: "land",
+  casa: "house", apartamento: "apartment", departamento: "apartment", terreno: "land", chacra: "farm", campo: "field",
   publicada: "published", publicado: "published", borrador: "draft",
 };
 const VALUE_LABELS: Record<string, string> = {
   sale: "venta", rent: "alquiler", house: "casa", apartment: "apartamento", land: "terreno",
-  penthouse: "penthouse", published: "publicada", draft: "borrador",
+  farm: "chacra", field: "campo", published: "publicada", draft: "borrador",
 };
 
 const fold = (v: string) => v.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -161,6 +163,8 @@ export function applyInventoryRows(
       bathrooms: number(v.bathrooms),
       areaM2: number(v.areaM2),
       ...("yearBuilt" in v ? { yearBuilt: number(v.yearBuilt) } : {}),
+      ...("padron" in v ? { padron: text(v.padron) } : {}),
+      ...("frontage" in v ? { frontage: number(v.frontage) } : {}),
       ...("commonExpenses" in v ? { commonExpenses: number(v.commonExpenses) } : {}),
       ...("annualTaxes" in v ? { annualTaxes: number(v.annualTaxes) } : {}),
       features: splitList(v.features),

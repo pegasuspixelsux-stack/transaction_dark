@@ -83,7 +83,7 @@ export default async function PropiedadesPage({
             <>
               <div className="grid gap-x-4 gap-y-8 sm:grid-cols-2">
                 {paginatedResults.map((property) => (
-                  <PropertyCard key={property.id} property={property} />
+                  <PropertyCard key={property.id} property={property} featured />
                 ))}
               </div>
 

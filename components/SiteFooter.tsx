@@ -3,26 +3,21 @@ import { SOCIAL } from "@/components/social-icons";
 import { getSiteConfig, telHref } from "@/lib/server/public-config";
 
 const staticColumns: { heading: string; href?: string; items: string[]; hrefs?: string[] }[] = [
-  { heading: "Propiedades", href: "/propiedades", items: ["Casas", "Apartamentos", "Penthouses", "Terrenos"] },
+  { heading: "Propiedades", href: "/propiedades", items: ["Casas", "Apartamentos", "Terrenos", "Chacras", "Campos"] },
   { heading: "Zonas", href: "/#zonas", items: ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"] },
   { heading: "Transaction", href: "/#nosotros", items: ["Nosotros", "Contacto", "Prensa"] },
 ];
 
 export async function SiteFooter() {
   const config = await getSiteConfig();
-  const { street, city } = config.address;
+  const { city } = config.address;
   const FOOTER_COLUMNS = [
     ...staticColumns,
     {
       heading: "Contacto",
       href: "/#contacto",
       // Same details, in the same order, as the Contacto section.
-      items: [
-        config.contact.emails[0],
-        config.contact.phones[0],
-        `${street} · ${city}`,
-        ...[config.hours.weekday, config.hours.saturday, config.hours.sunday, config.hours.holidays].filter(Boolean),
-      ],
+      items: [config.contact.emails[0], config.contact.phones[0]],
       hrefs: [`mailto:${config.contact.emails[0]}`, telHref(config.contact.phones[0])],
     },
   ];

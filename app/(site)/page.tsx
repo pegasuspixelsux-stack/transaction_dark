@@ -4,6 +4,7 @@ import { FeaturedProperties } from "@/components/FeaturedProperties";
 import { Zones } from "@/components/Zones";
 import { BrandStatement } from "@/components/BrandStatement";
 import { Team } from "@/components/Team";
+import { InvestmentsIntro } from "@/components/InvestmentsIntro";
 import { Contact } from "@/components/Contact";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
@@ -22,6 +23,7 @@ export default async function Home() {
       <FeaturedProperties />
       <Zones />
       <Team />
+      <InvestmentsIntro />
       <Contact />
       <SiteFooter />
       {isAgentEnabled(config) ? (

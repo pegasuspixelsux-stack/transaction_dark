@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { Bath, Bed, Ruler } from "lucide-react";
 import { HeroSlideshow } from "@/components/HeroSlideshow";
 import { Trident } from "@/components/Trident";
 import { WatermarkIcon } from "@/components/WatermarkIcon";
-import { formatPrice, propertyTypeLabel } from "@/lib/properties";
+import { formatPrice } from "@/lib/properties";
 import type { Property } from "@/types/property";
+
+const textShadow = "[text-shadow:0_1px_6px_rgba(0,0,0,0.5)]";
 
 export function TransactionHero({ properties: HERO_PROPERTIES }: { properties: Property[] }) {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -22,15 +23,6 @@ export function TransactionHero({ properties: HERO_PROPERTIES }: { properties: P
   }, [count, activeSlide]);
 
   const current = HERO_PROPERTIES[activeSlide] ?? HERO_PROPERTIES[0];
-  const metrics = current
-    ? [
-        current.bedrooms > 0 ? { icon: Bed, text: `${current.bedrooms} ${current.bedrooms === 1 ? "dorm" : "dorms"}` } : null,
-        current.bathrooms && current.bathrooms > 0
-          ? { icon: Bath, text: `${current.bathrooms} ${current.bathrooms === 1 ? "baño" : "baños"}` }
-          : null,
-        current.area && current.area > 0 ? { icon: Ruler, text: `${current.area.toLocaleString("es-UY")} m²` } : null,
-      ].filter((m): m is NonNullable<typeof m> => m !== null)
-    : [];
   const tag = current
     ? current.location && current.location !== current.zone
       ? `${current.location} | ${current.zone}`
@@ -73,8 +65,10 @@ export function TransactionHero({ properties: HERO_PROPERTIES }: { properties: P
         <div className="container-page pb-8 pt-4">
           {current ? (
             <div key={current.id} className="md:max-w-[70%]">
-              <p className="text-sm uppercase tracking-luxury text-white/75">{tag}</p>
-              <h3 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">
+              <p className={`text-xs uppercase tracking-luxury text-white/80 ${textShadow}`}>
+                Ref. {current.id} · {tag}
+              </p>
+              <h3 className={`mt-2 font-display text-3xl font-normal tracking-tight sm:text-4xl ${textShadow}`}>
                 <Link
                   href={`/propiedades/${current.id}`}
                   className="pointer-events-auto focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white"
@@ -82,18 +76,8 @@ export function TransactionHero({ properties: HERO_PROPERTIES }: { properties: P
                   {current.title}
                 </Link>
               </h3>
-              {metrics.length > 0 ? (
-                <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-white/90">
-                  {metrics.map(({ icon: Icon, text }) => (
-                    <li key={text} className="flex items-center gap-2">
-                      <Icon className="size-4" aria-hidden />
-                      {text}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-              <p className="mt-2 text-sm uppercase tracking-luxury text-white/75">
-                {propertyTypeLabel(current.type)} · {formatPrice(current.price)}
+              <p className={`mt-4 border-t border-white/25 pt-4 text-xl ${textShadow}`}>
+                {formatPrice(current.price)}
               </p>
             </div>
           ) : null}

@@ -24,6 +24,8 @@ interface FormState {
   areaM2: string;
   commonExpenses: string;
   annualTaxes: string;
+  padron: string;
+  frontage: string;
   features: string[];
   /** Gallery in display order; the first photo is the cover. */
   photos: string[];
@@ -40,8 +42,9 @@ const ZONES: PropertyZone[] = ["José Ignacio", "Manantiales", "La Barra", "Pen�
 const TYPES: { value: PropertyType; label: string }[] = [
   { value: "house", label: "Casa" },
   { value: "apartment", label: "Apartamento" },
-  { value: "penthouse", label: "Penthouse" },
   { value: "land", label: "Terreno" },
+  { value: "farm", label: "Chacra" },
+  { value: "field", label: "Campo" },
 ];
 
 const empty: FormState = {
@@ -55,6 +58,8 @@ const empty: FormState = {
   areaM2: "",
   commonExpenses: "",
   annualTaxes: "",
+  padron: "",
+  frontage: "",
   features: [],
   photos: [],
   description: "",
@@ -78,13 +83,16 @@ function fromProperty(p: AdminProperty): FormState {
     areaM2: String(p.areaM2),
     commonExpenses: p.commonExpenses === undefined ? "" : String(p.commonExpenses),
     annualTaxes: p.annualTaxes === undefined ? "" : String(p.annualTaxes),
+    padron: p.padron ?? "",
+    frontage: p.frontage === undefined ? "" : String(p.frontage),
     features: p.features,
     photos: [...new Set([p.imageUrl, ...(p.images ?? [])].filter(Boolean))],
     description: p.description,
     status: p.status,
     assignedAgentId: p.assignedAgentId ?? "",
     zone: p.zone ?? "José Ignacio",
-    propertyType: p.propertyType ?? "house",
+    // Records saved before the category change may still say "penthouse".
+    propertyType: (p.propertyType as string) === "penthouse" ? "apartment" : (p.propertyType ?? "house"),
     featured: !!p.featured,
     hero: !!p.hero,
   };
@@ -239,6 +247,8 @@ export function PropertyForm({
       areaM2: Number(form.areaM2),
       commonExpenses: form.commonExpenses.trim() ? Number(form.commonExpenses) : null,
       annualTaxes: form.annualTaxes.trim() ? Number(form.annualTaxes) : null,
+      padron: form.padron.trim(),
+      frontage: form.frontage.trim() ? Number(form.frontage) : null,
       features: form.features,
       imageUrl: form.photos[0] ?? "",
       images: form.photos,
@@ -347,6 +357,19 @@ export function PropertyForm({
         <Field label="Impuestos (anual)" hint="Opcional. Contribución inmobiliaria e impuesto de primaria.">
           {({ id, describedBy }) => (
             <input id={id} type="number" min="0" aria-describedby={describedBy} value={form.annualTaxes} onChange={(e) => set("annualTaxes", e.target.value)} className={inputClass} />
+          )}
+        </Field>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Padrón" hint="Opcional. Número de padrón catastral.">
+          {({ id, describedBy }) => (
+            <input id={id} aria-describedby={describedBy} value={form.padron} onChange={(e) => set("padron", e.target.value)} className={inputClass} />
+          )}
+        </Field>
+        <Field label="Frente (m)" hint="Opcional. Medida del frente en metros.">
+          {({ id, describedBy }) => (
+            <input id={id} type="number" min="0" step="any" aria-describedby={describedBy} value={form.frontage} onChange={(e) => set("frontage", e.target.value)} className={inputClass} />
           )}
         </Field>
       </div>

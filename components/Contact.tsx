@@ -7,7 +7,6 @@ const focusRing =
 
 export async function Contact() {
   const config = await getSiteConfig();
-  const { street, city } = config.address;
   return (
     <section id="contacto" className="scroll-mt-24 border-t border-hairline bg-surface-raised dark:border-white/10 dark:bg-zinc-900">
       <div className="container-page py-24 sm:py-32">
@@ -35,20 +34,6 @@ export async function Contact() {
                   <a href={telHref(config.contact.phones[0])} className={`transition-colors hover:text-ink dark:hover:text-white ${focusRing}`}>
                     {config.contact.phones[0]}
                   </a>
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">Oficina</dt>
-                <dd className="mt-1 text-sm text-ink-muted dark:text-white/75">{street} · {city}</dd>
-              </div>
-              <div id="horarios" className="scroll-mt-28">
-                <dt className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">Horarios</dt>
-                <dd className="mt-1 space-y-0.5 text-sm text-ink-muted dark:text-white/75">
-                  {[config.hours.weekday, config.hours.saturday, config.hours.sunday, config.hours.holidays]
-                    .filter(Boolean)
-                    .map((line) => (
-                      <p key={line}>{line}</p>
-                    ))}
                 </dd>
               </div>
             </dl>
