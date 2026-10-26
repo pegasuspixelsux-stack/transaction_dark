@@ -20,7 +20,8 @@ const propositions = [
 
 export function ValuePropositions() {
   return (
-    <section className="container-page py-12 sm:py-16">
+    <section className="bg-surface-raised">
+      <div className="container-page py-12 sm:py-16">
       <div className="grid gap-8 grid-cols-3 sm:gap-12">
         {propositions.map(({ icon: Icon, title, description }) => (
           <div key={title} className="flex flex-col gap-5 sm:gap-5">
@@ -33,6 +34,7 @@ export function ValuePropositions() {
             </div>
           </div>
         ))}
+      </div>
       </div>
     </section>
   );

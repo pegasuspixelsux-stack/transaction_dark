@@ -49,7 +49,7 @@ const ZONES: {
 export async function Zones() {
   const properties = await getPublicProperties();
   return (
-    <section id="zonas" className="scroll-mt-24 border-y border-hairline bg-surface-raised">
+    <section id="zonas" className="scroll-mt-24 border-y border-hairline bg-surface">
       <div className="container-page py-24 sm:py-32">
         <p className="text-xs uppercase tracking-luxury text-ink-muted">Nuestra costa</p>
         <h2 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">

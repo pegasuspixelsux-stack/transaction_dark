@@ -5,7 +5,8 @@ import { PropertyCard } from "@/components/PropertyCard";
 export async function FeaturedProperties() {
   const featured = pickFeatured(await getPublicProperties());
   return (
-    <section className="container-page py-24 sm:py-32">
+    <section className="bg-surface-raised">
+      <div className="container-page py-24 sm:py-32">
       <header className="mb-14 flex items-end justify-between gap-6">
         <div>
           <p className="text-xs uppercase tracking-luxury text-ink-muted">Selección</p>
@@ -38,6 +39,7 @@ export async function FeaturedProperties() {
         >
           Ver todo el inventario
         </Link>
+      </div>
       </div>
     </section>
   );

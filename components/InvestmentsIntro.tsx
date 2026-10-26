@@ -6,7 +6,7 @@ export function InvestmentsIntro() {
   return (
     <section
       id="inversiones"
-      className="scroll-mt-24 border-y border-hairline bg-surface-raised dark:border-white/10 dark:bg-neutral-900"
+      className="scroll-mt-24 border-y border-hairline bg-surface dark:border-white/10 dark:bg-neutral-900"
     >
       <div className="container-page grid gap-12 py-24 sm:py-32 lg:grid-cols-2 lg:gap-16">
         <div>

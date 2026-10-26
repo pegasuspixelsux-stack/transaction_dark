@@ -19,7 +19,8 @@ const LEGAL_ADVISORS = ["Escribano", "Contador", "Abogado", "Agrimensor"];
 
 export function Team() {
   return (
-    <section className="container-page py-24 sm:py-32">
+    <section className="bg-surface-raised">
+      <div className="container-page py-24 sm:py-32">
       <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
         <div>
           <p className="text-xs uppercase tracking-luxury text-ink-muted">Nosotros</p>
@@ -81,6 +82,7 @@ export function Team() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );

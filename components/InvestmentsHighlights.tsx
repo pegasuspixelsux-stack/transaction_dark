@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useReducedMotion } from "motion/react";
 import { Building2, Globe, KeyRound } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -13,12 +13,18 @@ const HIGHLIGHTS = [
 
 const INTERVAL_MS = 2500;
 
+const noopSubscribe = () => () => {};
+/** `false` during SSR and hydration, `true` afterwards, so the first client render matches the server HTML. */
+const useHydrated = () => useSyncExternalStore(noopSubscribe, () => true, () => false);
+
 /** Bullet list that spotlights one item at a time, cycling through all three. */
 export function InvestmentsHighlights() {
   const [active, setActive] = useState(0);
   const reduce = useReducedMotion();
-  // `null` on the server: stay static until hydrated, and never cycle under reduced motion.
-  const cycling = reduce === false;
+  const hydrated = useHydrated();
+  // Stay static until hydrated (`useReducedMotion` already reports `false` on the client's first
+  // render, unlike the server's `null`), and never cycle under reduced motion.
+  const cycling = hydrated && reduce === false;
 
   useEffect(() => {
     if (!cycling) return;
