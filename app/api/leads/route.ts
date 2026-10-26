@@ -4,7 +4,8 @@ import { allowRequest, clientIp } from "@/lib/server/rate-limit";
 
 const str = (v: unknown, max = 200) => String(v ?? "").trim().slice(0, max);
 
-const SOURCES = { "contact-form": "contact-form", "a-gente-concierge": "a-gente-concierge" } as const;
+const SOURCES = ["contact-form", "a-gente-concierge", "property-whatsapp", "property-email"] as const;
+type Source = (typeof SOURCES)[number];
 
 /** Rule-based intent score from the concierge answers (no AI involved). */
 function scoreIntent(body: Record<string, unknown>): "alta" | "media" | "baja" {
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Nombre y teléfono son obligatorios." }, { status: 400 });
   }
 
-  const source = body.source === "contact-form" ? SOURCES["contact-form"] : SOURCES["a-gente-concierge"];
+  const source: Source = SOURCES.find((s) => s === body.source) ?? "a-gente-concierge";
 
   // The concierge asks several questions; fold the answers into a readable note.
   const answers = [

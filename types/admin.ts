@@ -70,13 +70,7 @@ export interface AdminProperty {
   hero?: boolean;
 }
 
-export const LEAD_STAGES = [
-  "new",
-  "contacted",
-  "viewing",
-  "negotiation",
-  "closed",
-] as const;
+export const LEAD_STAGES = ["new", "contacted", "negotiation", "won", "closed"] as const;
 export type LeadStage = (typeof LEAD_STAGES)[number];
 export type LeadOutcome = "won" | "lost";
 

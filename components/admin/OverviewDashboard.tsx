@@ -21,12 +21,12 @@ export function OverviewDashboard() {
     const byStage = Object.fromEntries(
       LEAD_STAGES.map((s) => [s, leads.filter((l) => l.stage === s).length]),
     ) as Record<(typeof LEAD_STAGES)[number], number>;
-    const won = leads.filter((l) => l.stage === "closed" && l.outcome === "won").length;
+    const won = leads.filter((l) => l.stage === "won" || (l.stage === "closed" && l.outcome === "won")).length;
     const lost = leads.filter((l) => l.stage === "closed" && l.outcome === "lost").length;
     return {
       published: properties.filter((p) => p.status === "published").length,
       drafts: properties.filter((p) => p.status === "draft").length,
-      open: leads.filter((l) => l.stage !== "closed").length,
+      open: leads.filter((l) => l.stage !== "closed" && l.stage !== "won").length,
       newThisWeek: leads.filter((l) => new Date(l.createdAt).getTime() > weekAgo).length,
       unassigned: leads.filter((l) => !l.assignedAgentId).length,
       won,

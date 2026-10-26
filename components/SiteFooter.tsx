@@ -5,7 +5,7 @@ import { getSiteConfig, telHref } from "@/lib/server/public-config";
 const staticColumns: { heading: string; href?: string; items: string[]; hrefs?: string[] }[] = [
   { heading: "Propiedades", href: "/propiedades", items: ["Casas", "Apartamentos", "Terrenos", "Chacras", "Campos"] },
   { heading: "Zonas", href: "/#zonas", items: ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"] },
-  { heading: "Transaction", href: "/#nosotros", items: ["Nosotros", "Contacto", "Prensa"] },
+  { heading: "Transaction", href: "/#nosotros", items: ["Nosotros", "Contacto"] },
 ];
 
 export async function SiteFooter() {

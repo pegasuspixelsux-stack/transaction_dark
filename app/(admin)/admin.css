@@ -110,3 +110,10 @@ html {
   scrollbar-width: thin;
   scrollbar-color: var(--color-admin-line) transparent;
 }
+
+@keyframes drawerIn {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}

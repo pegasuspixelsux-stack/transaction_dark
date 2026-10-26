@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Building2,
+  Inbox,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -34,6 +35,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: "/admin", label: "Resumen", Icon: LayoutDashboard },
   { href: "/admin/properties", label: "Propiedades", Icon: Building2 },
+  { href: "/admin/consultas", label: "Consultas", Icon: Inbox },
   { href: "/admin/leads", label: "Pipeline de consultas", Icon: SquareKanban },
   { href: "/admin/users", label: "Gestión de usuarios", Icon: Users, requires: "users:manage" },
 ];

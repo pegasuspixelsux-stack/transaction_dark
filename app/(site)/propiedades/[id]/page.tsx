@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
-import { Mail, MessageCircle, Bed, Bath, Ruler, Calendar, MapPin, FileText, MoveHorizontal } from "lucide-react";
+import { Bed, Bath, Ruler, Calendar, MapPin, FileText, MoveHorizontal } from "lucide-react";
 import { getPublicProperties } from "@/lib/server/public-properties";
 import { PropertySlideshow } from "@/components/PropertySlideshow";
 import { ContactForm } from "@/components/ContactForm";
+import { PropertyInquiryActions } from "@/components/PropertyInquiryActions";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
 import { ZONE_CENTERS } from "@/lib/properties";
@@ -193,24 +194,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               </p>
             ) : null}
 
-            <div className="mt-8 flex gap-4">
-              <a
-                href={`mailto:${config.contact.emails[0]}?subject=${encodeURIComponent(`Consulta sobre ${property.title}`)}`}
-                className="inline-flex items-center gap-2 border border-blue-800 dark:border-blue-100 px-6 py-3 text-sm uppercase tracking-luxury text-blue-800 dark:text-blue-100 transition-colors hover:bg-blue-800 hover:text-white dark:hover:bg-blue-100/15 "
-              >
-                <Mail size={18} />
-                Email
-              </a>
-              <a
-                href={`https://wa.me/${whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 border border-blue-800 dark:border-blue-100 px-6 py-3 text-sm uppercase tracking-luxury text-blue-800 dark:text-blue-100 transition-colors hover:bg-blue-800 hover:text-white dark:hover:bg-blue-100/15 "
-              >
-                <MessageCircle size={18} />
-                WhatsApp
-              </a>
-            </div>
+            <PropertyInquiryActions
+              propertyId={property.id}
+              propertyTitle={property.title}
+              whatsapp={whatsapp}
+              email={config.contact.emails[0]}
+            />
 
             <div className="mt-16">
               <h3 className="font-display text-xl font-normal tracking-tight text-ink dark:text-white">

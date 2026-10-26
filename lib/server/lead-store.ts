@@ -19,6 +19,8 @@ const filePath = () => process.env.LEADS_PATH ?? path.join(process.cwd(), "data"
 const SOURCE_LABELS: Record<string, string> = {
   "contact-form": "Formulario de contacto",
   "a-gente-concierge": "Concierge A-Gente",
+  "property-whatsapp": "WhatsApp (ficha de propiedad)",
+  "property-email": "Email (ficha de propiedad)",
 };
 
 type Raw = Record<string, unknown>;
@@ -33,7 +35,9 @@ function iso(v: unknown): string {
 }
 
 function normalise(id: string, d: Raw): Lead {
-  const stage = LEAD_STAGES.includes(d.stage as LeadStage) ? (d.stage as LeadStage) : "new";
+  // "viewing" was a stage in the previous pipeline; it now belongs to follow-up.
+  const rawStage = d.stage === "viewing" ? "contacted" : d.stage;
+  const stage = LEAD_STAGES.includes(rawStage as LeadStage) ? (rawStage as LeadStage) : "new";
   const source = s(d.source);
   return {
     id,
