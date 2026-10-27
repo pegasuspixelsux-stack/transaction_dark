@@ -14,8 +14,6 @@ interface PropertyInquiryActionsProps {
   email: string;
 }
 
-const INTENTS = ["Comprar", "Alquilar", "Invertir", "Solo quiero información"] as const;
-
 const actionClass =
   "inline-flex min-h-11 items-center gap-2 border border-blue-800 dark:border-blue-100 px-6 py-3 text-sm uppercase tracking-luxury text-blue-800 dark:text-blue-100 transition-colors duration-200 hover:bg-blue-800 hover:text-white dark:hover:bg-blue-100/15 active:bg-blue-900 active:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink";
 const labelClass = "text-xs uppercase tracking-luxury text-ink-muted";
@@ -41,7 +39,6 @@ export function PropertyInquiryActions({
     name: "",
     phone: "",
     email: "",
-    intent: INTENTS[0] as string,
     message: "",
     website: "", // honeypot: real visitors never see or fill this
   });
@@ -93,7 +90,6 @@ export function PropertyInquiryActions({
           name: form.name,
           phone: form.phone,
           email: form.email,
-          intent: form.intent,
           message: form.message,
           source: channel === "whatsapp" ? "property-whatsapp" : "property-email",
           propertyId,
@@ -108,7 +104,6 @@ export function PropertyInquiryActions({
 
       const body =
         `Hola, mi nombre es ${form.name}.\n` +
-        `Me interesa: ${form.intent}.\n` +
         `Propiedad: ${propertyTitle} (Ref. ${propertyId})\n` +
         (form.message ? `Mensaje: ${form.message}` : "");
 
@@ -198,27 +193,19 @@ export function PropertyInquiryActions({
                 </label>
               </div>
               <label className="flex flex-col gap-2">
-                <span className={labelClass}>Nombre y apellido</span>
+                <span className={labelClass}>{isWhatsapp ? "Nombre" : "Nombre y apellido"}</span>
                 <input type="text" name="nombre" autoComplete="name" required disabled={loading} value={form.name} onChange={set("name")} className={fieldClass} />
               </label>
               <label className="flex flex-col gap-2">
                 <span className={labelClass}>Teléfono / WhatsApp</span>
                 <input type="tel" name="telefono" autoComplete="tel" required disabled={loading} value={form.phone} onChange={set("phone")} placeholder="+598 99 123 456" className={fieldClass} />
               </label>
-              <label className="flex flex-col gap-2">
-                <span className={labelClass}>Email</span>
-                <input type="email" name="email" autoComplete="email" required disabled={loading} value={form.email} onChange={set("email")} className={fieldClass} />
-              </label>
-              <label className="flex flex-col gap-2">
-                <span className={labelClass}>¿Qué estás buscando?</span>
-                <select name="interes" disabled={loading} value={form.intent} onChange={set("intent")} className={fieldClass}>
-                  {INTENTS.map((i) => (
-                    <option key={i} value={i}>
-                      {i}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              {isWhatsapp ? null : (
+                <label className="flex flex-col gap-2">
+                  <span className={labelClass}>Email</span>
+                  <input type="email" name="email" autoComplete="email" required disabled={loading} value={form.email} onChange={set("email")} className={fieldClass} />
+                </label>
+              )}
               <label className="flex flex-col gap-2">
                 <span className={labelClass}>Mensaje (opcional)</span>
                 <textarea name="mensaje" rows={3} disabled={loading} value={form.message} onChange={set("message")} className={cn(fieldClass, "resize-none")} />
