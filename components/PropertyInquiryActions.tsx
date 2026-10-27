@@ -109,7 +109,7 @@ export function PropertyInquiryActions({
       const body =
         `Hola, mi nombre es ${form.name}.\n` +
         `Me interesa: ${form.intent}.\n` +
-        `Propiedad: ${propertyTitle}\n` +
+        `Propiedad: ${propertyTitle} (Ref. ${propertyId})\n` +
         (form.message ? `Mensaje: ${form.message}` : "");
 
       if (channel === "whatsapp") {
@@ -187,6 +187,16 @@ export function PropertyInquiryActions({
                 aria-hidden="true"
                 className="absolute -left-[9999px] h-0 w-0 opacity-0"
               />
+              <div className="grid gap-5 sm:grid-cols-3">
+                <label className="flex flex-col gap-2 sm:col-span-1">
+                  <span className={labelClass}>Referencia</span>
+                  <input type="text" name="referencia" readOnly value={propertyId} className={cn(fieldClass, "cursor-default")} />
+                </label>
+                <label className="flex flex-col gap-2 sm:col-span-2">
+                  <span className={labelClass}>Propiedad</span>
+                  <input type="text" name="propiedad" readOnly value={propertyTitle} className={cn(fieldClass, "cursor-default")} />
+                </label>
+              </div>
               <label className="flex flex-col gap-2">
                 <span className={labelClass}>Nombre y apellido</span>
                 <input type="text" name="nombre" autoComplete="name" required disabled={loading} value={form.name} onChange={set("name")} className={fieldClass} />

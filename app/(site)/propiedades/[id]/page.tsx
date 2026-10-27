@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { Bed, Bath, Ruler, Calendar, MapPin, FileText, MoveHorizontal } from "lucide-react";
 import { getPublicProperties } from "@/lib/server/public-properties";
 import { PropertySlideshow } from "@/components/PropertySlideshow";
-import { ContactForm } from "@/components/ContactForm";
 import { PropertyInquiryActions } from "@/components/PropertyInquiryActions";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
@@ -200,17 +199,6 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               whatsapp={whatsapp}
               email={config.contact.emails[0]}
             />
-
-            <div className="mt-16">
-              <h3 className="font-display text-xl font-normal tracking-tight text-ink dark:text-white">
-                Consultá por esta propiedad
-              </h3>
-              <p className="mb-8 mt-3 text-sm text-ink-muted dark:text-white/75">
-                Dejanos tus datos y un asesor privado te contacta. También podés responder unas
-                preguntas rápidas con el asistente AGENTE.
-              </p>
-              <ContactForm propertyTitle={property.title} propertyId={property.id} whatsapp={whatsapp} />
-            </div>
           </div>
         </section>
       </main>
