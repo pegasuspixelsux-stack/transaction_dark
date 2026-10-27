@@ -38,7 +38,8 @@ export function PropertyInquiryActions({
   const [form, setForm] = useState({
     name: "",
     phone: "",
-    email: "",
+    contact: "",
+    subject: "",
     message: "",
     website: "", // honeypot: real visitors never see or fill this
   });
@@ -58,6 +59,16 @@ export function PropertyInquiryActions({
   function show(next: Channel, trigger: HTMLElement) {
     triggerRef.current = trigger;
     setError("");
+    if (next === "email") {
+      setForm((f) => ({
+        ...f,
+        subject: `Consulta: ${propertyTitle} (Ref. ${propertyId})`,
+        message: `Hola, me interesa la propiedad "${propertyTitle}" (Ref. ${propertyId}).
+Me gustaría recibir más información y coordinar una visita.
+
+Gracias.`,
+      }));
+    }
     setChannel(next);
   }
 
@@ -75,6 +86,18 @@ export function PropertyInquiryActions({
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!channel || loading) return;
+
+    // Email is client-side only: build a mailto: link and let the device's mail app send it.
+    if (channel === "email") {
+      const mailBody = `${form.message}
+
+--
+Nombre: ${form.name}
+Contacto: ${form.contact}`;
+      window.location.href = `mailto:${email}?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(mailBody)}`;
+      setChannel(null);
+      return;
+    }
     setLoading(true);
     setError("");
 
@@ -89,7 +112,6 @@ export function PropertyInquiryActions({
         body: JSON.stringify({
           name: form.name,
           phone: form.phone,
-          email: form.email,
           message: form.message,
           source: channel === "whatsapp" ? "property-whatsapp" : "property-email",
           propertyId,
@@ -111,8 +133,6 @@ export function PropertyInquiryActions({
         const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(body)}`;
         if (tab) tab.location.href = url;
         else window.location.href = url;
-      } else {
-        window.location.href = `mailto:${email}?subject=${encodeURIComponent(`Consulta sobre ${propertyTitle}`)}&body=${encodeURIComponent(body)}`;
       }
       setForm((f) => ({ ...f, message: "", website: "" }));
       setChannel(null);
@@ -167,8 +187,15 @@ export function PropertyInquiryActions({
               </button>
             </div>
             <p className="mb-6 max-w-md text-sm leading-relaxed text-ink-muted">
-              Dejanos tus datos sobre <span className="text-ink">{propertyTitle}</span> y{" "}
-              {isWhatsapp ? "te abrimos WhatsApp" : "abrimos tu correo"} para seguir la conversación.
+              {isWhatsapp ? (
+                <>
+                  Dejanos tus datos sobre <span className="text-ink">{propertyTitle}</span> y te abrimos WhatsApp.
+                </>
+              ) : (
+                <>
+                  Revisá el mensaje sobre <span className="text-ink">{propertyTitle}</span> y se abrirá tu correo listo para enviar.
+                </>
+              )}
             </p>
 
             <form onSubmit={onSubmit} className="relative flex flex-col gap-5">
@@ -182,6 +209,7 @@ export function PropertyInquiryActions({
                 aria-hidden="true"
                 className="absolute -left-[9999px] h-0 w-0 opacity-0"
               />
+              {isWhatsapp ? (
               <div className="grid gap-5 sm:grid-cols-3">
                 <label className="flex flex-col gap-2 sm:col-span-1">
                   <span className={labelClass}>Referencia</span>
@@ -192,31 +220,45 @@ export function PropertyInquiryActions({
                   <input type="text" name="propiedad" readOnly value={propertyTitle} className={cn(fieldClass, "cursor-default")} />
                 </label>
               </div>
+              ) : null}
               <label className="flex flex-col gap-2">
-                <span className={labelClass}>{isWhatsapp ? "Nombre" : "Nombre y apellido"}</span>
+                <span className={labelClass}>Nombre</span>
                 <input type="text" name="nombre" autoComplete="name" required disabled={loading} value={form.name} onChange={set("name")} className={fieldClass} />
               </label>
-              <label className="flex flex-col gap-2">
-                <span className={labelClass}>Teléfono / WhatsApp</span>
-                <input type="tel" name="telefono" autoComplete="tel" required disabled={loading} value={form.phone} onChange={set("phone")} placeholder="+598 99 123 456" className={fieldClass} />
-              </label>
-              {isWhatsapp ? null : (
-                <label className="flex flex-col gap-2">
-                  <span className={labelClass}>Email</span>
-                  <input type="email" name="email" autoComplete="email" required disabled={loading} value={form.email} onChange={set("email")} className={fieldClass} />
-                </label>
+              {isWhatsapp ? (
+                <>
+                  <label className="flex flex-col gap-2">
+                    <span className={labelClass}>Teléfono / WhatsApp</span>
+                    <input type="tel" name="telefono" autoComplete="tel" required disabled={loading} value={form.phone} onChange={set("phone")} placeholder="+598 99 123 456" className={fieldClass} />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className={labelClass}>Mensaje (opcional)</span>
+                    <textarea name="mensaje" rows={3} disabled={loading} value={form.message} onChange={set("message")} className={cn(fieldClass, "resize-none")} />
+                  </label>
+                </>
+              ) : (
+                <>
+                  <label className="flex flex-col gap-2">
+                    <span className={labelClass}>Tu email o teléfono</span>
+                    <input type="text" name="contacto" autoComplete="email" required value={form.contact} onChange={set("contact")} className={fieldClass} />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className={labelClass}>Asunto</span>
+                    <input type="text" name="asunto" required value={form.subject} onChange={set("subject")} className={fieldClass} />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className={labelClass}>Mensaje</span>
+                    <textarea name="mensaje" rows={6} required value={form.message} onChange={set("message")} className={cn(fieldClass, "resize-none")} />
+                  </label>
+                </>
               )}
-              <label className="flex flex-col gap-2">
-                <span className={labelClass}>Mensaje (opcional)</span>
-                <textarea name="mensaje" rows={3} disabled={loading} value={form.message} onChange={set("message")} className={cn(fieldClass, "resize-none")} />
-              </label>
               {error ? (
                 <p role="alert" className="text-sm text-ink">
                   {error}
                 </p>
               ) : null}
               <button type="submit" disabled={loading} className={cn(submitClass, "mt-2")}>
-                {loading ? "Enviando…" : isWhatsapp ? "Continuar por WhatsApp" : "Continuar por email"}
+                {loading ? "Enviando…" : isWhatsapp ? "Continuar por WhatsApp" : "Abrir correo"}
               </button>
             </form>
           </div>
