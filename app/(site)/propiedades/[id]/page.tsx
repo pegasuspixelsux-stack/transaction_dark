@@ -197,7 +197,6 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               propertyId={property.id}
               propertyTitle={property.title}
               whatsapp={whatsapp}
-              email={config.contact.emails[0]}
             />
           </div>
         </section>

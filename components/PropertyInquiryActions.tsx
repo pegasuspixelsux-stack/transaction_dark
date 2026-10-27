@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Mail, MessageCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { sendEmailInquiry } from "@/app/actions/send-email-inquiry";
 
 type Channel = "whatsapp" | "email";
 
@@ -11,7 +12,6 @@ interface PropertyInquiryActionsProps {
   propertyTitle: string;
   /** wa.me format, digits only. */
   whatsapp: string;
-  email: string;
 }
 
 const actionClass =
@@ -30,15 +30,15 @@ export function PropertyInquiryActions({
   propertyId,
   propertyTitle,
   whatsapp,
-  email,
 }: PropertyInquiryActionsProps) {
   const [channel, setChannel] = useState<Channel | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [form, setForm] = useState({
     name: "",
     phone: "",
-    contact: "",
+    email: "",
     subject: "",
     message: "",
     website: "", // honeypot: real visitors never see or fill this
@@ -48,6 +48,12 @@ export function PropertyInquiryActions({
   const triggerRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
   const open = channel !== null;
+
+  useEffect(() => {
+    if (!notice) return;
+    const t = setTimeout(() => setNotice(""), 6000);
+    return () => clearTimeout(t);
+  }, [notice]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -87,17 +93,34 @@ Gracias.`,
     e.preventDefault();
     if (!channel || loading) return;
 
-    // Email is client-side only: build a mailto: link and let the device's mail app send it.
     if (channel === "email") {
-      const mailBody = `${form.message}
-
---
-Nombre: ${form.name}
-Contacto: ${form.contact}`;
-      window.location.href = `mailto:${email}?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(mailBody)}`;
-      setChannel(null);
+      setLoading(true);
+      setError("");
+      try {
+        const result = await sendEmailInquiry({
+          name: form.name,
+          email: form.email,
+          subject: form.subject,
+          message: form.message,
+          propertyId,
+          propertyTitle,
+          website: form.website,
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setChannel(null);
+        setNotice("Consulta enviada. Te respondemos a la brevedad.");
+        setForm((f) => ({ ...f, subject: "", message: "", website: "" }));
+      } catch {
+        setError("No pudimos enviar tu consulta. Probá de nuevo.");
+      } finally {
+        setLoading(false);
+      }
       return;
     }
+
     setLoading(true);
     setError("");
 
@@ -193,7 +216,7 @@ Contacto: ${form.contact}`;
                 </>
               ) : (
                 <>
-                  Revisá el mensaje sobre <span className="text-ink">{propertyTitle}</span> y se abrirá tu correo listo para enviar.
+                  Escribinos sobre <span className="text-ink">{propertyTitle}</span> y te respondemos por email.
                 </>
               )}
             </p>
@@ -239,16 +262,16 @@ Contacto: ${form.contact}`;
               ) : (
                 <>
                   <label className="flex flex-col gap-2">
-                    <span className={labelClass}>Tu email o teléfono</span>
-                    <input type="text" name="contacto" autoComplete="email" required value={form.contact} onChange={set("contact")} className={fieldClass} />
+                    <span className={labelClass}>Tu email</span>
+                    <input type="email" name="email" autoComplete="email" required disabled={loading} value={form.email} onChange={set("email")} className={fieldClass} />
                   </label>
                   <label className="flex flex-col gap-2">
                     <span className={labelClass}>Asunto</span>
-                    <input type="text" name="asunto" required value={form.subject} onChange={set("subject")} className={fieldClass} />
+                    <input type="text" name="asunto" required disabled={loading} value={form.subject} onChange={set("subject")} className={fieldClass} />
                   </label>
                   <label className="flex flex-col gap-2">
                     <span className={labelClass}>Mensaje</span>
-                    <textarea name="mensaje" rows={6} required value={form.message} onChange={set("message")} className={cn(fieldClass, "resize-none")} />
+                    <textarea name="mensaje" rows={6} required disabled={loading} value={form.message} onChange={set("message")} className={cn(fieldClass, "resize-none")} />
                   </label>
                 </>
               )}
@@ -258,12 +281,21 @@ Contacto: ${form.contact}`;
                 </p>
               ) : null}
               <button type="submit" disabled={loading} className={cn(submitClass, "mt-2")}>
-                {loading ? "Enviando…" : isWhatsapp ? "Continuar por WhatsApp" : "Abrir correo"}
+                {loading ? "Enviando…" : isWhatsapp ? "Continuar por WhatsApp" : "Enviar"}
               </button>
             </form>
           </div>
         ) : null}
       </dialog>
+
+      {notice ? (
+        <p
+          role="status"
+          className="fixed inset-x-4 bottom-6 z-50 mx-auto max-w-md border border-hairline bg-surface px-5 py-4 text-sm text-ink shadow-lg dark:bg-[#0a1a2e]"
+        >
+          {notice}
+        </p>
+      ) : null}
     </>
   );
 }
