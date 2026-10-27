@@ -26,7 +26,10 @@ const escapeHtml = (v: string) =>
 
 /** Logs the inquiry as a lead (dashboard / Consultas) and forwards it to the agency inbox. */
 export async function sendEmailInquiry(input: EmailInquiryInput): Promise<EmailInquiryResult> {
-  if (str(input.website, 100)) return { ok: true }; // bot: pretend success
+  if (str(input.website, 100)) {
+    console.warn("[email-inquiry] honeypot filled, inquiry dropped");
+    return { ok: true }; // bot: pretend success
+  }
 
   const name = str(input.name, 100);
   const email = str(input.email, 120);
