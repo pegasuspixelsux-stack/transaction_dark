@@ -41,7 +41,6 @@ export function PropertyInquiryActions({
     email: "",
     subject: "",
     message: "",
-    website: "", // honeypot: real visitors never see or fill this
   });
 
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -104,7 +103,6 @@ Gracias.`,
           message: form.message,
           propertyId,
           propertyTitle,
-          website: form.website,
         });
         if (!result.ok) {
           setError(result.error);
@@ -112,7 +110,7 @@ Gracias.`,
         }
         setChannel(null);
         setNotice("Consulta enviada. Te respondemos a la brevedad.");
-        setForm((f) => ({ ...f, subject: "", message: "", website: "" }));
+        setForm((f) => ({ ...f, subject: "", message: "" }));
       } catch {
         setError("No pudimos enviar tu consulta. Probá de nuevo.");
       } finally {
@@ -139,7 +137,6 @@ Gracias.`,
           source: channel === "whatsapp" ? "property-whatsapp" : "property-email",
           propertyId,
           propertyTitle,
-          website: form.website,
         }),
       });
       if (!res.ok) {
@@ -157,7 +154,7 @@ Gracias.`,
         if (tab) tab.location.href = url;
         else window.location.href = url;
       }
-      setForm((f) => ({ ...f, message: "", website: "" }));
+      setForm((f) => ({ ...f, message: "" }));
       setChannel(null);
     } catch (err) {
       tab?.close();
@@ -222,16 +219,6 @@ Gracias.`,
             </p>
 
             <form onSubmit={onSubmit} className="relative flex flex-col gap-5">
-              <input
-                type="text"
-                name="hp_trap_field"
-                value={form.website}
-                onChange={set("website")}
-                tabIndex={-1}
-                autoComplete="off"
-                aria-hidden="true"
-                className="absolute -left-[9999px] h-0 w-0 opacity-0"
-              />
               {isWhatsapp ? (
               <div className="grid gap-5 sm:grid-cols-3">
                 <label className="flex flex-col gap-2 sm:col-span-1">
