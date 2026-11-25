@@ -61,6 +61,8 @@ interface AdminContextValue {
 
   login: (email: string, password: string) => Promise<Result>;
   logout: () => void;
+  /** True after the server rejected a request because the session ended (signed out elsewhere or expired). */
+  sessionExpired: boolean;
 
   moveLead: (id: string, stage: LeadStage, outcome?: LeadOutcome) => Promise<Result>;
   setLeadOutcome: (id: string, outcome: LeadOutcome) => Promise<Result>;
@@ -95,6 +97,21 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [serverChecked, setServerChecked] = useState(false);
   const [catalog, setCatalog] = useState<AdminProperty[]>([]);
   const [leadList, setLeadList] = useState<Lead[]>([]);
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  /**
+   * The cookie is shared by every tab: signing out in one tab (or the 8 h expiry)
+   * ends the session for all of them. Any 401 means this tab is stale, so drop
+   * the user and let the shell send it to the login screen instead of failing
+   * silently on every save.
+   */
+  const guard = useCallback((res: Response) => {
+    if (res.status === 401) {
+      setAuthUser(null);
+      setSessionExpired(true);
+    }
+    return res;
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -118,7 +135,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const refreshStaff = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/users", { cache: "no-store" });
+      const res = guard(await fetch("/api/admin/users", { cache: "no-store" }));
       if (!res.ok) return;
       const data = await readJson<{ users?: SessionUser[] }>(res);
       // Defensive: the super admin must never appear in any directory.
@@ -126,7 +143,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     } catch {
       // Leave the previous list in place.
     }
-  }, []);
+  }, [guard]);
 
   const userId = currentUser?.id;
   useEffect(() => {
@@ -187,6 +204,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       const data = await readJson<{ user?: SessionUser; error?: string }>(res);
       if (res.ok && data.user) {
         setAuthUser(data.user);
+        setSessionExpired(false);
         return ok;
       }
       if (res.status === 429 && data.error) return fail(data.error);
@@ -203,6 +221,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       const data = await readJson<{ user?: SessionUser; error?: string }>(res);
       if (!res.ok || !data.user) return fail(data.error ?? BAD_CREDENTIALS);
       setAuthUser(data.user);
+      setSessionExpired(false);
       return ok;
     } catch (error) {
       const code = (error as { code?: string }).code;
@@ -240,11 +259,11 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       setLeadList((list) => list.map((l) => (l.id === id ? local(l) : l)));
       const rollback = () => setLeadList((list) => list.map((l) => (l.id === id ? previous : l)));
       try {
-        const res = await fetch(`/api/admin/leads/${encodeURIComponent(id)}`, {
+        const res = guard(await fetch(`/api/admin/leads/${encodeURIComponent(id)}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
-        });
+        }));
         const data = await readJson<{ lead?: Lead; error?: string }>(res);
         if (!res.ok || !data.lead) {
           rollback();
@@ -258,7 +277,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         return fail("No pudimos conectar con el servidor.");
       }
     },
-    [currentUser, leadList],
+    [currentUser, leadList, guard],
   );
 
   const moveLead = useCallback<AdminContextValue["moveLead"]>(
@@ -288,7 +307,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     async (init: RequestInit, url = "/api/admin/properties"): Promise<Result> => {
       if (!allowed("properties:write")) return fail("No tenés permiso para editar propiedades.");
       try {
-        const res = await fetch(url, init);
+        const res = guard(await fetch(url, init));
         const data = await readJson<{ properties?: AdminProperty[]; error?: string }>(res);
         if (!res.ok || !data.properties) return fail(data.error ?? "No pudimos guardar los cambios.");
         setCatalog(data.properties);
@@ -297,7 +316,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         return fail("No pudimos conectar con el servidor.");
       }
     },
-    [allowed],
+    [allowed, guard],
   );
 
   const saveProperty = useCallback<AdminContextValue["saveProperty"]>(
@@ -341,7 +360,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       body.set("file", file);
       if (commit) body.set("commit", "1");
       try {
-        const res = await fetch("/api/admin/properties/import", { method: "POST", body });
+        const res = guard(await fetch("/api/admin/properties/import", { method: "POST", body }));
         const data = await readJson<
           PropertyImportSummary & { properties?: AdminProperty[]; error?: string }
         >(res);
@@ -358,7 +377,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         return { ok: false, error: "No pudimos conectar con el servidor." };
       }
     },
-    [allowed],
+    [allowed, guard],
   );
 
   const saveUser = useCallback<AdminContextValue["saveUser"]>(
@@ -368,7 +387,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       }
       if ((input.role as string) === "superadmin") return fail("Ese rol no se puede asignar.");
       try {
-        const res = await fetch(input.id ? `/api/admin/users/${encodeURIComponent(input.id)}` : "/api/admin/users", {
+        const res = guard(await fetch(input.id ? `/api/admin/users/${encodeURIComponent(input.id)}` : "/api/admin/users", {
           method: input.id ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -378,7 +397,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
             role: input.role,
             active: input.active,
           }),
-        });
+        }));
         const data = await readJson<{ error?: string }>(res);
         if (!res.ok) return fail(data.error ?? "No pudimos guardar el usuario.");
         await refreshStaff();
@@ -387,7 +406,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         return fail("No pudimos conectar con el servidor.");
       }
     },
-    [allowed, refreshStaff],
+    [allowed, refreshStaff, guard],
   );
 
   const setUserActive = useCallback<AdminContextValue["setUserActive"]>(
@@ -396,11 +415,11 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         return fail("Solo los administradores pueden gestionar usuarios.");
       }
       try {
-        const res = await fetch(`/api/admin/users/${encodeURIComponent(id)}`, {
+        const res = guard(await fetch(`/api/admin/users/${encodeURIComponent(id)}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ active }),
-        });
+        }));
         const data = await readJson<{ error?: string }>(res);
         if (!res.ok) return fail(data.error ?? "No pudimos actualizar el usuario.");
         await refreshStaff();
@@ -409,7 +428,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         return fail("No pudimos conectar con el servidor.");
       }
     },
-    [allowed, refreshStaff],
+    [allowed, refreshStaff, guard],
   );
 
   const value = useMemo<AdminContextValue>(
@@ -422,6 +441,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       can: allowed,
       login,
       logout,
+      sessionExpired,
       moveLead,
       setLeadOutcome,
       reassignLead,
@@ -442,6 +462,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       allowed,
       login,
       logout,
+      sessionExpired,
       moveLead,
       setLeadOutcome,
       reassignLead,

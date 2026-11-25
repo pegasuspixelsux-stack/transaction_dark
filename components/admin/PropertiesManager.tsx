@@ -274,7 +274,12 @@ export function PropertiesManager() {
             featuredFull={featuredCount >= MAX_FEATURED}
             heroFull={heroCount >= MAX_HERO}
             onSubmit={async (input) => {
-              if (await report(saveProperty(input))) setEditing(null);
+              const result = await saveProperty(input);
+              if (result.ok) {
+                setNotice(null);
+                setEditing(null);
+              }
+              return result;
             }}
           />
         ) : null}

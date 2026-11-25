@@ -138,7 +138,8 @@ export function PropertyForm({
   /** True when 5 other properties already hold the slot, so this one cannot take it. */
   featuredFull: boolean;
   heroFull: boolean;
-  onSubmit: (input: PropertyInput) => void | Promise<void>;
+  /** Resolves with the server's answer so a refusal is shown inside the dialog. */
+  onSubmit: (input: PropertyInput) => Promise<{ ok: true } | { ok: false; error: string }>;
   onCancel: () => void;
 }) {
   const [form, setForm] = useState<FormState>(() =>
@@ -150,6 +151,9 @@ export function PropertyForm({
     ? types
     : [{ id: form.propertyType, label: form.propertyType, built: true }, ...types];
   const [errors, setErrors] = useState<Errors>({});
+  const [saving, setSaving] = useState(false);
+  /** Shown next to the save button: the server's refusal, or a pointer to invalid fields above. */
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [featureDraft, setFeatureDraft] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -207,12 +211,19 @@ export function PropertyForm({
     }
   }
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
+    if (saving) return;
     const found = validate(form);
     setErrors(found);
-    if (Object.keys(found).length > 0) return;
-    onSubmit({
+    if (Object.keys(found).length > 0) {
+      // The invalid field may be scrolled out of view in this long dialog.
+      setSubmitError("Revisá los campos marcados en rojo.");
+      return;
+    }
+    setSubmitError(null);
+    setSaving(true);
+    const result = await onSubmit({
       ...(property ? { id: property.id } : {}),
       newId: form.propertyId.trim(),
       title: form.title.trim(),
@@ -239,6 +250,8 @@ export function PropertyForm({
       featured: form.featured,
       hero: form.hero,
     });
+    setSaving(false);
+    if (!result.ok) setSubmitError(result.error);
   }
 
   return (
@@ -511,10 +524,16 @@ export function PropertyForm({
         )}
       </Field>
 
+      {submitError ? (
+        <p role="alert" className="rounded-xl bg-admin-bad/10 px-4 py-3 text-callout text-admin-bad">
+          {submitError}
+        </p>
+      ) : null}
+
       <div className="flex flex-wrap justify-end gap-3 pt-2">
         <Button onClick={onCancel}>Cancelar</Button>
-        <Button type="submit" variant="primary">
-          {property ? "Guardar cambios" : "Crear propiedad"}
+        <Button type="submit" variant="primary" disabled={saving}>
+          {saving ? "Guardando…" : property ? "Guardar cambios" : "Crear propiedad"}
         </Button>
       </div>
     </form>

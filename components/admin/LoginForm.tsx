@@ -18,7 +18,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginForm() {
   const router = useRouter();
-  const { status, user, login } = useAdmin();
+  const { status, user, login, sessionExpired } = useAdmin();
   const [mode, setMode] = useState<"login" | "reset">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -199,6 +199,11 @@ export function LoginForm() {
                 {formError ? (
                   <p role="alert" className="text-sm text-admin-bad">
                     {formError}
+                  </p>
+                ) : sessionExpired ? (
+                  <p role="status" className="text-sm text-admin-warn">
+                    Tu sesión se cerró (se cerró sesión en otra pestaña o venció). Ingresá de nuevo; los cambios sin
+                    guardar se perdieron.
                   </p>
                 ) : null}
 
