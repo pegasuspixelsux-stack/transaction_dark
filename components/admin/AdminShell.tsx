@@ -8,10 +8,12 @@ import {
   Inbox,
   LayoutDashboard,
   LogOut,
+  MapPin,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
+  Shapes,
   SquareKanban,
   Users,
   X,
@@ -35,6 +37,8 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: "/admin", label: "Resumen", Icon: LayoutDashboard },
   { href: "/admin/properties", label: "Propiedades", Icon: Building2 },
+  { href: "/admin/zonas", label: "Zonas", Icon: MapPin, requires: "properties:write" },
+  { href: "/admin/tipos", label: "Tipos de propiedad", Icon: Shapes, requires: "properties:write" },
   { href: "/admin/consultas", label: "Consultas", Icon: Inbox },
   { href: "/admin/leads", label: "Pipeline de consultas", Icon: SquareKanban },
   { href: "/admin/users", label: "Gestión de usuarios", Icon: Users, requires: "users:manage" },
@@ -96,42 +100,43 @@ export function AdminShell({ children }: { children: ReactNode }) {
         aria-current={active ? "page" : undefined}
         onClick={() => setDrawerOpen(false)}
         className={cn(
-          "flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent",
+          "flex min-h-11 items-center gap-3 rounded-lg px-3 text-body transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent",
           collapsed && "lg:justify-center",
           active
-            ? "bg-white/15 text-white"
-            : "text-white/80 hover:bg-white/10 hover:text-white active:bg-white/15",
+            ? "bg-white/15 font-medium text-white"
+            : "text-white/85 hover:bg-white/10 hover:text-white active:bg-white/15",
         )}
       >
-        <Icon className={cn("size-5 shrink-0", active && "text-white")} aria-hidden />
+        <Icon className={cn("size-5 shrink-0", active ? "text-sky-200" : "text-sky-300")} strokeWidth={1.75} aria-hidden />
         <span className={cn(collapsed && "lg:sr-only")}>{label}</span>
       </Link>
     );
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="dash flex min-h-screen">
       {drawerOpen ? (
         <button
           type="button"
           aria-label="Cerrar menú"
           onClick={() => setDrawerOpen(false)}
-          className="fixed inset-0 z-30 bg-slate-900/60 lg:hidden"
+          className="fixed inset-0 z-30 bg-slate-900/30 lg:hidden"
         />
       ) : null}
 
       <aside
         id="admin-sidebar"
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col admin-dark border-r border-white/10 bg-slate-900 transition-transform duration-200 ease-out motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
+          // Sidebar: solid brand blue (admin-dark re-themes the controls inside it), light-blue icons.
+          "admin-dark fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-white/10 bg-blue-900 transition-transform duration-300 ease-out motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
           drawerOpen ? "translate-x-0" : "-translate-x-full",
           collapsed ? "lg:w-20" : "lg:w-64",
         )}
       >
-        <div className="flex h-16 items-center justify-between gap-2 border-b border-admin-line px-4">
+        <div className="flex h-16 items-center justify-between gap-2 px-5">
           <span
             className={cn(
-              "truncate text-xs uppercase tracking-wordmark",
+              "truncate text-headline text-white",
               collapsed && "lg:sr-only",
             )}
           >
@@ -146,11 +151,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </IconButton>
         </div>
 
-        <nav aria-label="Administración" className="flex-1 space-y-1 p-3">
+        <nav aria-label="Administración" className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2">
           {items.map(renderLink)}
         </nav>
 
-        <div className="space-y-1 border-t border-admin-line p-3">
+        <div className="space-y-0.5 border-t border-white/10 px-3 py-3">
           {showSettings ? renderLink(SETTINGS_ITEM) : null}
           <button
             type="button"
@@ -159,15 +164,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
             aria-controls="admin-sidebar"
             title={collapsed ? "Expandir barra lateral" : "Contraer barra lateral"}
             className={cn(
-              "hidden min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-white/80 transition-colors duration-200 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:bg-white/15",
+              "hidden min-h-11 w-full items-center gap-3 rounded-lg px-3 text-body text-white/85 transition-colors duration-150 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:bg-white/15",
               "lg:flex",
               collapsed && "justify-center",
             )}
           >
             {collapsed ? (
-              <PanelLeftOpen className="size-5" aria-hidden />
+              <PanelLeftOpen className="size-5 text-sky-300" strokeWidth={1.75} aria-hidden />
             ) : (
-              <PanelLeftClose className="size-5" aria-hidden />
+              <PanelLeftClose className="size-5 text-sky-300" strokeWidth={1.75} aria-hidden />
             )}
             <span className={cn(collapsed && "sr-only")}>Contraer</span>
           </button>
@@ -175,7 +180,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-admin-line bg-admin-bg/80 px-4 backdrop-blur-xl sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-admin-line/70 bg-admin-bg/75 px-4 backdrop-blur-2xl backdrop-saturate-150 sm:px-6 lg:px-10">
           <IconButton
             label="Abrir menú"
             className="lg:hidden"
@@ -189,12 +194,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
-              <p className="text-sm text-admin-ink">{user.fullName}</p>
-              <p className="text-sm text-admin-muted">{user.email}</p>
+              <p className="text-callout font-medium text-admin-ink">{user.fullName}</p>
+              <p className="text-footnote text-admin-muted">{user.email}</p>
             </div>
             <span
               aria-hidden
-              className="flex size-11 items-center justify-center rounded-full border border-admin-line bg-admin-panel-strong text-xs tracking-luxury"
+              className="flex size-10 items-center justify-center rounded-full bg-slate-900/[0.08] text-footnote font-semibold"
             >
               {initials(user.fullName)}
             </span>
@@ -213,7 +218,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-8 sm:px-6 lg:px-10">{children}</main>
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-16 pt-8 sm:px-6 lg:px-10 lg:pt-10">{children}</main>
       </div>
     </div>
   );

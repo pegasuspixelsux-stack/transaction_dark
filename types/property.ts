@@ -1,11 +1,8 @@
-export type PropertyZone =
-  | "José Ignacio"
-  | "Manantiales"
-  | "La Barra"
-  | "Península"
-  | "Mansa";
+/** A zone name, managed in the admin "Zonas" page (see lib/zones.ts). */
+export type PropertyZone = string;
 
-export type PropertyType = "house" | "apartment" | "land" | "farm" | "field";
+/** A property type id, managed in the admin "Tipos" page (see lib/property-types.ts). */
+export type PropertyType = string;
 
 export interface Property {
   id: string;

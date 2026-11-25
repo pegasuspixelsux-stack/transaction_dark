@@ -25,7 +25,7 @@ const snippet = (text: string | undefined, max = 90) => {
 };
 
 const actionLink =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-admin-line px-5 text-xs uppercase tracking-luxury text-admin-ink transition-colors duration-200 hover:bg-admin-panel-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent active:bg-admin-panel";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900/[0.05] px-5 text-footnote font-medium text-admin-ink transition-colors duration-200 hover:bg-admin-panel-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent active:bg-admin-panel";
 
 export function ConsultasList() {
   const { status, leads, users, can, moveLead } = useAdmin();
@@ -139,11 +139,11 @@ export function ConsultasList() {
         ) : null}
       </div>
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:max-w-xl">
-        <label className="block text-xs uppercase tracking-luxury">
+        <label className="block text-footnote font-medium">
           <span className="mb-2 block">Creado desde</span>
           <input type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} className={inputClass} />
         </label>
-        <label className="block text-xs uppercase tracking-luxury">
+        <label className="block text-footnote font-medium">
           <span className="mb-2 block">Creado hasta</span>
           <input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} className={inputClass} />
         </label>
@@ -198,7 +198,7 @@ export function ConsultasList() {
           {/* Table from md up */}
           <div className="hidden overflow-x-auto rounded-2xl border border-admin-line md:block">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-admin-line bg-admin-panel text-xs uppercase tracking-luxury text-admin-muted">
+              <thead className="border-b border-admin-line bg-admin-panel text-footnote font-medium text-admin-muted">
                 <tr>
                   {["Nombre", "Contacto", "Propiedad", "Fecha", "Estado", "Mensaje"].map((h) => (
                     <th key={h} scope="col" className="px-4 py-3 font-normal">
@@ -353,7 +353,7 @@ function DetailDrawer({
       >
         <div className="flex items-start justify-between gap-4 border-b border-admin-line p-6">
           <div className="min-w-0">
-            <h2 id="consulta-title" className="truncate font-display text-2xl font-normal tracking-tight">
+            <h2 id="consulta-title" className="truncate text-title-2">
               {lead.name}
             </h2>
             <div className="mt-2">
@@ -375,7 +375,7 @@ function DetailDrawer({
             ))}
           </dl>
           <div>
-            <h3 className="mb-2 text-xs uppercase tracking-luxury text-admin-muted">Mensaje</h3>
+            <h3 className="mb-2 text-footnote font-medium text-admin-muted">Mensaje</h3>
             <p className="max-w-prose whitespace-pre-line text-sm leading-relaxed">
               {lead.message || "Sin mensaje."}
             </p>

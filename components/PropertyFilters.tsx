@@ -1,17 +1,8 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { PropertyType, PropertyZone } from "@/types/property";
-import { propertyTypeLabel } from "@/lib/properties";
+import type { PropertyTypeDef } from "@/lib/property-types";
 
-const ZONES: PropertyZone[] = [
-  "José Ignacio",
-  "Manantiales",
-  "La Barra",
-  "Península",
-  "Mansa",
-];
-const TYPES: PropertyType[] = ["house", "apartment", "land", "farm", "field"];
 const PRICE_OPTIONS = [
   { label: "Sin límite", value: "" },
   { label: "Hasta US$ 1M", value: "1000000" },
@@ -33,7 +24,8 @@ const rowClass =
 const selectClass =
   "w-full border border-hairline bg-surface px-3 py-2 text-sm text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-0 focus-visible:outline-ink";
 
-export function PropertyFilters() {
+/** `zones` / `types`: from the admin "Zonas" and "Tipos" pages. */
+export function PropertyFilters({ zones, types }: { zones: string[]; types: PropertyTypeDef[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
@@ -70,7 +62,7 @@ export function PropertyFilters() {
     <aside className="flex flex-col gap-8 lg:sticky lg:top-28 lg:self-start">
       <div className={groupClass}>
         <p className={legendClass}>Zona</p>
-        {ZONES.map((zone) => (
+        {zones.map((zone) => (
           <label key={zone} className={rowClass}>
             <input
               type="checkbox"
@@ -85,15 +77,15 @@ export function PropertyFilters() {
 
       <div className={groupClass}>
         <p className={legendClass}>Tipo</p>
-        {TYPES.map((type) => (
-          <label key={type} className={rowClass}>
+        {types.map((type) => (
+          <label key={type.id} className={rowClass}>
             <input
               type="checkbox"
-              checked={list("tipo").includes(type)}
-              onChange={() => toggleMulti("tipo", type)}
+              checked={list("tipo").includes(type.id)}
+              onChange={() => toggleMulti("tipo", type.id)}
               className="size-4 accent-ink"
             />
-            {propertyTypeLabel(type)}
+            {type.label}
           </label>
         ))}
       </div>

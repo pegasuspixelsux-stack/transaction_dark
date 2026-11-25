@@ -8,7 +8,22 @@ import { STAGE_DOT, STAGE_LABELS } from "@/lib/admin/stages";
 import { formatDate } from "@/lib/admin/utils";
 import { LEAD_STAGES } from "@/types/admin";
 import { cn } from "@/lib/utils";
+import { usePropertyTypes } from "@/lib/admin/use-zones";
+import { normalizeTypeId } from "@/lib/property-types";
+import { DonutChart, type DonutSlice } from "./DonutChart";
 import { EmptyState, GlassCard, PageHeader, Spinner } from "./ui";
+
+/**
+ * Categorical slots 1–5, assigned by the type's position on the "Tipos" page.
+ * Validated for color-vision deficiency including the ring's wrap-around
+ * (slot 5 touches slot 1); a 6th+ type folds into "Otros tipos" instead of a
+ * generated hue.
+ */
+const TYPE_COLORS = ["#257de0", "#f47230", "#00b894", "#f2a600", "#ee7fac"];
+
+/** Zones ranked by listings for sale: one blue, darkest = most (validated ordinal ramp). */
+const RANK_RAMP = ["#0f4a96", "#1b64be", "#257de0", "#519ced", "#84b9f3"];
+const OTHER_COLOR = "#a1a1aa";
 
 export function OverviewDashboard() {
   const { status, user, properties, leads, users, can } = useAdmin();
@@ -35,6 +50,41 @@ export function OverviewDashboard() {
       activeUsers: users.filter((u) => u.active).length,
     };
   }, [properties, leads, users, now]);
+
+  const types = usePropertyTypes();
+  const typeSlices = useMemo<DonutSlice[]>(() => {
+    if (types === null) return [];
+    const list = types;
+    const count = (id: string) => properties.filter((p) => normalizeTypeId(p.propertyType) === id).length;
+    const named = list.slice(0, TYPE_COLORS.length).map((t, i) => ({
+      key: t.id,
+      label: t.label,
+      color: TYPE_COLORS[i],
+      value: count(t.id),
+    }));
+    const namedIds = new Set(named.map((s) => s.key));
+    const rest = properties.filter((p) => !namedIds.has(normalizeTypeId(p.propertyType))).length;
+    return rest > 0 ? [...named, { key: "__other", label: "Otros tipos", value: rest, color: OTHER_COLOR }] : named;
+  }, [properties, types]);
+
+  const zoneSlices = useMemo<DonutSlice[]>(() => {
+    const counts = new Map<string, number>();
+    for (const p of properties) {
+      if (p.listingType !== "sale") continue;
+      const zone = p.zone || "Sin zona";
+      counts.set(zone, (counts.get(zone) ?? 0) + 1);
+    }
+    const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "es"));
+    const top = ranked.slice(0, RANK_RAMP.length).map(([zone, value], i) => ({
+      key: zone,
+      label: zone,
+      value,
+      color: RANK_RAMP[i],
+    }));
+    const rest = ranked.slice(RANK_RAMP.length).reduce((sum, [, n]) => sum + n, 0);
+    return rest > 0 ? [...top, { key: "__other", label: "Otras zonas", value: rest, color: OTHER_COLOR }] : top;
+  }, [properties]);
+
 
   if (status === "loading" || !user) return <Spinner />;
 
@@ -65,16 +115,33 @@ export function OverviewDashboard() {
       <section aria-label="Métricas clave" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map((m) => (
           <GlassCard key={m.label} className="p-6">
-            <p className="text-xs uppercase tracking-luxury text-admin-muted">{m.label}</p>
-            <p className="mt-4 font-display text-4xl font-normal tracking-tight">{m.value}</p>
+            <p className="text-footnote font-medium text-admin-muted">{m.label}</p>
+            <p className="mt-3 text-hero-number tabular-nums">{m.value}</p>
             <p className="mt-2 text-sm text-admin-muted">{m.note}</p>
           </GlassCard>
         ))}
       </section>
 
+      <section aria-label="Composición del catálogo" className="mt-6 grid gap-6 lg:grid-cols-2">
+        <GlassCard className="p-6">
+          <h2 className="text-title-3">Propiedades por tipo</h2>
+          <p className="mt-1 text-footnote text-admin-muted">Todo el catálogo, publicadas y borradores.</p>
+          <DonutChart
+            slices={typeSlices}
+            totalLabel="propiedades"
+            emptyText={types === null ? "Cargando tipos…" : "Todavía no hay propiedades."}
+          />
+        </GlassCard>
+        <GlassCard className="p-6">
+          <h2 className="text-title-3">Zonas con más propiedades en venta</h2>
+          <p className="mt-1 text-footnote text-admin-muted">Ordenadas de mayor a menor; el azul más oscuro es la zona con más ofertas.</p>
+          <DonutChart slices={zoneSlices} totalLabel="en venta" emptyText="No hay propiedades en venta." />
+        </GlassCard>
+      </section>
+
       <div className="mt-6 grid gap-6 lg:grid-cols-5">
         <GlassCard className="p-6 lg:col-span-3">
-          <h2 className="font-display text-xl font-normal tracking-tight">Pipeline</h2>
+          <h2 className="text-title-3">Pipeline</h2>
           {leads.length === 0 ? (
             <p className="mt-4 text-sm text-admin-muted">Aún no hay consultas.</p>
           ) : (
@@ -100,14 +167,14 @@ export function OverviewDashboard() {
           )}
           <Link
             href="/admin/leads"
-            className="mt-6 inline-flex min-h-11 items-center gap-2 text-xs uppercase tracking-luxury text-admin-accent hover:text-admin-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent"
+            className="mt-6 inline-flex min-h-11 items-center gap-2 text-footnote font-medium text-admin-accent hover:text-admin-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent"
           >
             Abrir pipeline <ArrowRight className="size-4" aria-hidden />
           </Link>
         </GlassCard>
 
         <GlassCard className="p-6 lg:col-span-2">
-          <h2 className="font-display text-xl font-normal tracking-tight">Últimas consultas</h2>
+          <h2 className="text-title-3">Últimas consultas</h2>
           {recent.length === 0 ? (
             <div className="mt-4">
               <EmptyState title="Todavía no hay nada" body="Las nuevas consultas del sitio aparecerán acá." />

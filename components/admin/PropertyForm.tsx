@@ -11,6 +11,8 @@ import type {
 } from "@/types/admin";
 import type { PropertyInput } from "@/lib/admin/admin-context";
 import type { PropertyType, PropertyZone } from "@/types/property";
+import { uploadImage } from "@/lib/admin/upload-image";
+import type { PropertyTypeDef } from "@/lib/property-types";
 import { Button, Field, inputClass } from "./ui";
 
 interface FormState {
@@ -38,14 +40,6 @@ interface FormState {
   hero: boolean;
 }
 
-const ZONES: PropertyZone[] = ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"];
-const TYPES: { value: PropertyType; label: string }[] = [
-  { value: "house", label: "Casa" },
-  { value: "apartment", label: "Apartamento" },
-  { value: "land", label: "Terreno" },
-  { value: "farm", label: "Chacra" },
-  { value: "field", label: "Campo" },
-];
 
 const empty: FormState = {
   title: "",
@@ -65,7 +59,7 @@ const empty: FormState = {
   description: "",
   status: "draft",
   assignedAgentId: "",
-  zone: "José Ignacio",
+  zone: "",
   propertyType: "house",
   featured: false,
   hero: false,
@@ -90,7 +84,7 @@ function fromProperty(p: AdminProperty): FormState {
     description: p.description,
     status: p.status,
     assignedAgentId: p.assignedAgentId ?? "",
-    zone: p.zone ?? "José Ignacio",
+    zone: p.zone ?? "",
     // Records saved before the category change may still say "penthouse".
     propertyType: (p.propertyType as string) === "penthouse" ? "apartment" : (p.propertyType ?? "house"),
     featured: !!p.featured,
@@ -115,27 +109,11 @@ function validate(f: FormState): Errors {
 }
 
 const MAX_PHOTOS = 10;
-const MAX_EDGE_PX = 2000;
-const WEBP_QUALITY = 0.82;
-
-/** Downscale (never upscale) to MAX_EDGE_PX on the long side and re-encode as WebP. */
-async function toWebp(file: File): Promise<File> {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, MAX_EDGE_PX / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-  canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", WEBP_QUALITY));
-  if (!blob || blob.type !== "image/webp") throw new Error(`${file.name}: no pudimos convertir la imagen a WebP.`);
-  return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" });
-}
-
-
 export function PropertyForm({
   property,
   agents,
+  zones,
+  types,
   featuredFull,
   heroFull,
   onSubmit,
@@ -143,13 +121,24 @@ export function PropertyForm({
 }: {
   property: AdminProperty | null;
   agents: SessionUser[];
+  /** Zone names from the "Zonas" page, in display order. */
+  zones: string[];
+  /** Property types from the "Tipos" page, in display order. */
+  types: PropertyTypeDef[];
   /** True when 5 other properties already hold the slot, so this one cannot take it. */
   featuredFull: boolean;
   heroFull: boolean;
   onSubmit: (input: PropertyInput) => void | Promise<void>;
   onCancel: () => void;
 }) {
-  const [form, setForm] = useState<FormState>(property ? fromProperty(property) : empty);
+  const [form, setForm] = useState<FormState>(() =>
+    property ? fromProperty(property) : { ...empty, zone: zones[0] ?? "", propertyType: types[0]?.id ?? "house" },
+  );
+  // Keep a zone that was since removed or renamed selectable instead of silently switching it.
+  const zoneOptions = form.zone && !zones.includes(form.zone) ? [form.zone, ...zones] : zones;
+  const typeOptions = types.some((t) => t.id === form.propertyType)
+    ? types
+    : [{ id: form.propertyType, label: form.propertyType, built: true }, ...types];
   const [errors, setErrors] = useState<Errors>({});
   const [featureDraft, setFeatureDraft] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -158,28 +147,6 @@ export function PropertyForm({
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
-
-  async function uploadOne(file: File): Promise<string> {
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error(`${file.name}: usá una imagen JPG, PNG o WebP.`);
-    if (file.size > 10 * 1024 * 1024) throw new Error(`${file.name}: supera los 10 MB.`);
-    const webp = await toWebp(file);
-    const authRes = await fetch("/api/admin/imagekit-auth", { cache: "no-store" });
-    const auth = await authRes.json().catch(() => ({}));
-    if (!authRes.ok) throw new Error(auth.error ?? "No pudimos autorizar la subida.");
-    const body = new FormData();
-    body.set("file", webp);
-    body.set("fileName", webp.name);
-    body.set("folder", "/properties");
-    body.set("useUniqueFileName", "true");
-    body.set("publicKey", auth.publicKey);
-    body.set("token", auth.token);
-    body.set("expire", String(auth.expire));
-    body.set("signature", auth.signature);
-    const res = await fetch("https://upload.imagekit.io/api/v1/files/upload", { method: "POST", body });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.url) throw new Error(data.message ?? `${file.name}: no pudimos subir la imagen.`);
-    return data.url as string;
-  }
 
   async function onPickImages(e: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -193,7 +160,7 @@ export function PropertyForm({
     const problems: string[] = [];
     for (const file of files.slice(0, room)) {
       try {
-        added.push(await uploadOne(file));
+        added.push(await uploadImage(file, "/properties"));
       } catch (err) {
         problems.push(err instanceof Error ? err.message : "No pudimos subir la imagen.");
       }
@@ -307,7 +274,7 @@ export function PropertyForm({
         <Field label="Zona">
           {({ id }) => (
             <select id={id} value={form.zone} onChange={(e) => set("zone", e.target.value as PropertyZone)} className={inputClass}>
-              {ZONES.map((z) => (
+              {zoneOptions.map((z) => (
                 <option key={z} value={z}>{z}</option>
               ))}
             </select>
@@ -316,8 +283,8 @@ export function PropertyForm({
         <Field label="Tipo de propiedad">
           {({ id }) => (
             <select id={id} value={form.propertyType} onChange={(e) => set("propertyType", e.target.value as PropertyType)} className={inputClass}>
-              {TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
+              {typeOptions.map((t) => (
+                <option key={t.id} value={t.id}>{t.label}</option>
               ))}
             </select>
           )}
@@ -405,7 +372,7 @@ export function PropertyForm({
       </Field>
 
       <div>
-        <p className="mb-2 text-xs uppercase tracking-luxury text-admin-ink">Fotos ({form.photos.length}/{MAX_PHOTOS})</p>
+        <p className="mb-2 text-footnote font-medium text-admin-ink">Fotos ({form.photos.length}/{MAX_PHOTOS})</p>
         <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-admin-line px-4 py-6 text-center text-admin-muted focus-within:ring-2 focus-within:ring-admin-ink">
           <Upload className="size-5" aria-hidden />
           <span className="text-sm">{uploading ? "Subiendo…" : "Subir fotos (JPG, PNG o WebP, se convierten a WebP, hasta 10 MB cada una)"}</span>
@@ -436,7 +403,7 @@ export function PropertyForm({
                 {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary admin-supplied host */}
                 <img src={url} alt={`Foto ${i + 1} de la propiedad`} className="h-28 w-full object-cover" />
                 {i === 0 ? (
-                  <span className="absolute left-2 top-2 rounded-full bg-admin-accent px-2 py-0.5 text-[10px] uppercase tracking-luxury text-admin-accent-ink">Portada</span>
+                  <span className="absolute left-2 top-2 rounded-full bg-admin-accent px-2 py-0.5 text-caption font-medium text-admin-accent-ink">Portada</span>
                 ) : null}
                 <div className="flex justify-between gap-1 p-1.5 text-xs">
                   {i === 0 ? <span /> : (
@@ -464,7 +431,7 @@ export function PropertyForm({
       ) : null}
 
       <fieldset className="space-y-2">
-        <legend className="mb-2 text-xs uppercase tracking-luxury text-admin-ink">Página principal</legend>
+        <legend className="mb-2 text-footnote font-medium text-admin-ink">Página principal</legend>
         {([
           { key: "featured", label: "Propiedad destacada", full: featuredFull, hint: "Aparece en “Propiedades destacadas” (máx. 5)." },
           { key: "hero", label: "Mostrar en el hero", full: heroFull, hint: "Aparece en el carrusel principal (máx. 5)." },

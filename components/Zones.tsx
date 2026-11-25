@@ -3,51 +3,22 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { countByZone } from "@/lib/properties";
 import { getPublicProperties } from "@/lib/server/public-properties";
-import type { PropertyZone } from "@/types/property";
+import { getPublicZones } from "@/lib/server/public-config";
+import { MAX_HOME_ZONES } from "@/lib/zones";
 
-const zimg = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=80`;
-
-const ZONES: {
-  name: PropertyZone;
-  blurb: string;
-  image: string;
-  className: string;
-}[] = [
-  {
-    name: "José Ignacio",
-    blurb: "El pueblo de pescadores convertido en uno de los destinos más reconocidos de la costa uruguaya.",
-    image: zimg("1507525428034-b723cf961d3e"),
-    className: "sm:col-span-4 sm:row-span-2",
-  },
-  {
-    name: "Manantiales",
-    blurb: "La tranquilidad de un entorno costero en una zona de creciente desarrollo.",
-    image: zimg("1519046904884-53103b34b206"),
-    className: "sm:col-span-2 sm:row-span-2",
-  },
-  {
-    name: "La Barra",
-    blurb: "Galerías y arquitectura de autor sobre el arroyo Maldonado.",
-    image: zimg("1471922694854-ff1b63b20054"),
-    className: "sm:col-span-2",
-  },
-  {
-    name: "Península",
-    blurb: "El corazón histórico de Punta del Este, entre dos mares.",
-    image: zimg("1505142468610-359e7d316be0"),
-    className: "sm:col-span-2",
-  },
-  {
-    name: "Mansa",
-    blurb: "Atardeceres sobre aguas calmas y las torres frente al mar.",
-    image: zimg("1533105079780-92b9be482077"),
-    className: "sm:col-span-2",
-  },
+/** Bento layout for up to five tiles: one large, one tall, three small. */
+const TILE_CLASSES = [
+  "sm:col-span-4 sm:row-span-2",
+  "sm:col-span-2 sm:row-span-2",
+  "sm:col-span-2",
+  "sm:col-span-2",
+  "sm:col-span-2",
 ];
 
 export async function Zones() {
-  const properties = await getPublicProperties();
+  const [properties, zones] = await Promise.all([getPublicProperties(), getPublicZones()]);
+  const homeZones = zones.filter((z) => z.showOnHome).slice(0, MAX_HOME_ZONES);
+  if (homeZones.length === 0) return null;
   return (
     <section id="zonas" className="scroll-mt-24 border-y border-hairline bg-surface">
       <div className="container-page py-24 sm:py-32">
@@ -56,11 +27,11 @@ export async function Zones() {
           Dónde trabajamos
         </h2>
         <p className="mt-4 max-w-md text-base leading-relaxed text-ink-muted">
-          Cinco enclaves donde se concentra la demanda. También asesoramos en el
+          Los enclaves donde se concentra la demanda. También asesoramos en el
           resto del litoral esteño y en la costa de Rocha.
         </p>
         <div className="mt-14 grid grid-cols-1 gap-4 sm:auto-rows-[240px] sm:grid-cols-6">
-          {ZONES.map((zone) => {
+          {homeZones.map((zone, i) => {
             const count = countByZone(properties, zone.name);
             return (
               <Link
@@ -68,7 +39,7 @@ export async function Zones() {
                 href={`/propiedades?zona=${encodeURIComponent(zone.name)}`}
                 className={cn(
                   "group relative min-h-[240px] overflow-hidden border border-hairline focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink sm:min-h-0",
-                  zone.className,
+                  TILE_CLASSES[i],
                 )}
               >
                 <Image

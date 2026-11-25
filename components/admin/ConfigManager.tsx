@@ -33,7 +33,7 @@ function setIn<T>(obj: T, path: string, value: unknown): T {
 function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
     <GlassCard className="p-6">
-      <h2 className="font-display text-xl font-normal tracking-tight">{title}</h2>
+      <h2 className="text-title-3">{title}</h2>
       {hint ? <p className="mt-1 text-sm text-admin-muted">{hint}</p> : null}
       <div className="mt-5 grid gap-5 sm:grid-cols-2">{children}</div>
     </GlassCard>
@@ -121,7 +121,7 @@ export function ConfigManager() {
       <div data-rise>
         <PageHeader eyebrow="Negocio" title="Configuración del sitio" />
         <GlassCard className="max-w-md p-6">
-          <h2 className="font-display text-xl font-normal tracking-tight">Confirmá tu identidad</h2>
+          <h2 className="text-title-3">Confirmá tu identidad</h2>
           <p className="mt-2 text-sm text-admin-muted">
             Para editar la configuración, el servidor necesita verificar tu contraseña ({user.email}).
           </p>
@@ -319,7 +319,7 @@ export function ConfigManager() {
         </Section>
 
         <GlassCard className="p-6">
-          <h2 className="font-display text-xl font-normal tracking-tight">Enlaces externos</h2>
+          <h2 className="text-title-3">Enlaces externos</h2>
           <p className="mt-1 text-sm text-admin-muted">Sitios o recursos adicionales (hasta 20).</p>
           <ul className="mt-5 space-y-4">
             {draft.externalLinks.map((link, i) => (
@@ -361,7 +361,7 @@ export function ConfigManager() {
         </Section>
 
         <GlassCard className="p-6">
-          <h2 className="font-display text-xl font-normal tracking-tight">Notificaciones e indicadores</h2>
+          <h2 className="text-title-3">Notificaciones e indicadores</h2>
           <Field
             label="Correos que reciben las consultas nuevas"
             hint="Uno por línea."
@@ -381,7 +381,7 @@ export function ConfigManager() {
             )}
           </Field>
 
-          <p className="mb-2 mt-6 text-xs uppercase tracking-luxury text-admin-ink">Indicadores de funcionalidades</p>
+          <p className="mb-2 mt-6 text-footnote font-medium text-admin-ink">Indicadores de funcionalidades</p>
           <label className="flex min-h-11 cursor-pointer items-center gap-3 border-b border-admin-line text-sm">
             <input
               type="checkbox"

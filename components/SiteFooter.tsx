@@ -1,18 +1,25 @@
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SOCIAL } from "@/components/social-icons";
-import { getSiteConfig, telHref } from "@/lib/server/public-config";
+import { getPublicZones, getSiteConfig, telHref } from "@/lib/server/public-config";
 
 const staticColumns: { heading: string; href?: string; items: string[]; hrefs?: string[] }[] = [
   { heading: "Propiedades", href: "/propiedades", items: ["Casas", "Apartamentos", "Terrenos", "Chacras", "Campos"] },
-  { heading: "Zonas", href: "/#zonas", items: ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"] },
   { heading: "Transaction", href: "/#nosotros", items: ["Nosotros", "Contacto"] },
 ];
 
 export async function SiteFooter() {
-  const config = await getSiteConfig();
+  const [config, zones] = await Promise.all([getSiteConfig(), getPublicZones()]);
   const { city } = config.address;
+  const homeZones = zones.filter((z) => z.showOnHome);
   const FOOTER_COLUMNS = [
-    ...staticColumns,
+    staticColumns[0],
+    {
+      heading: "Zonas",
+      href: "/#zonas",
+      items: homeZones.map((z) => z.name),
+      hrefs: homeZones.map((z) => `/propiedades?zona=${encodeURIComponent(z.name)}`),
+    },
+    ...staticColumns.slice(1),
     {
       heading: "Contacto",
       href: "/#contacto",

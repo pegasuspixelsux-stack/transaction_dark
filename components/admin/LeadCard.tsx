@@ -61,7 +61,7 @@ export function LeadCard({
             {lead.name}
             {lead.priority ? (
               <span
-                className={`ml-2 border px-1.5 py-0.5 text-[10px] uppercase tracking-luxury ${
+                className={`ml-2 border px-1.5 py-0.5 text-caption font-medium ${
                   lead.priority === "alta"
                     ? "border-admin-ok text-admin-ok"
                     : lead.priority === "media"
@@ -123,7 +123,7 @@ export function LeadCard({
                 aria-pressed={lead.outcome === o}
                 onClick={() => onOutcome(o)}
                 className={cn(
-                  "min-h-11 rounded-lg border px-3 text-xs uppercase tracking-luxury transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent disabled:cursor-not-allowed disabled:opacity-40",
+                  "min-h-11 rounded-lg border px-3 text-footnote font-medium transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent disabled:cursor-not-allowed disabled:opacity-40",
                   lead.outcome === o
                     ? o === "won"
                       ? "border-admin-ok/50 bg-admin-ok/15 text-admin-ok"
@@ -140,7 +140,7 @@ export function LeadCard({
 
       <div className="mt-3 space-y-2">
         <label className="block">
-          <span className="mb-1 block text-xs uppercase tracking-luxury text-admin-ink">
+          <span className="mb-1 block text-footnote font-medium text-admin-ink">
             Etapa
           </span>
           <select
@@ -159,7 +159,7 @@ export function LeadCard({
 
         {canReassign ? (
           <label className="block">
-            <span className="mb-1 block text-xs uppercase tracking-luxury text-admin-ink">
+            <span className="mb-1 block text-footnote font-medium text-admin-ink">
               Agente asignado
             </span>
             <select

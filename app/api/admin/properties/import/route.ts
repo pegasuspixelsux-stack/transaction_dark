@@ -8,6 +8,9 @@ import {
   readInventoryRows,
 } from "@/lib/server/property-import";
 import { readProperties, writeProperties } from "@/lib/server/property-store";
+import { readZones } from "@/lib/server/zone-store";
+import { readPropertyTypes } from "@/lib/server/property-type-store";
+import { zoneNames } from "@/lib/zones";
 
 const noStore = { "Cache-Control": "no-store" };
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: noStore });
@@ -39,7 +42,7 @@ export async function POST(request: Request) {
   let report;
   try {
     const rows = await readInventoryRows(file);
-    report = applyInventoryRows(await readProperties(), rows);
+    report = applyInventoryRows(await readProperties(), rows, zoneNames(await readZones()), await readPropertyTypes());
   } catch (error) {
     if (error instanceof ImportFileError) return json({ error: error.message }, 422);
     console.error("[properties] import failed:", error);

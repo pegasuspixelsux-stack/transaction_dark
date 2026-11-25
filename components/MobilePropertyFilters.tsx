@@ -1,25 +1,10 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { PropertyType, PropertyZone } from "@/types/property";
-import { propertyTypeLabel } from "@/lib/properties";
+import type { PropertyTypeDef } from "@/lib/property-types";
 
-const CATEGORIES = [
-  { label: "Destacados", key: "featured", value: "true", group: "featured" },
-  { label: "Apartamentos", key: "tipo", value: "apartment", group: "tipo" },
-  { label: "Casa", key: "tipo", value: "house", group: "tipo" },
-  { label: "Terrenos", key: "tipo", value: "land", group: "tipo" },
-];
-
-const ZONES: PropertyZone[] = [
-  "José Ignacio",
-  "Manantiales",
-  "La Barra",
-  "Península",
-  "Mansa",
-];
-
-export function MobilePropertyFilters() {
+/** `types`: from the admin "Tipos" page, in display order. */
+export function MobilePropertyFilters({ types }: { types: PropertyTypeDef[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
@@ -46,7 +31,10 @@ export function MobilePropertyFilters() {
     commit(params);
   };
 
-  const allItems = CATEGORIES;
+  const allItems = [
+    { label: "Destacados", key: "featured", value: "true", group: "featured" },
+    ...types.map((t) => ({ label: t.label, key: "tipo", value: t.id, group: "tipo" })),
+  ];
 
   const selectedZones = list("zona");
   const selectedTypes = list("tipo");
@@ -54,7 +42,7 @@ export function MobilePropertyFilters() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-4 gap-3">
+      <div className="-mx-4 flex gap-5 overflow-x-auto px-4 [scrollbar-width:none]">
         {allItems.map(({ label, key, value, group }) => {
             const isSelected =
               (group === "zona" && selectedZones.includes(value)) ||
@@ -65,7 +53,9 @@ export function MobilePropertyFilters() {
               <button
                 key={`${key}-${value}`}
                 onClick={() => setSingle(key, value)}
-                className="flex flex-col items-center gap-1 whitespace-nowrap"
+                type="button"
+                aria-pressed={isSelected}
+                className="flex min-h-11 shrink-0 flex-col items-center justify-center gap-1 whitespace-nowrap"
               >
                 <span
                   className={`text-xs font-medium transition-colors ${

@@ -83,7 +83,7 @@ export function LeadsBoard() {
                   )}
                 >
                   <header className="mb-3 flex items-center justify-between px-1 py-2">
-                    <h2 className="flex items-center gap-2 text-xs uppercase tracking-luxury text-admin-ink">
+                    <h2 className="flex items-center gap-2 text-footnote font-medium text-admin-ink">
                       <span aria-hidden className={cn("size-2 rounded-full", STAGE_DOT[stage])} />
                       {STAGE_LABELS[stage]}
                     </h2>

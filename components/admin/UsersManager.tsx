@@ -16,14 +16,14 @@ function Forbidden() {
   return (
     <div data-rise role="alert" className="mx-auto flex max-w-md flex-col items-center py-24 text-center">
       <ShieldAlert className="size-10 text-admin-bad" aria-hidden />
-      <p className="mt-6 text-xs uppercase tracking-luxury text-admin-bad">Error 403</p>
-      <h1 className="mt-2 font-display text-3xl font-normal tracking-tight">Acceso no autorizado</h1>
+      <p className="mt-6 text-footnote font-medium text-admin-bad">Error 403</p>
+      <h1 className="mt-2 text-title-1">Acceso no autorizado</h1>
       <p className="mt-3 text-sm text-admin-muted">
         La gestión de usuarios está limitada a administradores. Si creés que es un error, pedile a un administrador que actualice tu rol.
       </p>
       <Link
         href="/admin"
-        className="mt-8 inline-flex min-h-11 items-center rounded-lg border border-admin-line px-5 text-xs uppercase tracking-luxury transition-colors duration-200 hover:bg-admin-panel-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent active:bg-admin-panel"
+        className="mt-8 inline-flex min-h-11 items-center rounded-xl bg-slate-900/[0.05] px-5 text-footnote font-medium transition-colors duration-200 hover:bg-admin-panel-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-admin-accent active:bg-admin-panel"
       >
         Volver al resumen
       </Link>
@@ -146,7 +146,7 @@ export function UsersManager() {
       <GlassCard className="overflow-x-auto">
         <table className="w-full min-w-[48rem] text-left text-sm">
           <thead>
-            <tr className="border-b border-admin-line text-xs uppercase tracking-luxury text-admin-ink">
+            <tr className="border-b border-admin-line text-footnote font-medium text-admin-ink">
               <th scope="col" className="px-5 py-4 font-normal">Usuario</th>
               <th scope="col" className="px-5 py-4 font-normal">Rol</th>
               <th scope="col" className="px-5 py-4 font-normal">Estado</th>
@@ -159,7 +159,7 @@ export function UsersManager() {
               <tr key={u.id} className="transition-colors duration-200 hover:bg-slate-50">
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-3">
-                    <span aria-hidden className="flex size-10 shrink-0 items-center justify-center rounded-full border border-admin-line bg-admin-panel-strong text-xs tracking-luxury">
+                    <span aria-hidden className="flex size-10 shrink-0 items-center justify-center rounded-full border border-admin-line bg-admin-panel-strong text-footnote font-semibold">
                       {initials(u.fullName)}
                     </span>
                     <div className="min-w-0">

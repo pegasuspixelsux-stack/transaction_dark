@@ -1,11 +1,10 @@
 /** Excel (.xlsx) import of the property catalog. Server-only. */
+import { resolveType, typeIds, type PropertyTypeDef } from "@/lib/property-types";
 import { readSheet } from "read-excel-file/universal";
 import {
   CURRENCIES,
   LISTINGS,
   STATUSES,
-  TYPES,
-  ZONES,
   saveIntoCatalog,
 } from "@/lib/server/property-input";
 import type { AdminProperty, ImportRowError } from "@/types/admin";
@@ -142,6 +141,8 @@ export async function readInventoryRows(file: Blob): Promise<{ row: number; valu
 export function applyInventoryRows(
   list: AdminProperty[],
   rows: { row: number; values: Record<string, Cell> }[],
+  zones: readonly string[],
+  types: PropertyTypeDef[],
 ): ImportReport {
   let current = list;
   let created = 0;
@@ -158,7 +159,8 @@ export function applyInventoryRows(
       currency: text(v.currency).toUpperCase(),
       location: text(v.location),
       zone: text(v.zone),
-      propertyType: canonical(text(v.propertyType)),
+      // A type id or its label ("Casa", "casa", "house").
+      propertyType: resolveType(types, text(v.propertyType)) ?? text(v.propertyType),
       bedrooms: number(v.bedrooms),
       bathrooms: number(v.bathrooms),
       areaM2: number(v.areaM2),
@@ -181,22 +183,24 @@ export function applyInventoryRows(
     const invalid: [string, string, readonly string[]][] = [
       ["Operación", input.listingType, LISTINGS],
       ["Moneda", input.currency, CURRENCIES],
-      ["Zona", input.zone, ZONES],
-      ["Tipo", input.propertyType, TYPES],
+      ["Zona", input.zone, zones],
+      ["Tipo", input.propertyType, typeIds(types)],
       ["Estado", input.status, STATUSES],
     ];
+    const typeLabels = Object.fromEntries(types.map((t) => [t.id, t.label.toLowerCase()]));
+    const labelOf = (o: string) => typeLabels[o] ?? VALUE_LABELS[o] ?? o;
     const badField = invalid.find(([, value, allowed]) => !allowed.includes(value));
     if (badField) {
       errors.push({
         row,
         title: input.title,
-        error: `Valor inválido en «${badField[0]}»: "${VALUE_LABELS[badField[1]] ?? badField[1]}". Usá: ${badField[2].map((o) => VALUE_LABELS[o] ?? o).join(" | ")}.`,
+        error: `Valor inválido en «${badField[0]}»: "${labelOf(badField[1])}". Usá: ${badField[2].map(labelOf).join(" | ")}.`,
       });
       continue;
     }
 
     const wasExisting = id !== "" && current.some((p) => p.id === id);
-    const result = saveIntoCatalog(current, input, { allowNewId: true });
+    const result = saveIntoCatalog(current, input, { zones, types: typeIds(types), allowNewId: true });
     if (!result.ok) {
       errors.push({ row, title: input.title, error: result.error });
       continue;

@@ -5,9 +5,10 @@ import { PropertySlideshow } from "@/components/PropertySlideshow";
 import { PropertyInquiryActions } from "@/components/PropertyInquiryActions";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
-import { ZONE_CENTERS } from "@/lib/properties";
+import { findZone } from "@/lib/zones";
 import { isAgentEnabled } from "@/lib/site-config";
-import { getSiteConfig, waNumber } from "@/lib/server/public-config";
+import { getPublicPropertyTypes, getPublicZones, getSiteConfig, waNumber } from "@/lib/server/public-config";
+import { findType } from "@/lib/property-types";
 
 export default async function PropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -18,9 +19,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
   if (!property) {
     notFound();
   }
+  // Zone centre if the zone is known, otherwise the office address.
+  const center = findZone(await getPublicZones(), property.zone) ?? config.address.coordinates;
 
   const images = (property.images?.length ? property.images : [property.imageUrl]).filter(Boolean);
-  const isBuilt = property.type === "house" || property.type === "apartment";
+  const isBuilt = findType(await getPublicPropertyTypes(), property.type)?.built ?? false;
   const bathrooms = property.bathrooms ?? (isBuilt ? 3 : 0);
   const area = property.area ?? 450;
   const yearBuilt = property.yearBuilt ?? (isBuilt ? 2015 : undefined);
@@ -154,7 +157,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             </p>
             <iframe
               title={`Mapa de la zona ${property.zone}`}
-              src={`https://maps.google.com/maps?q=${ZONE_CENTERS[property.zone].lat},${ZONE_CENTERS[property.zone].lng}&z=13&output=embed`}
+              src={`https://maps.google.com/maps?q=${center.lat},${center.lng}&z=13&output=embed`}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               className="mt-6 aspect-[4/3] w-full border border-hairline sm:aspect-video dark:border-white/10"

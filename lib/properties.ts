@@ -1,4 +1,4 @@
-import type { Property, PropertyType, PropertyZone } from "@/types/property";
+import type { Property, PropertyZone } from "@/types/property";
 
 // Placeholder imagery — Unsplash (architecture / coastal homes).
 const img = (id: string) =>
@@ -54,27 +54,6 @@ export const properties: Property[] = [
   { id: "pe-02", title: "Apartamento Torre Mar", zone: "Península", price: 690000, bedrooms: 2, type: "apartment", imageUrl: img("1502005097973-6a7082348e28") },
   { id: "ma-01", title: "Apartamento Brava", zone: "Mansa", price: 720000, bedrooms: 2, type: "apartment", imageUrl: img("1598928506311-c55ded91a20c") },
 ];
-
-const TYPE_LABELS: Record<PropertyType, string> = {
-  house: "Casa",
-  apartment: "Apartamento",
-  land: "Terreno",
-  farm: "Chacra",
-  field: "Campo",
-};
-
-export function propertyTypeLabel(type: PropertyType): string {
-  return TYPE_LABELS[type];
-}
-
-/** Approximate centre of each zone — deliberately not a property address. */
-export const ZONE_CENTERS: Record<PropertyZone, { lat: number; lng: number }> = {
-  "José Ignacio": { lat: -34.8433, lng: -54.635 },
-  Manantiales: { lat: -34.9081, lng: -54.8294 },
-  "La Barra": { lat: -34.914, lng: -54.872 },
-  Península: { lat: -34.968, lng: -54.944 },
-  Mansa: { lat: -34.94, lng: -54.925 },
-};
 
 export function countByZone(list: Property[], zone: PropertyZone): number {
   return list.filter((p) => p.zone === zone).length;

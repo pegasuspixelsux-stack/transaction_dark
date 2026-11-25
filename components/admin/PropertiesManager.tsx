@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Eye, EyeOff, FileSpreadsheet, GalleryHorizontal, LayoutGrid, List, Pencil, Plus, Search, Star, Trash2 } from "lucide-react";
 import { useAdmin } from "@/lib/admin/admin-context";
+import { usePropertyTypes, useZones } from "@/lib/admin/use-zones";
 import { formatMoney } from "@/lib/admin/utils";
 import type { AdminProperty, PublishStatus } from "@/types/admin";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,8 @@ export function PropertiesManager() {
   const { status, properties, users, can, saveProperty, togglePropertyStatus, togglePropertyFlag, deleteProperty } =
     useAdmin();
   const canWrite = can("properties:write");
+  const zones = useZones();
+  const types = usePropertyTypes();
 
   const [view, setView] = useState<View>("table");
   const [query, setQuery] = useState("");
@@ -188,7 +191,7 @@ export function PropertiesManager() {
         <GlassCard className="overflow-x-auto">
           <table className="w-full min-w-[44rem] text-left text-sm">
             <thead>
-              <tr className="border-b border-admin-line text-xs uppercase tracking-luxury text-admin-ink">
+              <tr className="border-b border-admin-line text-footnote font-medium text-admin-ink">
                 <th scope="col" className="px-5 py-4 font-normal">ID</th>
                 <th scope="col" className="px-5 py-4 font-normal">Propiedad</th>
                 <th scope="col" className="px-5 py-4 font-normal">Tipo</th>
@@ -232,7 +235,7 @@ export function PropertiesManager() {
                 )}
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-3">
-                    <h2 className="font-display text-xl font-normal tracking-tight">{p.title}</h2>
+                    <h2 className="text-title-3">{p.title}</h2>
                     {statusBadge(p.status)}
                   </div>
                   <p className="mt-1 text-sm text-admin-muted">{p.location}</p>
@@ -259,10 +262,14 @@ export function PropertiesManager() {
         title={editing === "new" ? "Crear propiedad" : "Editar propiedad"}
         wide
       >
-        {editing !== null ? (
+        {editing !== null && (zones === null || types === null) ? (
+          <Spinner label="Cargando zonas y tipos" />
+        ) : editing !== null && zones !== null && types !== null ? (
           <PropertyForm
             property={editing === "new" ? null : editing}
             agents={agents}
+            zones={zones.map((z) => z.name)}
+            types={types}
             onCancel={() => setEditing(null)}
             featuredFull={featuredCount >= MAX_FEATURED}
             heroFull={heroCount >= MAX_HERO}

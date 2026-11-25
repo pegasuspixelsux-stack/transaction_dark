@@ -3,6 +3,10 @@ import { can } from "@/lib/admin/rbac";
 import { getServerSession, sameOrigin } from "@/lib/server/admin-session";
 import { saveIntoCatalog } from "@/lib/server/property-input";
 import { readProperties, writeProperties } from "@/lib/server/property-store";
+import { readZones } from "@/lib/server/zone-store";
+import { readPropertyTypes } from "@/lib/server/property-type-store";
+import { typeIds } from "@/lib/property-types";
+import { zoneNames } from "@/lib/zones";
 
 const noStore = { "Cache-Control": "no-store" };
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: noStore });
@@ -31,7 +35,10 @@ export async function POST(request: Request) {
     return json({ error: "Solicitud inválida." }, 400);
   }
 
-  const result = saveIntoCatalog(await readProperties(), body);
+  const result = saveIntoCatalog(await readProperties(), body, {
+    zones: zoneNames(await readZones()),
+    types: typeIds(await readPropertyTypes()),
+  });
   if (!result.ok) return json({ error: result.error }, result.status);
   try {
     await writeProperties(result.properties);

@@ -1,10 +1,7 @@
 /** Validation and merge rules for saving a property. Server-only. */
 import type { AdminProperty, Currency, ListingType, PublishStatus } from "@/types/admin";
-import type { PropertyType, PropertyZone } from "@/types/property";
 import { MAX_FEATURED, MAX_HERO } from "@/lib/server/property-store";
 
-export const ZONES: PropertyZone[] = ["José Ignacio", "Manantiales", "La Barra", "Península", "Mansa"];
-export const TYPES: PropertyType[] = ["house", "apartment", "land", "farm", "field"];
 export const LISTINGS: ListingType[] = ["sale", "rent"];
 export const CURRENCIES: Currency[] = ["USD", "UYU", "EUR"];
 export const STATUSES: PublishStatus[] = ["draft", "published"];
@@ -22,7 +19,8 @@ const bad = (error: string, status = 422): SaveResult => ({ ok: false, error, st
 export function saveIntoCatalog(
   list: AdminProperty[],
   input: unknown,
-  opts: { allowNewId?: boolean } = {},
+  /** `zones` / `types`: the valid zone names and type ids (from their stores). */
+  opts: { zones: readonly string[]; types: readonly string[]; allowNewId?: boolean },
 ): SaveResult {
   if (!isObj(input)) return bad("Solicitud inválida.", 400);
 
@@ -118,8 +116,8 @@ export function saveIntoCatalog(
           : null
         : (existing?.assignedAgentId ?? null),
     updatedAt: new Date().toISOString(),
-    zone: pick(input.zone, ZONES, existing?.zone ?? "José Ignacio"),
-    propertyType: pick(input.propertyType, TYPES, existing?.propertyType ?? "house"),
+    zone: pick(input.zone, opts.zones, existing?.zone ?? opts.zones[0] ?? ""),
+    propertyType: pick(input.propertyType, opts.types, existing?.propertyType ?? opts.types[0] ?? "house"),
     featured,
     hero,
   };

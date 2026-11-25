@@ -7,7 +7,8 @@ import { MobilePropertyFilters } from "@/components/MobilePropertyFilters";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
 import { isAgentEnabled } from "@/lib/site-config";
-import { getSiteConfig, waNumber } from "@/lib/server/public-config";
+import { getPublicPropertyTypes, getPublicZones, getSiteConfig, waNumber } from "@/lib/server/public-config";
+import { zoneNames } from "@/lib/zones";
 
 export const metadata: Metadata = {
   title: "Propiedades · Transaction",
@@ -27,6 +28,8 @@ export default async function PropiedadesPage({
   const sp = await searchParams;
   const config = await getSiteConfig();
   const properties = await getPublicProperties();
+  const zoneList = zoneNames(await getPublicZones());
+  const typeList = await getPublicPropertyTypes();
   const zonas = one(sp.zona)?.split(",").filter(Boolean) ?? [];
   const tipos = one(sp.tipo)?.split(",").filter(Boolean) ?? [];
   const precioMax = Number(one(sp.precioMax)) || Infinity;
@@ -55,12 +58,12 @@ export default async function PropiedadesPage({
       </header>
 
       <div className="mb-4 sm:mb-6 lg:hidden">
-        <MobilePropertyFilters />
+        <MobilePropertyFilters types={typeList} />
       </div>
 
       <div className="grid gap-12 lg:grid-cols-[240px_1fr] lg:gap-16">
         <div className="hidden lg:block">
-          <PropertyFilters />
+          <PropertyFilters zones={zoneList} types={typeList} />
         </div>
 
         <div>
@@ -74,7 +77,7 @@ export default async function PropiedadesPage({
                 Búsqueda avanzada
               </summary>
               <div className="mt-6 border border-hairline bg-surface-raised p-6">
-                <PropertyFilters />
+                <PropertyFilters zones={zoneList} types={typeList} />
               </div>
             </details>
           </div>
