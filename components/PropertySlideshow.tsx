@@ -70,8 +70,6 @@ export function PropertySlideshow({ images, title, children }: PropertySlideshow
         </div>
       ))}
 
-      {/* No dark scrim: photos show at full brightness. The overlay text keeps its own text shadow. */}
-
       {/* Watermark */}
       <div className="pointer-events-none absolute inset-0 z-10 flex select-none items-center justify-center">
         <WatermarkIcon />
@@ -105,7 +103,15 @@ export function PropertySlideshow({ images, title, children }: PropertySlideshow
       <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 md:pointer-events-auto md:bottom-8">
         <div className="mx-auto flex w-full max-w-[calc(1000px+4rem)] items-end justify-between gap-6 px-6 md:px-8">
           {/* Takes all the width left of the slide controls (the title truncates inside it). */}
-          <div className="min-w-0 flex-1">{children}</div>
+          <div className="relative isolate min-w-0 flex-1">
+            {/* Desktop only: a soft dark glow just behind the Ref./title text, fading out around it,
+                so the rest of the photo stays clear. Phones have no overlay text, so no glow. */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -inset-x-10 -inset-y-8 -z-10 hidden bg-[radial-gradient(ellipse_at_left_bottom,rgb(0_0_0/0.6)_0%,rgb(0_0_0/0.35)_45%,transparent_75%)] md:block"
+            />
+            {children}
+          </div>
           {images.length > 1 ? (
             <div className="pointer-events-auto flex shrink-0 flex-col items-end gap-2">
               <div className="flex gap-2">

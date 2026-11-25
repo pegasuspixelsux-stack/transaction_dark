@@ -49,7 +49,9 @@ export default async function PropiedadesPage({
   const paginatedResults = results.slice((page - 1) * perPage, page * perPage);
 
   return (
-    <main className="container-page pb-8 pt-16 sm:pt-28">
+    <>
+    {/* Bottom padding matches the site's section rhythm before the footer. */}
+    <main className="container-page pb-24 pt-16 sm:pb-32 sm:pt-28">
       <header className="mb-6 sm:mb-12 max-w-2xl">
         <p className="hidden sm:block text-xs uppercase tracking-luxury text-ink-muted">Cartera</p>
         <h1 className="mt-3 font-display text-3xl font-normal tracking-tight sm:text-4xl">
@@ -91,7 +93,7 @@ export default async function PropiedadesPage({
               </div>
 
               {totalPages > 1 && (
-                <div className="mt-12 flex items-center justify-center gap-2">
+                <div className="mt-12 flex items-center justify-center gap-2 sm:mt-16">
                   {page > 1 && (
                     <Link
                       href={`?page=${page - 1}${sp.zona ? `&zona=${sp.zona}` : ""}${sp.tipo ? `&tipo=${sp.tipo}` : ""}${sp.precioMax ? `&precioMax=${sp.precioMax}` : ""}${sp.dormMin ? `&dormMin=${sp.dormMin}` : ""}`}
@@ -133,10 +135,12 @@ export default async function PropiedadesPage({
           )}
         </div>
       </div>
-      <SiteFooter />
-      {isAgentEnabled(config) ? (
-        <AGenteConcierge whatsapp={waNumber(config.whatsapp.primary.number)} />
-      ) : null}
     </main>
+    {/* Footer outside <main>: full width, like every other page. */}
+    <SiteFooter />
+    {isAgentEnabled(config) ? (
+      <AGenteConcierge whatsapp={waNumber(config.whatsapp.primary.number)} />
+    ) : null}
+    </>
   );
 }
