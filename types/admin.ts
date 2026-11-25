@@ -55,6 +55,8 @@ export interface AdminProperty {
   propertyType?: PropertyType;
   images?: string[];
   yearBuilt?: number;
+  /** Agency listing / reference number shown to staff (N.º de referencia). Unique when set. */
+  listingNumber?: string;
   /** Cadastral parcel number (padrón). */
   padron?: string;
   /** Street frontage in metres (medida del frente). */

@@ -53,7 +53,7 @@ export function PropertiesManager() {
     return properties.filter(
       (p) =>
         (statusFilter === "all" || p.status === statusFilter) &&
-        (!q || p.title.toLowerCase().includes(q) || p.location.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)),
+        (!q || p.title.toLowerCase().includes(q) || p.location.toLowerCase().includes(q) || p.id.toLowerCase().includes(q) || !!p.listingNumber?.toLowerCase().includes(q)),
     );
   }, [properties, query, statusFilter]);
 
@@ -147,7 +147,7 @@ export function PropertiesManager() {
           {({ id }) => (
             <div className="relative">
               <Search aria-hidden className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-admin-muted" />
-              <input id={id} type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Título, ubicación o ID" className={cn(inputClass, "pl-11")} />
+              <input id={id} type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Título, ubicación, ID o referencia" className={cn(inputClass, "pl-11")} />
             </div>
           )}
         </Field>

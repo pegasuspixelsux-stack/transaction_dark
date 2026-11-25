@@ -26,6 +26,7 @@ interface FormState {
   areaM2: string;
   commonExpenses: string;
   annualTaxes: string;
+  listingNumber: string;
   padron: string;
   frontage: string;
   features: string[];
@@ -52,6 +53,7 @@ const empty: FormState = {
   areaM2: "",
   commonExpenses: "",
   annualTaxes: "",
+  listingNumber: "",
   padron: "",
   frontage: "",
   features: [],
@@ -77,6 +79,7 @@ function fromProperty(p: AdminProperty): FormState {
     areaM2: String(p.areaM2),
     commonExpenses: p.commonExpenses === undefined ? "" : String(p.commonExpenses),
     annualTaxes: p.annualTaxes === undefined ? "" : String(p.annualTaxes),
+    listingNumber: p.listingNumber ?? "",
     padron: p.padron ?? "",
     frontage: p.frontage === undefined ? "" : String(p.frontage),
     features: p.features,
@@ -214,6 +217,7 @@ export function PropertyForm({
       areaM2: Number(form.areaM2),
       commonExpenses: form.commonExpenses.trim() ? Number(form.commonExpenses) : null,
       annualTaxes: form.annualTaxes.trim() ? Number(form.annualTaxes) : null,
+      listingNumber: form.listingNumber.trim(),
       padron: form.padron.trim(),
       frontage: form.frontage.trim() ? Number(form.frontage) : null,
       features: form.features,
@@ -231,11 +235,18 @@ export function PropertyForm({
 
   return (
     <form onSubmit={submit} noValidate className="space-y-5">
-      <Field label="Título" error={errors.title}>
-        {({ id, describedBy, invalid }) => (
-          <input id={id} aria-invalid={invalid} aria-describedby={describedBy} value={form.title} onChange={(e) => set("title", e.target.value)} className={inputClass} />
-        )}
-      </Field>
+      <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_12rem]">
+        <Field label="Título" error={errors.title}>
+          {({ id, describedBy, invalid }) => (
+            <input id={id} aria-invalid={invalid} aria-describedby={describedBy} value={form.title} onChange={(e) => set("title", e.target.value)} className={inputClass} />
+          )}
+        </Field>
+        <Field label="N.º de referencia" hint="Opcional. Único por propiedad.">
+          {({ id, describedBy }) => (
+            <input id={id} aria-describedby={describedBy} value={form.listingNumber} maxLength={30} onChange={(e) => set("listingNumber", e.target.value)} placeholder="TR-0001" className={inputClass} />
+          )}
+        </Field>
+      </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Tipo de operación">

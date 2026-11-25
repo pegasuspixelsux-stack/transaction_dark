@@ -73,6 +73,12 @@ export function saveIntoCatalog(
     extra.yearBuilt = Number.isInteger(y) && y >= 1500 && y <= 2200 ? y : undefined;
   }
   if ("padron" in input) extra.padron = str(input.padron, 40) || undefined;
+  if ("listingNumber" in input) {
+    const ref = str(input.listingNumber, 30);
+    const clash = ref && others.find((p) => p.listingNumber?.toLowerCase() === ref.toLowerCase());
+    if (clash) return bad(`El N.º de referencia ${ref} ya lo usa «${clash.title}».`, 409);
+    extra.listingNumber = ref || undefined;
+  }
   if ("frontage" in input) {
     const f = num(input.frontage);
     extra.frontage = Number.isFinite(f) && f > 0 ? f : undefined;

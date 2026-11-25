@@ -22,7 +22,7 @@ export interface ImportReport {
 
 const KNOWN_COLUMNS = [
   "id", "title", "listingType", "price", "currency", "location", "zone", "propertyType",
-  "bedrooms", "bathrooms", "areaM2", "yearBuilt", "padron", "frontage", "commonExpenses", "annualTaxes", "features", "amenities", "imageUrl",
+  "bedrooms", "bathrooms", "areaM2", "yearBuilt", "listingNumber", "padron", "frontage", "commonExpenses", "annualTaxes", "features", "amenities", "imageUrl",
   "images", "description", "status", "featured", "hero",
 ] as const;
 /** Spanish headers (what the template uses) and the original English ones both work. */
@@ -39,6 +39,7 @@ const HEADER_ALIASES: Record<(typeof KNOWN_COLUMNS)[number], string[]> = {
   bathrooms: ["banos", "bathrooms"],
   areaM2: ["superficiem", "superficiem2", "superficie", "aream2"],
   yearBuilt: ["anodeconstruccion", "aniodeconstruccion", "ano", "anio", "yearbuilt"],
+  listingNumber: ["referencia", "nreferencia", "nodereferencia", "numerodereferencia", "numerodepropiedad", "listingnumber"],
   padron: ["padron", "numerodepadron"],
   frontage: ["frente", "medidadelfrente", "frentem", "frontage"],
   commonExpenses: ["gastoscomunes", "gastoscomunesmensual", "commonexpenses"],
@@ -165,6 +166,7 @@ export function applyInventoryRows(
       bathrooms: number(v.bathrooms),
       areaM2: number(v.areaM2),
       ...("yearBuilt" in v ? { yearBuilt: number(v.yearBuilt) } : {}),
+      ...("listingNumber" in v ? { listingNumber: text(v.listingNumber) } : {}),
       ...("padron" in v ? { padron: text(v.padron) } : {}),
       ...("frontage" in v ? { frontage: number(v.frontage) } : {}),
       ...("commonExpenses" in v ? { commonExpenses: number(v.commonExpenses) } : {}),
