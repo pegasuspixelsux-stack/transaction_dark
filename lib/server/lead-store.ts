@@ -142,3 +142,20 @@ export async function updateLead(id: string, patch: LeadPatch): Promise<Lead | n
   await writeFileLeads(all.map((l) => (l.id === id ? next : l)));
   return next;
 }
+
+/** Point leads at a property's new ID after it was renamed. Returns how many changed. */
+export async function relinkLeadsToProperty(fromId: string, toId: string): Promise<number> {
+  const db = adminDb();
+  if (db) {
+    const snap = await db.collection(COLLECTION).where("propertyId", "==", fromId).get();
+    if (snap.empty) return 0;
+    const batch = db.batch();
+    snap.docs.forEach((doc) => batch.update(doc.ref, { propertyId: toId }));
+    await batch.commit();
+    return snap.size;
+  }
+  const all = await readFileLeads();
+  const hits = all.filter((l) => l.propertyId === fromId).length;
+  if (hits) await writeFileLeads(all.map((l) => (l.propertyId === fromId ? { ...l, propertyId: toId } : l)));
+  return hits;
+}

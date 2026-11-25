@@ -30,6 +30,8 @@ const BAD_CREDENTIALS = "Correo o contraseña incorrectos.";
 
 export type PropertyInput = Omit<AdminProperty, "id" | "updatedAt" | "commonExpenses" | "annualTaxes" | "frontage"> & {
   id?: string;
+  /** ID typed in the form: sets a new property's ID, or renames an existing one. Empty = keep / auto-generate. */
+  newId?: string;
   /** `null` clears the value. */
   commonExpenses?: number | null;
   annualTaxes?: number | null;

@@ -10,7 +10,13 @@ const isObj = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
 export type SaveResult =
-  | { ok: true; properties: AdminProperty[]; property: AdminProperty }
+  | {
+      ok: true;
+      properties: AdminProperty[];
+      property: AdminProperty;
+      /** Set when the save changed the property's ID (callers re-link references). */
+      renamedFrom?: string;
+    }
   | { ok: false; error: string; status: number };
 
 const bad = (error: string, status = 422): SaveResult => ({ ok: false, error, status });
@@ -32,6 +38,14 @@ export function saveIntoCatalog(
   if (id && !existing) {
     if (!opts.allowNewId) return bad("No se encontró la propiedad.", 404);
     if (!/^[a-zA-Z0-9_-]{1,40}$/.test(id)) return bad("El id solo admite letras, números, guiones (hasta 40).");
+  }
+
+  // Optional ID chosen in the form (`newId`): sets the ID of a new property or renames an existing one.
+  const wantedId = str(input.newId, 40);
+  if (wantedId) {
+    if (!/^[a-zA-Z0-9_-]{1,40}$/.test(wantedId)) return bad("El ID solo admite letras, números y guiones (hasta 40).");
+    const taken = list.find((p) => p.id.toLowerCase() === wantedId.toLowerCase() && p.id !== existing?.id);
+    if (taken) return bad(`El ID ${wantedId} ya lo usa «${taken.title}».`, 409);
   }
 
   const title = str(input.title, 120);
@@ -99,7 +113,7 @@ export function saveIntoCatalog(
   const property: AdminProperty = {
     ...existing,
     ...extra,
-    id: existing?.id ?? id ?? `p-${crypto.randomUUID().slice(0, 8)}`,
+    id: wantedId || (existing?.id ?? id ?? `p-${crypto.randomUUID().slice(0, 8)}`),
     title,
     listingType: pick(input.listingType, LISTINGS, "sale"),
     price,
@@ -129,7 +143,8 @@ export function saveIntoCatalog(
   };
 
   const properties = existing
-    ? list.map((p) => (p.id === property.id ? property : p))
+    ? list.map((p) => (p.id === existing.id ? property : p))
     : [property, ...list];
-  return { ok: true, properties, property };
+  const renamedFrom = existing && existing.id !== property.id ? existing.id : undefined;
+  return { ok: true, properties, property, renamedFrom };
 }

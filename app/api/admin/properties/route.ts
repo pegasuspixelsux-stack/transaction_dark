@@ -4,6 +4,7 @@ import { getServerSession, sameOrigin } from "@/lib/server/admin-session";
 import { saveIntoCatalog } from "@/lib/server/property-input";
 import { readProperties, writeProperties } from "@/lib/server/property-store";
 import { readZones } from "@/lib/server/zone-store";
+import { relinkLeadsToProperty } from "@/lib/server/lead-store";
 import { readPropertyTypes } from "@/lib/server/property-type-store";
 import { typeIds } from "@/lib/property-types";
 import { zoneNames } from "@/lib/zones";
@@ -45,6 +46,12 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[properties] failed to save:", error);
     return json({ error: "No pudimos guardar la propiedad en el servidor." }, 500);
+  }
+  if (result.renamedFrom) {
+    // The property is saved; a failure here only leaves old consultas pointing at the previous ID.
+    await relinkLeadsToProperty(result.renamedFrom, result.property.id).catch((error) =>
+      console.error("[properties] could not re-link leads after ID change:", error),
+    );
   }
   return json({ property: result.property, properties: result.properties });
 }

@@ -26,6 +26,8 @@ interface FormState {
   areaM2: string;
   commonExpenses: string;
   annualTaxes: string;
+  /** Property ID (also its public URL). Empty on a new property = generated. */
+  propertyId: string;
   listingNumber: string;
   padron: string;
   frontage: string;
@@ -53,6 +55,7 @@ const empty: FormState = {
   areaM2: "",
   commonExpenses: "",
   annualTaxes: "",
+  propertyId: "",
   listingNumber: "",
   padron: "",
   frontage: "",
@@ -79,6 +82,7 @@ function fromProperty(p: AdminProperty): FormState {
     areaM2: String(p.areaM2),
     commonExpenses: p.commonExpenses === undefined ? "" : String(p.commonExpenses),
     annualTaxes: p.annualTaxes === undefined ? "" : String(p.annualTaxes),
+    propertyId: p.id,
     listingNumber: p.listingNumber ?? "",
     padron: p.padron ?? "",
     frontage: p.frontage === undefined ? "" : String(p.frontage),
@@ -99,6 +103,9 @@ type Errors = Partial<Record<keyof FormState, string>>;
 
 function validate(f: FormState): Errors {
   const errors: Errors = {};
+  if (f.propertyId.trim() && !/^[a-zA-Z0-9_-]{1,40}$/.test(f.propertyId.trim())) {
+    errors.propertyId = "Solo letras, números y guiones (hasta 40).";
+  }
   if (!f.title.trim()) errors.title = "El título es obligatorio.";
   if (!f.location.trim()) errors.location = "La ubicación es obligatoria.";
   if (!(Number(f.price) > 0)) errors.price = "Ingresá un precio mayor a 0.";
@@ -207,6 +214,7 @@ export function PropertyForm({
     if (Object.keys(found).length > 0) return;
     onSubmit({
       ...(property ? { id: property.id } : {}),
+      newId: form.propertyId.trim(),
       title: form.title.trim(),
       listingType: form.listingType,
       price: Number(form.price),
@@ -235,15 +243,44 @@ export function PropertyForm({
 
   return (
     <form onSubmit={submit} noValidate className="space-y-5">
-      <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_12rem]">
-        <Field label="Título" error={errors.title}>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field
+          label="ID de la propiedad"
+          error={errors.propertyId}
+          hint={
+            property
+              ? form.propertyId.trim() && form.propertyId.trim() !== property.id
+                ? `La dirección pasa a /propiedades/${form.propertyId.trim()}; la anterior deja de funcionar.`
+                : `Dirección pública: /propiedades/${property.id}`
+              : "Opcional. Si lo dejás vacío se genera solo."
+          }
+        >
           {({ id, describedBy, invalid }) => (
-            <input id={id} aria-invalid={invalid} aria-describedby={describedBy} value={form.title} onChange={(e) => set("title", e.target.value)} className={inputClass} />
+            <input
+              id={id}
+              aria-invalid={invalid}
+              aria-describedby={describedBy}
+              value={form.propertyId}
+              maxLength={40}
+              autoComplete="off"
+              spellCheck={false}
+              onChange={(e) => set("propertyId", e.target.value.replace(/\s+/g, "-"))}
+              placeholder="1365"
+              className={inputClass}
+            />
           )}
         </Field>
         <Field label="N.º de referencia" hint="Opcional. Único por propiedad.">
           {({ id, describedBy }) => (
             <input id={id} aria-describedby={describedBy} value={form.listingNumber} maxLength={30} onChange={(e) => set("listingNumber", e.target.value)} placeholder="TR-0001" className={inputClass} />
+          )}
+        </Field>
+      </div>
+
+      <div>
+        <Field label="Título" error={errors.title}>
+          {({ id, describedBy, invalid }) => (
+            <input id={id} aria-invalid={invalid} aria-describedby={describedBy} value={form.title} onChange={(e) => set("title", e.target.value)} className={inputClass} />
           )}
         </Field>
       </div>
