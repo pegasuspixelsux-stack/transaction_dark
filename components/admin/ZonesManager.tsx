@@ -30,6 +30,7 @@ type Result = { ok: true } | { ok: false; error: string; errors?: ZoneErrors };
 
 interface FormState {
   name: string;
+  city: string;
   blurb: string;
   image: string;
   lat: string;
@@ -38,10 +39,11 @@ interface FormState {
 }
 
 /** Default map centre for a new zone: Punta del Este. */
-const empty: FormState = { name: "", blurb: "", image: "", lat: "-34.9667", lng: "-54.95", showOnHome: false };
+const empty: FormState = { name: "", city: "", blurb: "", image: "", lat: "-34.9667", lng: "-54.95", showOnHome: false };
 
 const toForm = (z: Zone): FormState => ({
   name: z.name,
+  city: z.city,
   blurb: z.blurb,
   image: z.image,
   lat: String(z.lat),
@@ -113,6 +115,12 @@ function ZoneForm({
       >
         {({ id, describedBy, invalid }) => (
           <input id={id} aria-invalid={invalid} aria-describedby={describedBy} value={form.name} maxLength={60} onChange={(e) => set("name", e.target.value)} className={inputClass} />
+        )}
+      </Field>
+
+      <Field label="Ciudad" error={errors.city} hint="Opcional. Se muestra en las fichas como «Zona, Ciudad», p. ej. «Playa Brava, Punta del Este».">
+        {({ id, describedBy, invalid }) => (
+          <input id={id} aria-invalid={invalid} aria-describedby={describedBy} value={form.city} maxLength={60} onChange={(e) => set("city", e.target.value)} placeholder="Punta del Este" className={inputClass} />
         )}
       </Field>
 
@@ -270,6 +278,7 @@ export function ZonesManager() {
   async function submitForm(form: FormState): Promise<Result> {
     const values = {
       name: form.name.trim(),
+      city: form.city.trim(),
       blurb: form.blurb.trim(),
       image: form.image,
       lat: Number(form.lat),

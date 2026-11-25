@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { zonePlace } from "@/lib/zones";
 import Image from "next/image";
 import { ArrowRight, Bath, Bed, ImageOff, Ruler } from "lucide-react";
 import type { Property } from "@/types/property";
@@ -11,10 +12,10 @@ export function PropertyCard({
   featured = false,
 }: {
   property: Property;
-  /** Homepage featured layout: "Ref. · location" sits above the title and the dorms / baños / m² row is omitted. */
+  /** Featured layout: "Zone, City" sits above the title and the dorms / baños / m² row is omitted. */
   featured?: boolean;
 }) {
-  const { id, title, zone, location, price, bedrooms, bathrooms, area, imageUrl } = property;
+  const { id, title, zone, city, price, bedrooms, bathrooms, area, imageUrl } = property;
 
   const metrics = [
     bedrooms > 0 ? { icon: Bed, text: `${bedrooms} ${bedrooms === 1 ? "dorm" : "dorms"}` } : null,
@@ -22,7 +23,8 @@ export function PropertyCard({
     area && area > 0 ? { icon: Ruler, text: `${area.toLocaleString("es-UY")} m²` } : null,
   ].filter((m): m is NonNullable<typeof m> => m !== null);
 
-  const tag = location && location !== zone ? `${location} | ${zone}` : zone;
+  // "Playa Brava, Punta del Este": zone plus its city from the Zonas page.
+  const tag = zonePlace(zone, city);
 
   return (
     <Link
@@ -60,7 +62,7 @@ export function PropertyCard({
         <div>
           {featured ? (
             <p className={`mb-2 text-xs uppercase tracking-luxury text-white/80 ${textShadow}`}>
-              Ref. {id} · {tag}
+              {tag}
             </p>
           ) : null}
           <h3 className={`font-display text-2xl font-normal tracking-tight ${textShadow}`}>{title}</h3>

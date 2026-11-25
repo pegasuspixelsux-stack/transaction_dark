@@ -8,6 +8,8 @@ export interface Property {
   id: string;
   title: string;
   zone: PropertyZone;
+  /** City of the zone (from the Zonas page), for the listing eyebrow. */
+  city?: string;
   /** Free-text address line, e.g. "Punta del Este, Maldonado". */
   location?: string;
   price: number; // USD, whole dollars

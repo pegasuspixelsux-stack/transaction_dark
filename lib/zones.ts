@@ -10,6 +10,8 @@ export interface Zone {
   /** Stable key; survives renames. */
   id: string;
   name: string;
+  /** City shown after the zone on listing cards, e.g. "Punta del Este". "" = zone only. */
+  city: string;
   blurb: string;
   /** Tile image on the homepage. */
   image: string;
@@ -31,6 +33,7 @@ export const DEFAULT_ZONES: Zone[] = [
   {
     id: "jose-ignacio",
     name: "José Ignacio",
+    city: "Maldonado",
     blurb: "El pueblo de pescadores convertido en uno de los destinos más reconocidos de la costa uruguaya.",
     image: zimg("1507525428034-b723cf961d3e"),
     lat: -34.8433,
@@ -40,6 +43,7 @@ export const DEFAULT_ZONES: Zone[] = [
   {
     id: "manantiales",
     name: "Manantiales",
+    city: "Maldonado",
     blurb: "La tranquilidad de un entorno costero en una zona de creciente desarrollo.",
     image: zimg("1519046904884-53103b34b206"),
     lat: -34.9081,
@@ -49,6 +53,7 @@ export const DEFAULT_ZONES: Zone[] = [
   {
     id: "la-barra",
     name: "La Barra",
+    city: "Maldonado",
     blurb: "Galerías y arquitectura de autor sobre el arroyo Maldonado.",
     image: zimg("1471922694854-ff1b63b20054"),
     lat: -34.914,
@@ -58,6 +63,7 @@ export const DEFAULT_ZONES: Zone[] = [
   {
     id: "peninsula",
     name: "Península",
+    city: "Punta del Este",
     blurb: "El corazón histórico de Punta del Este, entre dos mares.",
     image: zimg("1505142468610-359e7d316be0"),
     lat: -34.968,
@@ -67,6 +73,7 @@ export const DEFAULT_ZONES: Zone[] = [
   {
     id: "mansa",
     name: "Mansa",
+    city: "Punta del Este",
     blurb: "Atardeceres sobre aguas calmas y las torres frente al mar.",
     image: zimg("1533105079780-92b9be482077"),
     lat: -34.94,
@@ -77,6 +84,7 @@ export const DEFAULT_ZONES: Zone[] = [
   {
     id: "maldonado",
     name: "Maldonado",
+    city: "",
     blurb: "Chacras y campos en el interior del departamento, a minutos de la costa.",
     image: zimg("1500382017468-9049fed747ef"),
     lat: -34.75,
@@ -86,6 +94,7 @@ export const DEFAULT_ZONES: Zone[] = [
   {
     id: "rocha",
     name: "Rocha",
+    city: "",
     blurb: "Campos abiertos y chacras entre lagunas y la costa atlántica.",
     image: zimg("1499529112087-3cb3b73cec95"),
     lat: -34.48,
@@ -143,6 +152,7 @@ export function parseZones(input: unknown): ZonesParseResult {
     while (seenIds.has(id)) id = `${id}-${i}`;
     seenIds.add(id);
 
+    const city = str(r.city, 60);
     const blurb = str(r.blurb, 240);
 
     const image = str(r.image, 500);
@@ -154,7 +164,7 @@ export function parseZones(input: unknown): ZonesParseResult {
     if (!(lat >= -90 && lat <= 90)) errors[`${i}.lat`] = "Latitud entre -90 y 90.";
     if (!(lng >= -180 && lng <= 180)) errors[`${i}.lng`] = "Longitud entre -180 y 180.";
 
-    return { id, name, blurb, image, lat, lng, showOnHome: r.showOnHome === true };
+    return { id, name, city, blurb, image, lat, lng, showOnHome: r.showOnHome === true };
   });
 
   if (value.filter((z) => z.showOnHome).length > MAX_HOME_ZONES) {
@@ -163,3 +173,7 @@ export function parseZones(input: unknown): ZonesParseResult {
 
   return Object.keys(errors).length > 0 ? { ok: false, errors } : { ok: true, value };
 }
+
+/** Listing eyebrow: "Playa Brava, Punta del Este"; just the zone when there is no (distinct) city. */
+export const zonePlace = (zone: string, city?: string) =>
+  city && city.toLowerCase() !== zone.toLowerCase() ? `${zone}, ${city}` : zone;

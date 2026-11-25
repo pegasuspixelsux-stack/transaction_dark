@@ -6,6 +6,7 @@ import { HeroSlideshow } from "@/components/HeroSlideshow";
 import { Trident } from "@/components/Trident";
 import { WatermarkIcon } from "@/components/WatermarkIcon";
 import { formatPrice } from "@/lib/properties";
+import { zonePlace } from "@/lib/zones";
 import type { Property } from "@/types/property";
 
 const textShadow = "[text-shadow:0_1px_6px_rgba(0,0,0,0.5)]";
@@ -23,11 +24,8 @@ export function TransactionHero({ properties: HERO_PROPERTIES }: { properties: P
   }, [count, activeSlide]);
 
   const current = HERO_PROPERTIES[activeSlide] ?? HERO_PROPERTIES[0];
-  const tag = current
-    ? current.location && current.location !== current.zone
-      ? `${current.location} | ${current.zone}`
-      : current.zone
-    : "";
+  // Same eyebrow as the listing cards: "Playa Brava, Punta del Este".
+  const tag = current ? zonePlace(current.zone, current.city) : "";
 
   return (
     <section className="relative flex h-[75vh] sm:min-h-dvh w-full flex-col overflow-hidden bg-surface dark:bg-zinc-950">

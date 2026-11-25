@@ -5,15 +5,18 @@
  */
 import { connection } from "next/server";
 import { readProperties } from "@/lib/server/property-store";
+import { readZones } from "@/lib/server/zone-store";
 import type { AdminProperty } from "@/types/admin";
 import type { Property } from "@/types/property";
 
 const LIMIT = 5;
 
-function toPublic(p: AdminProperty): Property {
+function toPublic(p: AdminProperty, cityByZone: Map<string, string>): Property {
+  const city = p.zone ? cityByZone.get(p.zone) : undefined;
   return {
     id: p.id,
     title: p.title,
+    ...(city ? { city } : {}),
     zone: p.zone ?? "José Ignacio",
     location: p.location || undefined,
     price: p.price,
@@ -39,7 +42,9 @@ function toPublic(p: AdminProperty): Property {
 
 export async function getPublicProperties(): Promise<Property[]> {
   await connection();
-  return (await readProperties()).filter((p) => p.status === "published").map(toPublic);
+  const [all, zones] = await Promise.all([readProperties(), readZones()]);
+  const cityByZone = new Map(zones.map((z) => [z.name, z.city]));
+  return all.filter((p) => p.status === "published").map((p) => toPublic(p, cityByZone));
 }
 
 /** Properties marked "Destacada" (max 5); falls back to the first 5 if none are marked. */
