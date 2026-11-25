@@ -4,6 +4,7 @@ import { MapPin, Phone } from "lucide-react";
 import { SOCIAL } from "@/components/social-icons";
 import { MobileNav } from "@/components/MobileNav";
 import { getSiteConfig, telHref } from "@/lib/server/public-config";
+import { brandLogos } from "@/lib/site-config";
 
 const NAV_LINKS: { label: string; href: string }[] = [
   { label: "Inicio", href: "/" },
@@ -19,6 +20,7 @@ const focusRing =
 
 export async function SiteHeader() {
   const config = await getSiteConfig();
+  const logos = brandLogos(config.agency);
   const { lat, lng } = config.address.coordinates;
   const mapsHref = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
   return (
@@ -29,8 +31,11 @@ export async function SiteHeader() {
           aria-label="Transaction — inicio"
           className={`flex items-center gap-2.5 ${focusRing}`}
         >
-          {config.agency.logoUrl ? (
-            <Image src={config.agency.logoUrl} alt="" width={112} height={28} priority className="h-7 w-auto max-w-28 object-contain" />
+          {logos.light ? (
+            <>
+              <Image src={logos.light} alt="" width={112} height={28} priority className="h-7 w-auto max-w-28 object-contain dark:hidden" />
+              <Image src={logos.dark} alt="" width={112} height={28} priority className="hidden h-7 w-auto max-w-28 object-contain dark:block" />
+            </>
           ) : (
             <div className="flex size-4 items-center justify-center rounded-full border border-blue-800 dark:border-sky-600 text-[8px] font-bold text-blue-800 dark:text-sky-600">
               T

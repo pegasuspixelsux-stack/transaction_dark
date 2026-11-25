@@ -2,6 +2,7 @@ import Image from "next/image";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SOCIAL } from "@/components/social-icons";
 import { getPublicZones, getSiteConfig, telHref } from "@/lib/server/public-config";
+import { brandLogos } from "@/lib/site-config";
 
 const staticColumns: { heading: string; href?: string; items: string[]; hrefs?: string[] }[] = [
   { heading: "Propiedades", href: "/propiedades", items: ["Casas", "Apartamentos", "Terrenos", "Chacras", "Campos"] },
@@ -11,6 +12,7 @@ const staticColumns: { heading: string; href?: string; items: string[]; hrefs?: 
 export async function SiteFooter() {
   const [config, zones] = await Promise.all([getSiteConfig(), getPublicZones()]);
   const { city } = config.address;
+  const logos = brandLogos(config.agency);
   const homeZones = zones.filter((z) => z.showOnHome);
   const FOOTER_COLUMNS = [
     staticColumns[0],
@@ -35,8 +37,11 @@ export async function SiteFooter() {
         <div className="flex flex-col gap-12 lg:flex-row lg:justify-between">
           <div className="max-w-xs">
             <div className="flex items-center gap-3">
-              {config.agency.logoUrl ? (
-                <Image src={config.agency.logoUrl} alt="" width={160} height={40} className="h-10 w-auto max-w-40 object-contain" />
+              {logos.light ? (
+                <>
+                  <Image src={logos.light} alt="" width={160} height={40} className="h-10 w-auto max-w-40 object-contain dark:hidden" />
+                  <Image src={logos.dark} alt="" width={160} height={40} className="hidden h-10 w-auto max-w-40 object-contain dark:block" />
+                </>
               ) : (
                 <div className="flex size-8 items-center justify-center rounded-full border-[1.5px] border-blue-800 dark:border-sky-600 text-xs font-bold text-blue-800 dark:text-sky-600">
                   T

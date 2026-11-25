@@ -9,8 +9,10 @@ export interface SiteConfig {
     legalName: string;
     tagline: string;
     licenseId: string;
-    /** Uploaded logo (ImageKit URL), shown next to the name in the header, footer and dashboard. "" = none. */
+    /** Uploaded logo for light backgrounds (ImageKit URL), shown next to the name. "" = none. */
     logoUrl: string;
+    /** Uploaded logo for dark backgrounds (dark theme, dashboard sidebar). "" = use `logoUrl`. */
+    logoDarkUrl: string;
   };
   address: {
     street: string;
@@ -44,6 +46,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     tagline: "Propiedades de autor frente al mar en Punta del Este.",
     licenseId: "MVOTMA-REG-00000", // TODO: replace with the real registration ID
     logoUrl: "",
+    logoDarkUrl: "",
   },
   address: {
     street: "Av. Gorlero 000",
@@ -196,6 +199,7 @@ export function parseSiteConfig(input: unknown): ParseResult {
       tagline: text("agency.tagline", agency.tagline, { max: 200 }),
       licenseId: text("agency.licenseId", agency.licenseId, { max: 60 }),
       logoUrl: logo("agency.logoUrl", agency.logoUrl),
+      logoDarkUrl: logo("agency.logoDarkUrl", agency.logoDarkUrl),
     },
     address: {
       street: text("address.street", address.street, { required: true }),
@@ -245,4 +249,12 @@ export function withDefaults(stored: unknown): SiteConfig {
     return (over === undefined ? base : over) as T;
   };
   return merge(DEFAULT_SITE_CONFIG, stored);
+}
+
+/** Logo for each background; either one falls back to the other when only one is uploaded. */
+export function brandLogos(agency: SiteConfig["agency"]): { light: string; dark: string } {
+  return {
+    light: agency.logoUrl || agency.logoDarkUrl,
+    dark: agency.logoDarkUrl || agency.logoUrl,
+  };
 }

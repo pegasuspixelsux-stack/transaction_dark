@@ -18,6 +18,13 @@ import {
   inputClass,
 } from "@/components/admin/ui";
 
+type LogoField = "logoUrl" | "logoDarkUrl";
+
+const LOGO_SLOTS: { field: LogoField; title: string; bg: string; mutedText: string }[] = [
+  { field: "logoUrl", title: "Logo para fondo claro", bg: "bg-[#eaf4fb]", mutedText: "text-admin-muted" },
+  { field: "logoDarkUrl", title: "Logo para fondo oscuro", bg: "bg-[#0a1a2e]", mutedText: "text-white/70" },
+];
+
 type Load =
   | { state: "loading" }
   | { state: "auth" }
@@ -55,8 +62,9 @@ export function ConfigManager() {
   const [reauthPassword, setReauthPassword] = useState("");
   const [reauthError, setReauthError] = useState<string | null>(null);
   const [reauthBusy, setReauthBusy] = useState(false);
-  const [logoUploading, setLogoUploading] = useState(false);
-  const [logoError, setLogoError] = useState<string | null>(null);
+  /** Which logo slot is uploading, and per-slot upload errors. */
+  const [logoUploading, setLogoUploading] = useState<LogoField | null>(null);
+  const [logoError, setLogoError] = useState<Partial<Record<LogoField, string>>>({});
 
   const allowed = status === "ready" && can("config:manage");
 
@@ -192,18 +200,18 @@ export function ConfigManager() {
     </Field>
   );
 
-  async function onPickLogo(e: ChangeEvent<HTMLInputElement>) {
+  async function onPickLogo(field: LogoField, e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    setLogoError(null);
-    setLogoUploading(true);
+    setLogoError((er) => ({ ...er, [field]: undefined }));
+    setLogoUploading(field);
     try {
-      set("agency.logoUrl", await uploadImage(file, "/branding"));
+      set(`agency.${field}`, await uploadImage(file, "/branding"));
     } catch (err) {
-      setLogoError(err instanceof Error ? err.message : "No pudimos subir el logo.");
+      setLogoError((er) => ({ ...er, [field]: err instanceof Error ? err.message : "No pudimos subir el logo." }));
     } finally {
-      setLogoUploading(false);
+      setLogoUploading(null);
     }
   }
 
@@ -283,48 +291,61 @@ export function ConfigManager() {
       <form id="config-form" onSubmit={onSubmit} noValidate className="grid gap-6 lg:grid-cols-2">
         <GlassCard className="p-6 lg:col-span-2">
           <h2 className="text-title-3">Logo</h2>
-          <p className="mt-1 text-footnote text-admin-muted">
-            Se muestra junto al nombre en el menú superior, el pie de página y el panel. Usá un PNG o WebP con fondo
-            transparente; sin logo se muestra la inicial.
+          <p className="mt-1 max-w-prose text-footnote text-admin-muted">
+            Se muestra junto al nombre en el menú superior, el pie de página y el panel. Subí una versión para fondos
+            claros y otra para fondos oscuros (tema oscuro del sitio y barra lateral del panel). Si subís solo una, se usa
+            en ambos. Usá PNG o WebP con fondo transparente.
           </p>
-          <div className="mt-5 flex flex-wrap items-center gap-4">
-            {/* Previewed on both header backgrounds so a light or dark logo can be judged before saving. */}
-            <div className="flex gap-3">
-              {(["bg-[#eaf4fb]", "bg-[#0a1a2e]"] as const).map((bg) => (
-                <div key={bg} className={cn("flex h-16 w-40 items-center justify-center rounded-xl border border-admin-line", bg)}>
-                  {draft.agency.logoUrl ? (
-                    <Image src={draft.agency.logoUrl} alt="" width={128} height={40} className="h-10 w-auto max-w-32 object-contain" />
-                  ) : (
-                    <span className={cn("text-footnote", bg === "bg-[#0a1a2e]" ? "text-white/70" : "text-admin-muted")}>Sin logo</span>
-                  )}
+          <div className="mt-5 grid gap-6 sm:grid-cols-2">
+            {LOGO_SLOTS.map(({ field, title, bg, mutedText }) => {
+              const url = draft.agency[field];
+              const fallback = draft.agency[field === "logoUrl" ? "logoDarkUrl" : "logoUrl"];
+              const shown = url || fallback;
+              const error = logoError[field] || errors[`agency.${field}`];
+              const busy = logoUploading === field;
+              return (
+                <div key={field}>
+                  <p className="mb-2 text-footnote font-medium text-admin-ink">{title}</p>
+                  <div className={cn("flex h-20 items-center justify-center rounded-xl border border-admin-line", bg)}>
+                    {shown ? (
+                      <Image src={shown} alt="" width={160} height={48} className={cn("h-12 w-auto max-w-40 object-contain", !url && "opacity-60")} />
+                    ) : (
+                      <span className={cn("text-footnote", mutedText)}>Sin logo</span>
+                    )}
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    <label
+                      className={cn(
+                        "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900/[0.05] px-5 text-callout font-medium text-admin-ink transition-colors duration-150 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-admin-accent",
+                        busy ? "cursor-wait opacity-60" : "cursor-pointer hover:bg-slate-900/[0.08] active:bg-slate-900/[0.11]",
+                      )}
+                    >
+                      <Upload className="size-4" aria-hidden />
+                      {busy ? "Subiendo…" : url ? "Cambiar" : "Subir"}
+                      <input
+                        type="file"
+                        accept="image/png,image/webp,image/jpeg"
+                        aria-label={`Subir ${title.toLowerCase()}`}
+                        className="sr-only"
+                        disabled={logoUploading !== null}
+                        onChange={(e) => onPickLogo(field, e)}
+                      />
+                    </label>
+                    {url ? (
+                      <Button variant="danger" onClick={() => set(`agency.${field}`, "")}>
+                        <Trash2 className="size-4" aria-hidden />
+                        Quitar
+                      </Button>
+                    ) : null}
+                  </div>
+                  <p role={error ? "alert" : undefined} className={cn("mt-2 text-footnote", error ? "text-admin-bad" : "text-admin-muted")}>
+                    {error || (!url && fallback ? "Usando el otro logo." : " ")}
+                  </p>
                 </div>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <label
-                className={cn(
-                  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900/[0.05] px-5 text-callout font-medium text-admin-ink transition-colors duration-150 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-admin-accent",
-                  logoUploading ? "cursor-wait opacity-60" : "cursor-pointer hover:bg-slate-900/[0.08] active:bg-slate-900/[0.11]",
-                )}
-              >
-                <Upload className="size-4" aria-hidden />
-                {logoUploading ? "Subiendo…" : draft.agency.logoUrl ? "Cambiar logo" : "Subir logo"}
-                <input type="file" accept="image/png,image/webp,image/jpeg" className="sr-only" disabled={logoUploading} onChange={onPickLogo} />
-              </label>
-              {draft.agency.logoUrl ? (
-                <Button variant="danger" onClick={() => set("agency.logoUrl", "")}>
-                  <Trash2 className="size-4" aria-hidden />
-                  Quitar
-                </Button>
-              ) : null}
-            </div>
+              );
+            })}
           </div>
-          <p
-            role={logoError || errors["agency.logoUrl"] ? "alert" : undefined}
-            className={cn("mt-3 text-footnote", logoError || errors["agency.logoUrl"] ? "text-admin-bad" : "text-admin-muted")}
-          >
-            {logoError || errors["agency.logoUrl"] || "Guardá los cambios para publicarlo."}
-          </p>
+          <p className="mt-2 text-footnote text-admin-muted">Guardá los cambios para publicarlos.</p>
         </GlassCard>
 
         <Section title="Información del negocio">
