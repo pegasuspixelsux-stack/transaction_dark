@@ -230,3 +230,14 @@ html.dark [data-mobile-nav] {
   background-color: #0a1a2e !important;
   border-color: rgba(255, 255, 255, 0.25) !important;
 }
+
+/* Headings: left-aligned, with lines balanced to similar widths instead of a
+   long line plus a short orphan. In @layer base so a utility can still override. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    text-align: left;
+    text-wrap: balance;
+  }
+}

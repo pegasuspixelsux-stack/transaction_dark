@@ -188,3 +188,13 @@ html {
     transform: translateX(24px);
   }
 }
+
+/* Headings: left-aligned, with lines balanced to similar widths (same rule as the site). */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    text-align: left;
+    text-wrap: balance;
+  }
+}
