@@ -3,7 +3,7 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import Image from "next/image";
 import { Plus, Save, Trash2, Upload } from "lucide-react";
-import { uploadImage } from "@/lib/admin/upload-image";
+import { uploadImage, type UploadOptions } from "@/lib/admin/upload-image";
 import { cn } from "@/lib/utils";
 import { useAdmin } from "@/lib/admin/admin-context";
 import { AGENT_FLAG, isAgentEnabled, type ConfigErrors, type SiteConfig } from "@/lib/site-config";
@@ -19,10 +19,35 @@ import {
 } from "@/components/admin/ui";
 
 type LogoField = "logoUrl" | "logoDarkUrl";
+type ImageField = LogoField | "faviconUrl" | "ogImageUrl";
+
+/** How each uploaded image is prepared before it is stored. */
+const UPLOAD_OPTIONS: Record<ImageField, UploadOptions> = {
+  // Logos ship as padded squares: trim the empty border, cap at 320px (40px tall × 3x screens).
+  logoUrl: { trim: true, maxEdge: 320 },
+  logoDarkUrl: { trim: true, maxEdge: 320 },
+  // PNG is the favicon format every browser accepts; 512px covers tabs, bookmarks and home screens.
+  faviconUrl: { trim: true, square: 512, type: "image/png" },
+  // The size WhatsApp, Facebook, LinkedIn and X expect; JPEG is supported by every preview crawler.
+  ogImageUrl: { cover: { width: 1200, height: 630 }, type: "image/jpeg" },
+};
 
 const LOGO_SLOTS: { field: LogoField; title: string; bg: string; mutedText: string }[] = [
   { field: "logoUrl", title: "Logo para fondo claro", bg: "bg-[#eaf4fb]", mutedText: "text-admin-muted" },
   { field: "logoDarkUrl", title: "Logo para fondo oscuro", bg: "bg-[#0a1a2e]", mutedText: "text-white/70" },
+];
+
+const MEDIA_SLOTS: { field: "faviconUrl" | "ogImageUrl"; title: string; hint: string }[] = [
+  {
+    field: "faviconUrl",
+    title: "Favicon",
+    hint: "Imagen cuadrada, idealmente 512×512. Se recorta el margen y se guarda como PNG.",
+  },
+  {
+    field: "ogImageUrl",
+    title: "Imagen para compartir (Open Graph)",
+    hint: "Se recorta al centro en 1200×630 y se guarda como JPG. Dejá el contenido importante en el centro.",
+  },
 ];
 
 type Load =
@@ -63,8 +88,8 @@ export function ConfigManager() {
   const [reauthError, setReauthError] = useState<string | null>(null);
   const [reauthBusy, setReauthBusy] = useState(false);
   /** Which logo slot is uploading, and per-slot upload errors. */
-  const [logoUploading, setLogoUploading] = useState<LogoField | null>(null);
-  const [logoError, setLogoError] = useState<Partial<Record<LogoField, string>>>({});
+  const [logoUploading, setLogoUploading] = useState<ImageField | null>(null);
+  const [logoError, setLogoError] = useState<Partial<Record<ImageField, string>>>({});
 
   const allowed = status === "ready" && can("config:manage");
 
@@ -200,16 +225,14 @@ export function ConfigManager() {
     </Field>
   );
 
-  async function onPickLogo(field: LogoField, e: ChangeEvent<HTMLInputElement>) {
+  async function onPickLogo(field: ImageField, e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
     setLogoError((er) => ({ ...er, [field]: undefined }));
     setLogoUploading(field);
     try {
-      // Logos ship as padded squares: trim the empty border, cap at 320px (40px tall × 3x screens, with room
-      // for wide marks) and store as WebP, so the site never downloads a 500px PNG for a 40px slot.
-      set(`agency.${field}`, await uploadImage(file, "/branding", { trim: true, maxEdge: 320 }));
+      set(`agency.${field}`, await uploadImage(file, "/branding", UPLOAD_OPTIONS[field]));
     } catch (err) {
       setLogoError((er) => ({ ...er, [field]: err instanceof Error ? err.message : "No pudimos subir el logo." }));
     } finally {
@@ -348,6 +371,79 @@ export function ConfigManager() {
             })}
           </div>
           <p className="mt-2 text-footnote text-admin-muted">Guardá los cambios para publicarlos.</p>
+        </GlassCard>
+
+        <GlassCard className="p-6 lg:col-span-2">
+          <h2 className="text-title-3">Favicon y vista previa al compartir</h2>
+          <p className="mt-1 max-w-prose text-footnote text-admin-muted">
+            El favicon es el ícono de la pestaña del navegador. La vista previa (Open Graph) es la imagen que aparece al
+            compartir un enlace del sitio en WhatsApp, Facebook, LinkedIn o X.
+          </p>
+          <div className="mt-5 grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+            {MEDIA_SLOTS.map(({ field, title, hint }) => {
+              const url = draft.agency[field];
+              const error = logoError[field] || errors[`agency.${field}`];
+              const busy = logoUploading === field;
+              return (
+                <div key={field}>
+                  <p className="mb-2 text-footnote font-medium text-admin-ink">{title}</p>
+                  {field === "faviconUrl" ? (
+                    // Shown as a browser tab would show it.
+                    <div className="flex h-[7.5rem] items-center justify-center rounded-xl border border-admin-line bg-admin-panel">
+                      <div className="flex max-w-full items-center gap-2 rounded-t-lg bg-white px-3 py-2 shadow-sm">
+                        {url ? (
+                          <Image src={url} alt="" width={16} height={16} className="size-4" />
+                        ) : (
+                          <span aria-hidden className="size-4 rounded-sm bg-admin-line" />
+                        )}
+                        <span className="truncate text-footnote text-admin-ink">{draft.agency.name}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative aspect-[1200/630] overflow-hidden rounded-xl border border-admin-line bg-admin-panel">
+                      {url ? (
+                        <Image src={url} alt="" fill sizes="(min-width: 1024px) 480px, 100vw" className="object-cover" />
+                      ) : (
+                        <span className="flex h-full items-center justify-center text-footnote text-admin-muted">Sin imagen</span>
+                      )}
+                    </div>
+                  )}
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    <label
+                      className={cn(
+                        "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900/[0.05] px-5 text-callout font-medium text-admin-ink transition-colors duration-150 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-admin-accent",
+                        busy ? "cursor-wait opacity-60" : "cursor-pointer hover:bg-slate-900/[0.08] active:bg-slate-900/[0.11]",
+                      )}
+                    >
+                      <Upload className="size-4" aria-hidden />
+                      {busy ? "Subiendo…" : url ? "Cambiar" : "Subir"}
+                      <input
+                        type="file"
+                        accept="image/png,image/webp,image/jpeg"
+                        aria-label={`Subir ${title.toLowerCase()}`}
+                        className="sr-only"
+                        disabled={logoUploading !== null}
+                        onChange={(e) => onPickLogo(field, e)}
+                      />
+                    </label>
+                    {url ? (
+                      <Button variant="danger" onClick={() => set(`agency.${field}`, "")}>
+                        <Trash2 className="size-4" aria-hidden />
+                        Quitar
+                      </Button>
+                    ) : null}
+                  </div>
+                  <p role={error ? "alert" : undefined} className={cn("mt-2 text-footnote", error ? "text-admin-bad" : "text-admin-muted")}>
+                    {error || hint}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-footnote text-admin-muted">
+            Guardá los cambios para publicarlos. WhatsApp y las redes guardan la vista previa un tiempo, así que un cambio
+            puede tardar en verse en enlaces ya compartidos.
+          </p>
         </GlassCard>
 
         <Section title="Información del negocio">

@@ -2,12 +2,19 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/lib/theme-context";
 import { SiteHeader } from "@/components/SiteHeader";
 import { montserrat, playfair } from "@/lib/fonts";
+import { getSiteConfig } from "@/lib/server/public-config";
+import { brandingMetadata } from "@/lib/server/site-metadata";
 import "../globals.css";
 
-export const metadata: Metadata = {
-  title: "Transaction",
-  description: "Propiedades de autor frente al mar en Punta del Este.",
-};
+/** Title, description, favicon and share preview from the saved settings (Configuración del sitio). */
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getSiteConfig();
+  return {
+    title: config.agency.name,
+    description: config.agency.tagline || "Propiedades de autor frente al mar en Punta del Este.",
+    ...brandingMetadata(config),
+  };
+}
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

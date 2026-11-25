@@ -13,6 +13,10 @@ export interface SiteConfig {
     logoUrl: string;
     /** Uploaded logo for dark backgrounds (dark theme, dashboard sidebar). "" = use `logoUrl`. */
     logoDarkUrl: string;
+    /** Browser-tab icon: 512×512 PNG. "" = the built-in /favicon.ico. */
+    faviconUrl: string;
+    /** Link-preview image (Open Graph): 1200×630 JPEG shown when a page is shared. "" = none. */
+    ogImageUrl: string;
   };
   address: {
     street: string;
@@ -47,6 +51,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     licenseId: "MVOTMA-REG-00000", // TODO: replace with the real registration ID
     logoUrl: "",
     logoDarkUrl: "",
+    faviconUrl: "",
+    ogImageUrl: "",
   },
   address: {
     street: "Av. Gorlero 000",
@@ -125,7 +131,7 @@ export function parseSiteConfig(input: unknown): ParseResult {
   /** Only uploaded images: the host must be allowed by next.config.ts images.remotePatterns. */
   const logo = (path: string, v: unknown) => {
     const s = text(path, v, { max: 500 });
-    if (s && !/^https:\/\/ik\.imagekit\.io\/\S+$/i.test(s)) errors[path] = "Subí el logo desde este panel.";
+    if (s && !/^https:\/\/ik\.imagekit\.io\/\S+$/i.test(s)) errors[path] = "Subí la imagen desde este panel.";
     return s;
   };
   const phone = (path: string, v: unknown, required = false) => {
@@ -200,6 +206,8 @@ export function parseSiteConfig(input: unknown): ParseResult {
       licenseId: text("agency.licenseId", agency.licenseId, { max: 60 }),
       logoUrl: logo("agency.logoUrl", agency.logoUrl),
       logoDarkUrl: logo("agency.logoDarkUrl", agency.logoDarkUrl),
+      faviconUrl: logo("agency.faviconUrl", agency.faviconUrl),
+      ogImageUrl: logo("agency.ogImageUrl", agency.ogImageUrl),
     },
     address: {
       street: text("address.street", address.street, { required: true }),

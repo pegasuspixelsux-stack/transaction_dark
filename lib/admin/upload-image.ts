@@ -1,5 +1,5 @@
 /**
- * Browser-side image upload: optionally trim, downscale and re-encode as WebP,
+ * Browser-side image upload: optionally trim, resize and re-encode (WebP by default),
  * then upload straight to ImageKit with a short-lived token signed by
  * /api/admin/imagekit-auth (the private key never reaches the browser).
  */
@@ -16,6 +16,12 @@ export interface UploadOptions {
    * four corners) before resizing — for logos exported on a padded square canvas.
    */
   trim?: boolean;
+  /** Fit inside a transparent square of this size (favicons). Overrides `maxEdge`. */
+  square?: number;
+  /** Crop to fill exactly this size, centered (social preview images). Overrides `maxEdge`. */
+  cover?: { width: number; height: number };
+  /** Output format. Default WebP; PNG for favicons, JPEG for link previews. */
+  type?: "image/webp" | "image/png" | "image/jpeg";
 }
 
 type Box = { x: number; y: number; w: number; h: number };
@@ -52,8 +58,13 @@ function contentBox(ctx: CanvasRenderingContext2D, width: number, height: number
   return { x, y, w: Math.min(width, maxX + pad + 1) - x, h: Math.min(height, maxY + pad + 1) - y };
 }
 
-/** Trim (optional), downscale (never upscale) to `maxEdge` on the long side and re-encode as WebP. */
-async function toWebp(file: File, { maxEdge = DEFAULT_MAX_EDGE_PX, trim = false }: UploadOptions): Promise<File> {
+const EXT = { "image/webp": ".webp", "image/png": ".png", "image/jpeg": ".jpg" } as const;
+
+/** Trim (optional), resize and re-encode according to `options`. */
+async function encode(
+  file: File,
+  { maxEdge = DEFAULT_MAX_EDGE_PX, trim = false, square, cover, type = "image/webp" }: UploadOptions,
+): Promise<File> {
   const bitmap = await createImageBitmap(file);
   let box: Box = { x: 0, y: 0, w: bitmap.width, h: bitmap.height };
   if (trim) {
@@ -66,32 +77,62 @@ async function toWebp(file: File, { maxEdge = DEFAULT_MAX_EDGE_PX, trim = false 
       box = contentBox(pctx, bitmap.width, bitmap.height) ?? box;
     }
   }
-  const scale = Math.min(1, maxEdge / Math.max(box.w, box.h));
+
   const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(box.w * scale));
-  canvas.height = Math.max(1, Math.round(box.h * scale));
+  // Destination rectangle inside the canvas.
+  let dx = 0, dy = 0, dw: number, dh: number;
+  if (cover) {
+    // Scale so the image covers the target, then crop the overflow evenly.
+    canvas.width = cover.width;
+    canvas.height = cover.height;
+    const scale = Math.max(cover.width / box.w, cover.height / box.h);
+    const sw = cover.width / scale, sh = cover.height / scale;
+    box = { x: box.x + (box.w - sw) / 2, y: box.y + (box.h - sh) / 2, w: sw, h: sh };
+    dw = cover.width;
+    dh = cover.height;
+  } else if (square) {
+    // Fit inside the square (never upscale past it) and center; the rest stays transparent.
+    canvas.width = canvas.height = square;
+    const scale = square / Math.max(box.w, box.h);
+    dw = Math.round(box.w * scale);
+    dh = Math.round(box.h * scale);
+    dx = Math.round((square - dw) / 2);
+    dy = Math.round((square - dh) / 2);
+  } else {
+    const scale = Math.min(1, maxEdge / Math.max(box.w, box.h));
+    canvas.width = dw = Math.max(1, Math.round(box.w * scale));
+    canvas.height = dh = Math.max(1, Math.round(box.h * scale));
+  }
+
   const ctx = canvas.getContext("2d");
   if (ctx) {
     ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(bitmap, box.x, box.y, box.w, box.h, 0, 0, canvas.width, canvas.height);
+    if (type === "image/jpeg") {
+      // JPEG has no transparency: put transparent areas on white instead of black.
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.drawImage(bitmap, box.x, box.y, box.w, box.h, dx, dy, dw, dh);
   }
   bitmap.close();
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", WEBP_QUALITY));
-  if (!blob || blob.type !== "image/webp") throw new Error(`${file.name}: no pudimos convertir la imagen a WebP.`);
-  return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" });
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, type, type === "image/png" ? undefined : WEBP_QUALITY),
+  );
+  if (!blob || blob.type !== type) throw new Error(`${file.name}: no pudimos convertir la imagen.`);
+  return new File([blob], file.name.replace(/\.[^.]+$/, "") + EXT[type], { type });
 }
 
 /** Upload one JPG/PNG/WebP into an ImageKit folder (e.g. "/properties") and return its URL. */
 export async function uploadImage(file: File, folder: string, options: UploadOptions = {}): Promise<string> {
   if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error(`${file.name}: usá una imagen JPG, PNG o WebP.`);
   if (file.size > MAX_BYTES) throw new Error(`${file.name}: supera los 10 MB.`);
-  const webp = await toWebp(file, options);
+  const encoded = await encode(file, options);
   const authRes = await fetch("/api/admin/imagekit-auth", { cache: "no-store" });
   const auth = await authRes.json().catch(() => ({}));
   if (!authRes.ok) throw new Error(auth.error ?? "No pudimos autorizar la subida.");
   const body = new FormData();
-  body.set("file", webp);
-  body.set("fileName", webp.name);
+  body.set("file", encoded);
+  body.set("fileName", encoded.name);
   body.set("folder", folder);
   body.set("useUniqueFileName", "true");
   body.set("publicKey", auth.publicKey);

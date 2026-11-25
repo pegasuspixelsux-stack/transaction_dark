@@ -2,12 +2,19 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { AdminProvider } from "@/lib/admin/admin-context";
 import { interDisplay, montserrat, playfair } from "@/lib/fonts";
+import { getSiteConfig } from "@/lib/server/public-config";
+import { brandingMetadata } from "@/lib/server/site-metadata";
 import "./admin.css";
 
-export const metadata: Metadata = {
-  title: "Transaction · Admin",
-  robots: { index: false, follow: false },
-};
+/** Same favicon as the site; never indexed, so no share preview is needed. */
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getSiteConfig();
+  return {
+    title: `${config.agency.name} · Admin`,
+    robots: { index: false, follow: false },
+    icons: brandingMetadata(config).icons,
+  };
+}
 
 /** The dashboard is light-only: tells the browser not to apply OS dark mode to native controls. */
 export const viewport: Viewport = {
