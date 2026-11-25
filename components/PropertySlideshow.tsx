@@ -104,7 +104,8 @@ export function PropertySlideshow({ images, title, children }: PropertySlideshow
       {/* Bottom-left overlay, aligned with the 1000px page grid */}
       <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 md:pointer-events-auto md:bottom-8">
         <div className="mx-auto flex w-full max-w-[calc(1000px+4rem)] items-end justify-between gap-6 px-6 md:px-8">
-          <div className="min-w-0 md:w-[70%]">{children}</div>
+          {/* Takes all the width left of the slide controls (the title truncates inside it). */}
+          <div className="min-w-0 flex-1">{children}</div>
           {images.length > 1 ? (
             <div className="pointer-events-auto flex shrink-0 flex-col items-end gap-2">
               <div className="flex gap-2">

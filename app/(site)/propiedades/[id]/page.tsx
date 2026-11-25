@@ -6,7 +6,7 @@ import { PropertyInquiryActions } from "@/components/PropertyInquiryActions";
 import { AgentCard } from "@/components/AgentCard";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
-import { findZone } from "@/lib/zones";
+import { findZone, zonePlace } from "@/lib/zones";
 import { brandLogos, isAgentEnabled } from "@/lib/site-config";
 import { getPublicPropertyTypes, getPublicZones, getSiteConfig, waNumber } from "@/lib/server/public-config";
 import { findType } from "@/lib/property-types";
@@ -67,9 +67,15 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
   const heroOverlay = (
     <div className="text-white">
       <p className="text-xs uppercase tracking-luxury text-white/80 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">
-        <span className="hidden md:inline">{place} · </span>Ref. {property.id}
+        {/* Phones: just the Ref. Desktop: Ref., zone, city. */}
+        Ref. {property.id}
+        <span className="hidden md:inline"> · {zonePlace(property.zone, property.city)}</span>
       </p>
-      <h1 className="mt-2 hidden font-display text-5xl font-normal tracking-tight drop-shadow-md md:block">
+      {/* Desktop: one line across the full content width; a longer title ends in "…" (full title on hover). */}
+      <h1
+        title={property.title}
+        className="mt-2 hidden w-full truncate font-display text-5xl font-normal leading-tight tracking-tight drop-shadow-md md:block"
+      >
         {property.title}
       </h1>
     </div>

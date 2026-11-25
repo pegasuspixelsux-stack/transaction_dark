@@ -88,8 +88,9 @@ export function AgentCard({
         </div>
       </div>
 
-      {/* WhatsApp and Llamar take one column each; Email (children) spans two. */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {/* Phones: WhatsApp and Llamar side by side, Email full width below.
+          From sm up: three equal-width buttons in one row. */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {whatsapp ? (
           <a
             href={`https://wa.me/${waDigits(whatsapp)}?text=${encodeURIComponent(text)}`}
@@ -108,7 +109,7 @@ export function AgentCard({
             Llamar
           </a>
         ) : null}
-        {children ? <div className="col-span-2 grid">{children}</div> : null}
+        {children ? <div className="col-span-2 grid sm:col-span-1">{children}</div> : null}
       </div>
     </section>
   );
