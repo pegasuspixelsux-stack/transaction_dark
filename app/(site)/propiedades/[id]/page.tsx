@@ -3,10 +3,11 @@ import { Bed, Bath, Ruler, Calendar, MapPin, FileText, MoveHorizontal } from "lu
 import { getPublicProperties } from "@/lib/server/public-properties";
 import { PropertySlideshow } from "@/components/PropertySlideshow";
 import { PropertyInquiryActions } from "@/components/PropertyInquiryActions";
+import { AgentCard } from "@/components/AgentCard";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AGenteConcierge } from "@/components/AGenteConcierge";
 import { findZone } from "@/lib/zones";
-import { isAgentEnabled } from "@/lib/site-config";
+import { brandLogos, isAgentEnabled } from "@/lib/site-config";
 import { getPublicPropertyTypes, getPublicZones, getSiteConfig, waNumber } from "@/lib/server/public-config";
 import { findType } from "@/lib/property-types";
 
@@ -61,12 +62,14 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     property.frontage ? { icon: MoveHorizontal, text: `Frente ${property.frontage.toLocaleString("es-UY")} m` } : null,
   ].filter((x): x is NonNullable<typeof x> => x !== null);
 
+  // Phones: the photo carries only the reference; place and title sit below it so the image stays clear.
+  // From md up, everything overlays the slideshow as before. Only one <h1> is displayed at a time.
   const heroOverlay = (
     <div className="text-white">
       <p className="text-xs uppercase tracking-luxury text-white/80 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">
-        {place} · Ref. {property.id}
+        <span className="hidden md:inline">{place} · </span>Ref. {property.id}
       </p>
-      <h1 className="mt-2 font-display text-2xl font-normal tracking-tight drop-shadow-md sm:text-3xl md:text-5xl">
+      <h1 className="mt-2 hidden font-display text-5xl font-normal tracking-tight drop-shadow-md md:block">
         {property.title}
       </h1>
     </div>
@@ -81,7 +84,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             {heroOverlay}
           </PropertySlideshow>
         ) : (
-          <section className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-neutral-950 text-xs uppercase tracking-luxury text-white/60 sm:aspect-auto sm:min-h-dvh">
+          <section className="relative flex h-[60svh] w-full items-center justify-center overflow-hidden bg-neutral-950 text-xs uppercase tracking-luxury text-white/60 sm:h-auto sm:min-h-dvh">
             Fotos próximamente
             <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/30 to-transparent" />
             <div className="absolute inset-x-0 bottom-4 z-10 md:bottom-8">
@@ -91,7 +94,15 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
         )}
 
         {/* Property Info Section */}
-        <section className="mx-auto w-full max-w-[calc(1000px+4rem)] px-6 py-24 sm:py-32 md:px-8">
+        <section className="mx-auto w-full max-w-[calc(1000px+4rem)] px-6 pb-24 pt-8 sm:pb-32 md:px-8 md:pt-32">
+          {/* Phones only: title below the slideshow (it overlays the photo from md up). */}
+          <header className="mb-12 md:hidden">
+            <p className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">{place}</p>
+            <h1 className="mt-2 font-display text-3xl font-normal tracking-tight text-ink dark:text-white">
+              {property.title}
+            </h1>
+          </header>
+
           {/* Description Section */}
           <div className="mb-24">
             <ul className="mb-8 grid max-w-md grid-cols-2 gap-x-6 gap-y-3 text-sm text-ink dark:text-white/90">
@@ -103,7 +114,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               ))}
             </ul>
             <p className="text-xs uppercase tracking-luxury text-ink-muted dark:text-white/75">
-              Descripción · Ref. <span className="uppercase">{property.id}</span>
+              Descripción
             </p>
             <p className="mt-6 text-base leading-relaxed text-ink-muted dark:text-white/75">
               {description}
@@ -196,11 +207,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               </p>
             ) : null}
 
-            <PropertyInquiryActions
+            <AgentCard
+              name={config.agency.name}
+              logos={brandLogos(config.agency)}
+              whatsapp={config.whatsapp.primary.number}
+              phone={config.contact.phones[0] ?? ""}
               propertyId={property.id}
               propertyTitle={property.title}
-              whatsapp={whatsapp}
-            />
+            >
+              <PropertyInquiryActions propertyId={property.id} propertyTitle={property.title} />
+            </AgentCard>
           </div>
         </section>
       </main>

@@ -51,7 +51,7 @@ export function PropertySlideshow({ images, title, children }: PropertySlideshow
 
   return (
     <>
-    <section className="relative aspect-square w-full sm:aspect-auto sm:min-h-dvh overflow-hidden bg-neutral-950">
+    <section className="relative h-[60svh] w-full overflow-hidden bg-neutral-950 sm:h-auto sm:min-h-dvh">
       {/* Images */}
       {images.map((image, index) => (
         <div
@@ -70,11 +70,7 @@ export function PropertySlideshow({ images, title, children }: PropertySlideshow
         </div>
       ))}
 
-      {/* Gradient Overlays */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/30 to-transparent"
-      />
+      {/* No dark scrim: photos show at full brightness. The overlay text keeps its own text shadow. */}
 
       {/* Watermark */}
       <div className="pointer-events-none absolute inset-0 z-10 flex select-none items-center justify-center">

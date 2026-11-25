@@ -21,6 +21,8 @@ const SOURCE_LABELS: Record<string, string> = {
   "a-gente-concierge": "Concierge A-Gente",
   "property-whatsapp": "WhatsApp (ficha de propiedad)",
   "property-email": "Email (ficha de propiedad)",
+  "direct-whatsapp": "WhatsApp directo (ficha de propiedad)",
+  "direct-call": "Llamada directa (ficha de propiedad)",
 };
 
 type Raw = Record<string, unknown>;
