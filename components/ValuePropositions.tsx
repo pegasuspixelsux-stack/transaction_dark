@@ -3,18 +3,18 @@ import { Star, Users, Globe } from "lucide-react";
 const propositions = [
   {
     icon: Star,
-    title: "Propiedades Exclusivas",
-    description: "Selección curada de propiedades premium disponibles solo para nuestros clientes",
+    title: "Mirada local",
+    description: "Analizamos cada propiedad según su ubicación, entorno y potencial.",
   },
   {
     icon: Users,
-    title: "Concierge Privado",
-    description: "Servicio dedicado de atención personalizada para tu búsqueda de propiedades",
+    title: "Presentación cuidada",
+    description: "Recursos visuales de calidad en fotografía y diseño.",
   },
   {
     icon: Globe,
-    title: "Alcance Global",
-    description: "Experiencia internacional en bienes raíces de lujo frente al mar",
+    title: "Acompañamiento profesional",
+    description: "Información y asesoramiento para avanzar con seguridad en cada etapa de la operación.",
   },
 ];
 
