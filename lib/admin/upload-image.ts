@@ -18,6 +18,8 @@ export interface UploadOptions {
   trim?: boolean;
   /** Fit inside a transparent square of this size (favicons). Overrides `maxEdge`. */
   square?: number;
+  /** With `square`: empty margin on each side, as a fraction of the size (0.1 = 10%). */
+  padding?: number;
   /** Crop to fill exactly this size, centered (social preview images). Overrides `maxEdge`. */
   cover?: { width: number; height: number };
   /** Output format. Default WebP; PNG for favicons, JPEG for link previews. */
@@ -63,7 +65,7 @@ const EXT = { "image/webp": ".webp", "image/png": ".png", "image/jpeg": ".jpg" }
 /** Trim (optional), resize and re-encode according to `options`. */
 async function encode(
   file: File,
-  { maxEdge = DEFAULT_MAX_EDGE_PX, trim = false, square, cover, type = "image/webp" }: UploadOptions,
+  { maxEdge = DEFAULT_MAX_EDGE_PX, trim = false, square, padding = 0, cover, type = "image/webp" }: UploadOptions,
 ): Promise<File> {
   const bitmap = await createImageBitmap(file);
   let box: Box = { x: 0, y: 0, w: bitmap.width, h: bitmap.height };
@@ -91,9 +93,10 @@ async function encode(
     dw = cover.width;
     dh = cover.height;
   } else if (square) {
-    // Fit inside the square (never upscale past it) and center; the rest stays transparent.
+    // Fit inside the square minus the padding and center; the rest stays transparent.
     canvas.width = canvas.height = square;
-    const scale = square / Math.max(box.w, box.h);
+    const inner = square * (1 - 2 * Math.min(Math.max(padding, 0), 0.4));
+    const scale = inner / Math.max(box.w, box.h);
     dw = Math.round(box.w * scale);
     dh = Math.round(box.h * scale);
     dx = Math.round((square - dw) / 2);

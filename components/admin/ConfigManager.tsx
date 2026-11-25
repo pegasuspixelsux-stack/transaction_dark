@@ -27,7 +27,8 @@ const UPLOAD_OPTIONS: Record<ImageField, UploadOptions> = {
   logoUrl: { trim: true, maxEdge: 320 },
   logoDarkUrl: { trim: true, maxEdge: 320 },
   // PNG is the favicon format every browser accepts; 512px covers tabs, bookmarks and home screens.
-  faviconUrl: { trim: true, square: 512, type: "image/png" },
+  // 12% margin on each side so the mark is not cut off where browsers or phones round or mask the icon.
+  faviconUrl: { trim: true, square: 512, padding: 0.12, type: "image/png" },
   // The size WhatsApp, Facebook, LinkedIn and X expect; JPEG is supported by every preview crawler.
   ogImageUrl: { cover: { width: 1200, height: 630 }, type: "image/jpeg" },
 };
@@ -41,7 +42,7 @@ const MEDIA_SLOTS: { field: "faviconUrl" | "ogImageUrl"; title: string; hint: st
   {
     field: "faviconUrl",
     title: "Favicon",
-    hint: "Imagen cuadrada, idealmente 512×512. Se recorta el margen y se guarda como PNG.",
+    hint: "Se centra en un cuadrado de 512×512 con margen interno y se guarda como PNG.",
   },
   {
     field: "ogImageUrl",
