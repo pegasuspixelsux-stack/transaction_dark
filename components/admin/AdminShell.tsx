@@ -127,8 +127,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <aside
         id="admin-sidebar"
         className={cn(
-          // Sidebar: solid brand blue (admin-dark re-themes the controls inside it), light-blue icons.
-          "admin-dark fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-white/10 bg-blue-900 transition-transform duration-300 ease-out motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
+          // Sidebar: the homepage's dark-mode navy (#0a1a2e, app/globals.css); admin-dark re-themes the controls inside it.
+          "admin-dark fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-white/10 bg-[#0a1a2e] transition-transform duration-300 ease-out motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
           drawerOpen ? "translate-x-0" : "-translate-x-full",
           collapsed ? "lg:w-20" : "lg:w-64",
         )}
