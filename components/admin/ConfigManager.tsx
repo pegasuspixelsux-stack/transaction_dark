@@ -207,7 +207,9 @@ export function ConfigManager() {
     setLogoError((er) => ({ ...er, [field]: undefined }));
     setLogoUploading(field);
     try {
-      set(`agency.${field}`, await uploadImage(file, "/branding"));
+      // Logos ship as padded squares: trim the empty border, cap at 320px (40px tall × 3x screens, with room
+      // for wide marks) and store as WebP, so the site never downloads a 500px PNG for a 40px slot.
+      set(`agency.${field}`, await uploadImage(file, "/branding", { trim: true, maxEdge: 320 }));
     } catch (err) {
       setLogoError((er) => ({ ...er, [field]: err instanceof Error ? err.message : "No pudimos subir el logo." }));
     } finally {
@@ -294,7 +296,7 @@ export function ConfigManager() {
           <p className="mt-1 max-w-prose text-footnote text-admin-muted">
             Se muestra junto al nombre en el menú superior, el pie de página y el panel. Subí una versión para fondos
             claros y otra para fondos oscuros (tema oscuro del sitio y barra lateral del panel). Si subís solo una, se usa
-            en ambos. Usá PNG o WebP con fondo transparente.
+            en ambos. PNG, JPG o WebP: se recorta el margen vacío, se achica a 320 px y se convierte a WebP.
           </p>
           <div className="mt-5 grid gap-6 sm:grid-cols-2">
             {LOGO_SLOTS.map(({ field, title, bg, mutedText }) => {

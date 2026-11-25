@@ -33,8 +33,8 @@ export async function SiteHeader() {
         >
           {logos.light ? (
             <>
-              <Image src={logos.light} alt="" width={112} height={28} priority className="h-7 w-auto max-w-28 object-contain dark:hidden" />
-              <Image src={logos.dark} alt="" width={112} height={28} priority className="hidden h-7 w-auto max-w-28 object-contain dark:block" />
+              <Image src={logos.light} alt="" width={112} height={28} className="h-7 w-auto max-w-28 object-contain dark:hidden" />
+              <Image src={logos.dark} alt="" width={112} height={28} className="hidden h-7 w-auto max-w-28 object-contain dark:block" />
             </>
           ) : (
             <div className="flex size-4 items-center justify-center rounded-full border border-blue-800 dark:border-sky-600 text-[8px] font-bold text-blue-800 dark:text-sky-600">
