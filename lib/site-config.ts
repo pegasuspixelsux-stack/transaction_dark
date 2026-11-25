@@ -4,7 +4,14 @@
  */
 
 export interface SiteConfig {
-  agency: { name: string; legalName: string; tagline: string; licenseId: string };
+  agency: {
+    name: string;
+    legalName: string;
+    tagline: string;
+    licenseId: string;
+    /** Uploaded logo (ImageKit URL), shown next to the name in the header, footer and dashboard. "" = none. */
+    logoUrl: string;
+  };
   address: {
     street: string;
     city: string;
@@ -36,6 +43,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     legalName: "",
     tagline: "Propiedades de autor frente al mar en Punta del Este.",
     licenseId: "MVOTMA-REG-00000", // TODO: replace with the real registration ID
+    logoUrl: "",
   },
   address: {
     street: "Av. Gorlero 000",
@@ -111,6 +119,12 @@ export function parseSiteConfig(input: unknown): ParseResult {
     if (s && !/^https?:\/\/\S+$/i.test(s)) errors[path] = "Usá una URL completa que empiece con http(s)://";
     return s;
   };
+  /** Only uploaded images: the host must be allowed by next.config.ts images.remotePatterns. */
+  const logo = (path: string, v: unknown) => {
+    const s = text(path, v, { max: 500 });
+    if (s && !/^https:\/\/ik\.imagekit\.io\/\S+$/i.test(s)) errors[path] = "Subí el logo desde este panel.";
+    return s;
+  };
   const phone = (path: string, v: unknown, required = false) => {
     const s = text(path, v, { required, max: 30 });
     if (s && !PHONE_RE.test(s)) errors[path] = "Ingresá un teléfono válido.";
@@ -181,6 +195,7 @@ export function parseSiteConfig(input: unknown): ParseResult {
       legalName: text("agency.legalName", agency.legalName, { max: 120 }),
       tagline: text("agency.tagline", agency.tagline, { max: 200 }),
       licenseId: text("agency.licenseId", agency.licenseId, { max: 60 }),
+      logoUrl: logo("agency.logoUrl", agency.logoUrl),
     },
     address: {
       street: text("address.street", address.street, { required: true }),

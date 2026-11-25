@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { Plus, Save, Trash2 } from "lucide-react";
+import { useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import Image from "next/image";
+import { Plus, Save, Trash2, Upload } from "lucide-react";
+import { uploadImage } from "@/lib/admin/upload-image";
+import { cn } from "@/lib/utils";
 import { useAdmin } from "@/lib/admin/admin-context";
 import { AGENT_FLAG, isAgentEnabled, type ConfigErrors, type SiteConfig } from "@/lib/site-config";
 import {
@@ -52,6 +55,8 @@ export function ConfigManager() {
   const [reauthPassword, setReauthPassword] = useState("");
   const [reauthError, setReauthError] = useState<string | null>(null);
   const [reauthBusy, setReauthBusy] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
 
   const allowed = status === "ready" && can("config:manage");
 
@@ -187,6 +192,21 @@ export function ConfigManager() {
     </Field>
   );
 
+  async function onPickLogo(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setLogoError(null);
+    setLogoUploading(true);
+    try {
+      set("agency.logoUrl", await uploadImage(file, "/branding"));
+    } catch (err) {
+      setLogoError(err instanceof Error ? err.message : "No pudimos subir el logo.");
+    } finally {
+      setLogoUploading(false);
+    }
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!draft) return;
@@ -261,6 +281,52 @@ export function ConfigManager() {
       </div>
 
       <form id="config-form" onSubmit={onSubmit} noValidate className="grid gap-6 lg:grid-cols-2">
+        <GlassCard className="p-6 lg:col-span-2">
+          <h2 className="text-title-3">Logo</h2>
+          <p className="mt-1 text-footnote text-admin-muted">
+            Se muestra junto al nombre en el menú superior, el pie de página y el panel. Usá un PNG o WebP con fondo
+            transparente; sin logo se muestra la inicial.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-4">
+            {/* Previewed on both header backgrounds so a light or dark logo can be judged before saving. */}
+            <div className="flex gap-3">
+              {(["bg-[#eaf4fb]", "bg-[#0a1a2e]"] as const).map((bg) => (
+                <div key={bg} className={cn("flex h-16 w-40 items-center justify-center rounded-xl border border-admin-line", bg)}>
+                  {draft.agency.logoUrl ? (
+                    <Image src={draft.agency.logoUrl} alt="" width={128} height={40} className="h-10 w-auto max-w-32 object-contain" />
+                  ) : (
+                    <span className={cn("text-footnote", bg === "bg-[#0a1a2e]" ? "text-white/70" : "text-admin-muted")}>Sin logo</span>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <label
+                className={cn(
+                  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900/[0.05] px-5 text-callout font-medium text-admin-ink transition-colors duration-150 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-admin-accent",
+                  logoUploading ? "cursor-wait opacity-60" : "cursor-pointer hover:bg-slate-900/[0.08] active:bg-slate-900/[0.11]",
+                )}
+              >
+                <Upload className="size-4" aria-hidden />
+                {logoUploading ? "Subiendo…" : draft.agency.logoUrl ? "Cambiar logo" : "Subir logo"}
+                <input type="file" accept="image/png,image/webp,image/jpeg" className="sr-only" disabled={logoUploading} onChange={onPickLogo} />
+              </label>
+              {draft.agency.logoUrl ? (
+                <Button variant="danger" onClick={() => set("agency.logoUrl", "")}>
+                  <Trash2 className="size-4" aria-hidden />
+                  Quitar
+                </Button>
+              ) : null}
+            </div>
+          </div>
+          <p
+            role={logoError || errors["agency.logoUrl"] ? "alert" : undefined}
+            className={cn("mt-3 text-footnote", logoError || errors["agency.logoUrl"] ? "text-admin-bad" : "text-admin-muted")}
+          >
+            {logoError || errors["agency.logoUrl"] || "Guardá los cambios para publicarlo."}
+          </p>
+        </GlassCard>
+
         <Section title="Información del negocio">
           {text("Nombre comercial / proyecto", "agency.name")}
           {text("Razón social", "agency.legalName")}

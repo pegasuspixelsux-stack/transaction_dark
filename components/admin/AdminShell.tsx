@@ -23,7 +23,7 @@ import { useAdmin } from "@/lib/admin/admin-context";
 import type { Permission } from "@/lib/admin/rbac";
 import { ROLE_LABELS } from "@/lib/admin/rbac";
 import { initials } from "@/lib/admin/utils";
-import { siteConfig } from "@/config/siteConfig";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Badge, Button, IconButton, Spinner } from "./ui";
 
@@ -53,7 +53,14 @@ const SETTINGS_ITEM: NavItem = {
 
 const COLLAPSE_KEY = "transaction-admin-sidebar-collapsed";
 
-export function AdminShell({ children }: { children: ReactNode }) {
+export function AdminShell({
+  brand,
+  children,
+}: {
+  /** Saved agency name and logo, read on the server by the admin layout. */
+  brand: { name: string; logoUrl: string };
+  children: ReactNode;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const { status, user, can, logout } = useAdmin();
@@ -133,14 +140,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
           collapsed ? "lg:w-20" : "lg:w-64",
         )}
       >
-        <div className="flex h-16 items-center justify-between gap-2 px-5">
-          <span
-            className={cn(
-              "truncate text-headline text-white",
-              collapsed && "lg:sr-only",
-            )}
-          >
-            {siteConfig.agency.name}
+        <div className={cn("flex h-16 items-center justify-between gap-2 px-5", collapsed && "lg:justify-center lg:px-2")}>
+          <span className="flex min-w-0 items-center gap-2.5">
+            {brand.logoUrl ? (
+              <Image src={brand.logoUrl} alt="" width={96} height={28} className="h-7 w-auto max-w-24 shrink-0 object-contain" />
+            ) : null}
+            <span className={cn("truncate text-headline text-white", collapsed && "lg:sr-only")}>{brand.name}</span>
           </span>
           <IconButton
             label="Cerrar menú"

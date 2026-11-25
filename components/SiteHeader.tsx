@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Phone } from "lucide-react";
 import { SOCIAL } from "@/components/social-icons";
@@ -28,9 +29,13 @@ export async function SiteHeader() {
           aria-label="Transaction — inicio"
           className={`flex items-center gap-2.5 ${focusRing}`}
         >
-          <div className="flex size-4 items-center justify-center rounded-full border border-blue-800 dark:border-sky-600 text-[8px] font-bold text-blue-800 dark:text-sky-600">
-            T
-          </div>
+          {config.agency.logoUrl ? (
+            <Image src={config.agency.logoUrl} alt="" width={112} height={28} priority className="h-7 w-auto max-w-28 object-contain" />
+          ) : (
+            <div className="flex size-4 items-center justify-center rounded-full border border-blue-800 dark:border-sky-600 text-[8px] font-bold text-blue-800 dark:text-sky-600">
+              T
+            </div>
+          )}
           <span className="text-sm font-light uppercase tracking-wordmark text-ink dark:text-white">
             {config.agency.name}
           </span>
