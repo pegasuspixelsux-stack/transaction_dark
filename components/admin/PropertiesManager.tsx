@@ -144,7 +144,7 @@ export function PropertiesManager() {
 
       {!canWrite ? (
         <p className="mb-6 text-sm text-admin-muted">
-          Estás viendo todas las propiedades publicadas y las asignadas a vos. Podés editarlas, publicarlas y despublicarlas; crear, eliminar o destacar queda para gerentes y administradores.
+          Podés editar las propiedades, publicarlas y despublicarlas; crear, eliminar o destacar queda para gerentes y administradores.
         </p>
       ) : null}
 
@@ -192,7 +192,7 @@ export function PropertiesManager() {
       {properties.length === 0 ? (
         <EmptyState
           title="Aún no hay propiedades"
-          body={canWrite ? "Creá tu primera publicación para empezar." : "No hay propiedades publicadas ni asignadas a vos."}
+          body={canWrite ? "Creá tu primera publicación para empezar." : "Todavía no se cargó ninguna propiedad."}
           action={canWrite ? <Button variant="primary" onClick={() => setEditing("new")}>Crear propiedad</Button> : undefined}
         />
       ) : filtered.length === 0 ? (
