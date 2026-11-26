@@ -41,8 +41,8 @@ const PERMISSIONS: Record<Role, readonly Permission[]> = {
     "leads:reassign",
     "leads:move",
   ],
-  // Agents see and edit every property, but only their own leads (enforced by the data layer).
-  agent: ["properties:view-all", "properties:edit", "leads:move"],
+  // Agents manage properties like managers, but only see and move their own leads (enforced by the data layer).
+  agent: ["properties:view-all", "properties:write", "properties:edit", "leads:move"],
 };
 
 export function can(role: Role | undefined, permission: Permission): boolean {
