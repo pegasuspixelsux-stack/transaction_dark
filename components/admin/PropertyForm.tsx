@@ -122,6 +122,7 @@ const MAX_PHOTOS = 10;
 export function PropertyForm({
   property,
   agents,
+  contentOnly = false,
   zones,
   types,
   featuredFull,
@@ -131,6 +132,8 @@ export function PropertyForm({
 }: {
   property: AdminProperty | null;
   agents: SessionUser[];
+  /** Hide the ID, agent and homepage fields (agents can't change them; the server enforces it). */
+  contentOnly?: boolean;
   /** Zone names from the "Zonas" page, in display order. */
   zones: string[];
   /** Property types from the "Tipos" page, in display order. */
@@ -257,6 +260,7 @@ export function PropertyForm({
   return (
     <form onSubmit={submit} noValidate className="space-y-5">
       <div className="grid gap-5 sm:grid-cols-2">
+        {contentOnly ? null : (
         <Field
           label="ID de la propiedad"
           error={errors.propertyId}
@@ -283,6 +287,7 @@ export function PropertyForm({
             />
           )}
         </Field>
+        )}
         <Field label="N.º de referencia" hint="Opcional. Único por propiedad.">
           {({ id, describedBy }) => (
             <input id={id} aria-describedby={describedBy} value={form.listingNumber} maxLength={30} onChange={(e) => set("listingNumber", e.target.value)} placeholder="TR-0001" className={inputClass} />
@@ -478,7 +483,7 @@ export function PropertyForm({
         ) : null}
       </div>
 
-      {agents.length > 0 ? (
+      {!contentOnly && agents.length > 0 ? (
         <Field label="Agente asignado">
           {({ id }) => (
             <select id={id} value={form.assignedAgentId} onChange={(e) => set("assignedAgentId", e.target.value)} className={inputClass}>
@@ -491,6 +496,7 @@ export function PropertyForm({
         </Field>
       ) : null}
 
+      {contentOnly ? null : (
       <fieldset className="space-y-2">
         <legend className="mb-2 text-footnote font-medium text-admin-ink">Página principal</legend>
         {([
@@ -517,6 +523,7 @@ export function PropertyForm({
           );
         })}
       </fieldset>
+      )}
 
       <Field label="Descripción">
         {({ id }) => (

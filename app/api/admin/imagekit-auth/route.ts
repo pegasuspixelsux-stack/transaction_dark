@@ -13,7 +13,7 @@ const json = (body: unknown, status = 200) => NextResponse.json(body, { status, 
 export async function GET() {
   const session = await getServerSession();
   if (!session) return json({ error: "No autenticado." }, 401);
-  if (!can(session.role, "properties:write")) return json({ error: "No tenés permiso para subir imágenes." }, 403);
+  if (!can(session.role, "properties:edit")) return json({ error: "No tenés permiso para subir imágenes." }, 403);
 
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
   const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY;

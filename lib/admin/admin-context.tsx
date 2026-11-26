@@ -304,8 +304,12 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   );
 
   const sendProperty = useCallback(
-    async (init: RequestInit, url = "/api/admin/properties"): Promise<Result> => {
-      if (!allowed("properties:write")) return fail("No tenés permiso para editar propiedades.");
+    async (
+      init: RequestInit,
+      url = "/api/admin/properties",
+      permission: "properties:write" | "properties:edit" = "properties:write",
+    ): Promise<Result> => {
+      if (!allowed(permission)) return fail("No tenés permiso para editar propiedades.");
       try {
         const res = guard(await fetch(url, init));
         const data = await readJson<{ properties?: AdminProperty[]; error?: string }>(res);
@@ -325,7 +329,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
-      }),
+      }, undefined, "properties:edit"),
     [sendProperty],
   );
 

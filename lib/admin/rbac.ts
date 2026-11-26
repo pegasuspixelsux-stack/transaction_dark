@@ -5,6 +5,8 @@ export type Permission =
   | "config:manage"
   | "properties:view-all"
   | "properties:write"
+  /** Edit and publish/unpublish a property already in the list (no create, delete or homepage flags). */
+  | "properties:edit"
   | "leads:view-all"
   | "leads:reassign"
   | "leads:move";
@@ -16,6 +18,7 @@ const PERMISSIONS: Record<Role, readonly Permission[]> = {
     "config:manage",
     "properties:view-all",
     "properties:write",
+    "properties:edit",
     "leads:view-all",
     "leads:reassign",
     "leads:move",
@@ -25,6 +28,7 @@ const PERMISSIONS: Record<Role, readonly Permission[]> = {
     "config:manage",
     "properties:view-all",
     "properties:write",
+    "properties:edit",
     "leads:view-all",
     "leads:reassign",
     "leads:move",
@@ -32,12 +36,13 @@ const PERMISSIONS: Record<Role, readonly Permission[]> = {
   manager: [
     "properties:view-all",
     "properties:write",
+    "properties:edit",
     "leads:view-all",
     "leads:reassign",
     "leads:move",
   ],
-  // Agents only see what is assigned to them (enforced by the data layer).
-  agent: ["leads:move"],
+  // Agents see published properties plus their own, and only their own leads (enforced by the data layer).
+  agent: ["properties:edit", "leads:move"],
 };
 
 export function can(role: Role | undefined, permission: Permission): boolean {

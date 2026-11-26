@@ -35,6 +35,7 @@ export function PropertiesManager() {
   const { status, properties, users, can, saveProperty, togglePropertyStatus, togglePropertyFlag, deleteProperty } =
     useAdmin();
   const canWrite = can("properties:write");
+  const canEdit = can("properties:edit");
   const zones = useZones();
   const types = usePropertyTypes();
 
@@ -69,7 +70,16 @@ export function PropertiesManager() {
   }
 
   const rowActions = (p: AdminProperty) =>
-    canWrite ? (
+    !canWrite && canEdit ? (
+      <div className="flex">
+        <IconButton label={p.status === "published" ? `Despublicar ${p.title}` : `Publicar ${p.title}`} onClick={() => report(togglePropertyStatus(p.id))}>
+          {p.status === "published" ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+        </IconButton>
+        <IconButton label={`Editar ${p.title}`} onClick={() => setEditing(p)}>
+          <Pencil className="size-4" aria-hidden />
+        </IconButton>
+      </div>
+    ) : canWrite ? (
       <div className="flex">
         <IconButton
           label={p.featured ? `Quitar ${p.title} de destacadas` : `Marcar ${p.title} como destacada`}
@@ -134,7 +144,7 @@ export function PropertiesManager() {
 
       {!canWrite ? (
         <p className="mb-6 text-sm text-admin-muted">
-          Estás viendo todas las propiedades publicadas y las asignadas a vos. Solo gerentes y administradores pueden editar publicaciones.
+          Estás viendo todas las propiedades publicadas y las asignadas a vos. Podés editarlas, publicarlas y despublicarlas; crear, eliminar o destacar queda para gerentes y administradores.
         </p>
       ) : null}
 
@@ -268,6 +278,7 @@ export function PropertiesManager() {
           <PropertyForm
             property={editing === "new" ? null : editing}
             agents={agents}
+            contentOnly={!canWrite}
             zones={zones.map((z) => z.name)}
             types={types}
             onCancel={() => setEditing(null)}
