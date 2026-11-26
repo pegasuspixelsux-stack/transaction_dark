@@ -68,3 +68,8 @@ const priceFormatter = new Intl.NumberFormat("es-UY", {
 export function formatPrice(usd: number): string {
   return priceFormatter.format(usd);
 }
+
+/** The property's price text (e.g. "A consultar") when set, otherwise its formatted price. */
+export function displayPrice(p: { price: number; priceText?: string }): string {
+  return p.priceText || formatPrice(p.price);
+}

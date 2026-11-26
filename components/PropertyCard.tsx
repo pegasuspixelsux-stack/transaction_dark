@@ -3,7 +3,7 @@ import { zonePlace } from "@/lib/zones";
 import Image from "next/image";
 import { ArrowRight, Bath, Bed, ImageOff, Ruler } from "lucide-react";
 import type { Property } from "@/types/property";
-import { formatPrice } from "@/lib/properties";
+import { displayPrice } from "@/lib/properties";
 
 const textShadow = "[text-shadow:0_1px_6px_rgba(0,0,0,0.5)]";
 
@@ -15,7 +15,7 @@ export function PropertyCard({
   /** Featured layout: "Zone, City" sits above the title and the dorms / baños / m² row is omitted. */
   featured?: boolean;
 }) {
-  const { id, title, zone, city, price, bedrooms, bathrooms, area, imageUrl } = property;
+  const { id, title, zone, city, bedrooms, bathrooms, area, imageUrl } = property;
 
   const metrics = [
     bedrooms > 0 ? { icon: Bed, text: `${bedrooms} ${bedrooms === 1 ? "dorm" : "dorms"}` } : null,
@@ -29,7 +29,7 @@ export function PropertyCard({
   return (
     <Link
       href={`/propiedades/${id}`}
-      aria-label={`${title}, ${formatPrice(price)}. Ver ficha completa`}
+      aria-label={`${title}, ${displayPrice(property)}. Ver ficha completa`}
       className="group relative block h-[520px] overflow-hidden border border-hairline bg-neutral-950 text-white transition-opacity hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:opacity-90"
     >
       {imageUrl ? (
@@ -80,7 +80,7 @@ export function PropertyCard({
         ) : null}
 
         <div className="flex items-end justify-between gap-3 border-t border-white/25 pt-4">
-          <p className={`text-xl ${textShadow}`}>{formatPrice(price)}</p>
+          <p className={`text-xl ${textShadow}`}>{displayPrice(property)}</p>
           <span
             aria-hidden
             className={`flex items-center gap-2 text-xs uppercase tracking-luxury text-white/80 transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transform-none ${textShadow}`}

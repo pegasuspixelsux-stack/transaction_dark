@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { HeroSlideshow } from "@/components/HeroSlideshow";
 import { Trident } from "@/components/Trident";
 import { WatermarkIcon } from "@/components/WatermarkIcon";
-import { formatPrice } from "@/lib/properties";
+import { displayPrice } from "@/lib/properties";
 import { zonePlace } from "@/lib/zones";
 import type { Property } from "@/types/property";
 
@@ -75,7 +75,7 @@ export function TransactionHero({ properties: HERO_PROPERTIES }: { properties: P
                 </Link>
               </h3>
               <p className={`mt-4 border-t border-white/25 pt-4 text-xl ${textShadow}`}>
-                {formatPrice(current.price)}
+                {displayPrice(current)}
               </p>
             </div>
           ) : null}

@@ -39,6 +39,8 @@ export interface AdminProperty {
   title: string;
   listingType: ListingType;
   price: number;
+  /** Shown instead of the price when set, e.g. "A consultar" (price may then be 0). */
+  priceText?: string;
   currency: Currency;
   location: string;
   bedrooms: number;

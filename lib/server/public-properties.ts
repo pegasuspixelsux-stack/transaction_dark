@@ -20,6 +20,7 @@ function toPublic(p: AdminProperty, cityByZone: Map<string, string>): Property {
     zone: p.zone ?? "José Ignacio",
     location: p.location || undefined,
     price: p.price,
+    ...(p.priceText ? { priceText: p.priceText } : {}),
     bedrooms: p.bedrooms,
     bathrooms: p.bathrooms,
     area: p.areaM2,

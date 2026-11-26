@@ -13,6 +13,8 @@ export interface Property {
   /** Free-text address line, e.g. "Punta del Este, Maldonado". */
   location?: string;
   price: number; // USD, whole dollars
+  /** Shown instead of the price when set, e.g. "A consultar". */
+  priceText?: string;
   bedrooms: number;
   bathrooms?: number;
   area?: number; // m²

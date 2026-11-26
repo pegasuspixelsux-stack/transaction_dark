@@ -50,13 +50,16 @@ export function saveIntoCatalog(
 
   const title = str(input.title, 120);
   const location = str(input.location, 160);
-  const price = num(input.price);
+  const priceText =
+    "priceText" in input ? str(input.priceText, 40) : (existing?.priceText ?? "");
+  const rawPrice = num(input.price);
+  const price = priceText && !(rawPrice > 0) ? 0 : rawPrice;
   const areaM2 = num(input.areaM2);
   const bedrooms = num(input.bedrooms);
   const bathrooms = num(input.bathrooms);
   if (!title) return bad("El título es obligatorio.");
   if (!location) return bad("La ubicación es obligatoria.");
-  if (!(price > 0)) return bad("Ingresá un precio mayor a 0.");
+  if (!priceText && !(price > 0)) return bad("Ingresá un precio mayor a 0 o un texto como «A consultar».");
   if (!(areaM2 > 0)) return bad("Ingresá la superficie en m².");
   if (!(Number.isInteger(bedrooms) && bedrooms >= 0)) return bad("Dormitorios inválidos.");
   if (!(Number.isInteger(bathrooms) && bathrooms >= 0)) return bad("Baños inválidos.");
@@ -113,6 +116,7 @@ export function saveIntoCatalog(
   const property: AdminProperty = {
     ...existing,
     ...extra,
+    priceText: priceText || undefined,
     id: wantedId || (existing?.id ?? id ?? `p-${crypto.randomUUID().slice(0, 8)}`),
     title,
     listingType: pick(input.listingType, LISTINGS, "sale"),

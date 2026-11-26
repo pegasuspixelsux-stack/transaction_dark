@@ -192,7 +192,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             <dl className="mt-8 divide-y divide-hairline border-y border-hairline text-base dark:divide-white/10 dark:border-white/10">
               <div className="flex items-baseline justify-between gap-4 py-4">
                 <dt className="text-ink-muted dark:text-white/75">Precio</dt>
-                <dd className="font-display text-2xl text-ink dark:text-white">US$ {property.price.toLocaleString("es-UY")}</dd>
+                <dd className="font-display text-2xl text-ink dark:text-white">{property.priceText || `US$ ${property.price.toLocaleString("es-UY")}`}</dd>
               </div>
               {property.commonExpenses !== undefined ? (
                 <div className="flex items-baseline justify-between gap-4 py-4">

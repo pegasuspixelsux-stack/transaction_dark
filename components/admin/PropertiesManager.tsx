@@ -221,7 +221,7 @@ export function PropertiesManager() {
                     {flagBadges(p)}
                   </td>
                   <td className="px-5 py-3 text-admin-muted">{listingLabel(p.listingType)}</td>
-                  <td className="px-5 py-3">{formatMoney(p.price, p.currency)}</td>
+                  <td className="px-5 py-3">{p.priceText || formatMoney(p.price, p.currency)}</td>
                   <td className="px-5 py-3 text-admin-muted">
                     {p.bedrooms} dorm. · {p.bathrooms} baños · {p.areaM2} m²
                   </td>
@@ -252,7 +252,7 @@ export function PropertiesManager() {
                   <p className="mt-1 font-mono text-xs text-admin-muted">ID: {p.id}</p>
                   {flagBadges(p)}
                   <p className="mt-3 text-admin-ink">
-                    {formatMoney(p.price, p.currency)}
+                    {p.priceText || formatMoney(p.price, p.currency)}
                     <span className="text-sm text-admin-muted"> · {listingLabel(p.listingType)}</span>
                   </p>
                   <p className="mt-1 text-sm text-admin-muted">

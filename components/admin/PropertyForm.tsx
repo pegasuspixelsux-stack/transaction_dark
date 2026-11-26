@@ -19,6 +19,7 @@ interface FormState {
   title: string;
   listingType: ListingType;
   price: string;
+  priceText: string;
   currency: Currency;
   location: string;
   bedrooms: string;
@@ -48,6 +49,7 @@ const empty: FormState = {
   title: "",
   listingType: "sale",
   price: "",
+  priceText: "",
   currency: "USD",
   location: "",
   bedrooms: "0",
@@ -74,7 +76,8 @@ function fromProperty(p: AdminProperty): FormState {
   return {
     title: p.title,
     listingType: p.listingType,
-    price: String(p.price),
+    price: p.priceText && !p.price ? "" : String(p.price),
+    priceText: p.priceText ?? "",
     currency: p.currency,
     location: p.location,
     bedrooms: String(p.bedrooms),
@@ -108,7 +111,9 @@ function validate(f: FormState): Errors {
   }
   if (!f.title.trim()) errors.title = "El título es obligatorio.";
   if (!f.location.trim()) errors.location = "La ubicación es obligatoria.";
-  if (!(Number(f.price) > 0)) errors.price = "Ingresá un precio mayor a 0.";
+  if (!f.priceText.trim() && !(Number(f.price) > 0)) {
+    errors.price = "Ingresá un precio mayor a 0, o un texto como «A consultar».";
+  }
   if (!(Number(f.areaM2) > 0)) errors.areaM2 = "Ingresá la superficie en m².";
   for (const key of ["bedrooms", "bathrooms"] as const) {
     if (!(Number.isInteger(Number(f[key])) && Number(f[key]) >= 0)) {
@@ -231,7 +236,8 @@ export function PropertyForm({
       newId: form.propertyId.trim(),
       title: form.title.trim(),
       listingType: form.listingType,
-      price: Number(form.price),
+      price: Number(form.price) || 0,
+      priceText: form.priceText.trim(),
       currency: form.currency,
       location: form.location.trim(),
       bedrooms: Number(form.bedrooms),
@@ -320,7 +326,7 @@ export function PropertyForm({
             </select>
           )}
         </Field>
-        <Field label="Precio" error={errors.price}>
+        <Field label="Precio" error={errors.price} hint={form.priceText.trim() ? "Opcional: en el sitio se muestra el texto." : undefined}>
           {({ id, describedBy, invalid }) => (
             <input id={id} type="number" min="0" inputMode="decimal" aria-invalid={invalid} aria-describedby={describedBy} value={form.price} onChange={(e) => set("price", e.target.value)} className={inputClass} />
           )}
@@ -332,6 +338,16 @@ export function PropertyForm({
               <option value="EUR">EUR</option>
               <option value="UYU">UYU</option>
             </select>
+          )}
+        </Field>
+        <Field label="Texto en lugar del precio" hint="Opcional. Ej.: «A consultar». Se muestra en el sitio en lugar del precio.">
+          {({ id, describedBy }) => (
+            <div className="flex gap-2">
+              <input id={id} aria-describedby={describedBy} value={form.priceText} maxLength={40} onChange={(e) => set("priceText", e.target.value)} placeholder="A consultar" className={inputClass} />
+              {form.priceText.trim() ? null : (
+                <Button type="button" onClick={() => set("priceText", "A consultar")} className="shrink-0">A consultar</Button>
+              )}
+            </div>
           )}
         </Field>
       </div>
