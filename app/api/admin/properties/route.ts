@@ -18,7 +18,8 @@ export async function GET() {
   const all = await readProperties();
   const properties = can(session.role, "properties:view-all")
     ? all
-    : all.filter((p) => p.assignedAgentId === session.sub);
+    : // Agents see every published listing, plus anything assigned to them (e.g. drafts).
+      all.filter((p) => p.status === "published" || p.assignedAgentId === session.sub);
   return json({ properties });
 }
 
